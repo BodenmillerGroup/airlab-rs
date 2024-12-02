@@ -1,0 +1,19 @@
+[package]
+name = "lib-auth"
+version = "0.1.0"
+edition = "2021"
+authors = ["Lars Malmstroem <lars.malmstroem@uzh.ch>"]
+description = "airlab backend"
+license = "MIT"
+
+[dependencies]
+lib-utils = { path = "../../libs/lib-utils"}
+serde = { version = "1", features = ["derive"] }
+hmac = "0.12"
+sha2 = "0.10"
+argon2 = {version="0.5", features=["std"]}
+uuid = {version = "1", features = ["v4","fast-rng",]}
+lazy-regex = "3"
+
+[dev-dependencies]
+anyhow = "1"

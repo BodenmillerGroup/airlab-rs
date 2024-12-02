@@ -1,0 +1,4 @@
+[tasks.watch]
+workspace = false
+command = "cargo"
+args = ["watch", "-q", "-c", "-w", "crates/services/web-airlab/src/", "-w", "crates/libs/", "-w", ".cargo/", "-x", "run -p web-airlab"]

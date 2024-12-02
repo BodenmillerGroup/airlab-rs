@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+
+import sys
+from subprocess import check_output
+from pathlib import Path
+import logging
+
+logging.basicConfig(level=logging.INFO)
+
+commit_msg_filepath = sys.argv[1]
+
+branch = check_output(["git", "symbolic-ref", "--short", "HEAD"]).strip()
+logging.info(f"commit-msg: On branch {branch.decode('utf-8')}")
+
+with Path(commit_msg_filepath).open("r") as f:
+    content = f.read()
+    if content.startswith("Bump"):
+        # smart-release
+        sys.exit(0)
+    if content.startswith("Adjusting"):
+        # smart-release
+        sys.exit(0)
+    commit_type = content.split(":")[0]
+    if commit_type in [
+        "fix",
+        "feat",
+        "build",
+        "chore",
+        "ci",
+        "docs",
+        "style",
+        "refactor",
+        "perf",
+        "test",
+    ]:
+        sys.exit(0)
+    logging.fatal(f"commit-type not recognized: {commit_type}")
+    logging.info(f"Content: {content}")
+sys.exit(1)
