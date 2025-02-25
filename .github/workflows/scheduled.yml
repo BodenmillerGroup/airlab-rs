@@ -8,6 +8,23 @@ on:
     - cron:  '7 7 * * *'
 env:
   DATABASE_URL: "postgres://postgres:postgres@localhost:5432/postgres"
+  SERVICE_TOKEN_DURATION_SEC: "1800"
+  SERVICE_WEB_FOLDER: "web-airlab/"
+  SERVICE_DATA_PATH: "data/airlab-data"
+  SERVICE_PWD_KEY: "KEY"
+  SERVICE_TOKEN_KEY: "TOKEN"
+  SERVICE_DB_URL: "postgres://postgres:postgres@localhost:5432/postgres"
+  SERVICE_EMAIL_FROM_ADDRESS: "admin@example.com"
+  SERVICE_EMAIL_FROM_NAME: "Admin Example"
+  SERVICE_EMAIL_TOKEN: "EMAIL_TOKEN"
+  SERVICE_EMAIL_ADDRESS: "SERIVCE_PROVIDER"
+  SERVICE_LOG_AGGR_URL: "http://127.0.0.1:9124/api/v1/logstream/airlab"
+  SERVICE_RESET_PWD_URL: "https://127.0.0.1:9080/reset-password"
+  SERVICE_HOST_ADDR: "127.0.0.1"
+  SERVICE_HOST_PORT: "9080"
+  SUPER_USER: "admin@example.com"
+  SUPER_USER_PWD: "changeit"
+  SETUP_DEMO_GROUP: "false"
 name: rolling
 jobs:
   nightly:
