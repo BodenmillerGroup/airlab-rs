@@ -17,6 +17,9 @@ with Path(commit_msg_filepath).open("r") as f:
     if content.startswith("Bump"):
         # smart-release
         sys.exit(0)
+    if content.startswith("Release"):
+        # smart-release
+        sys.exit(0)
     if content.startswith("Adjusting"):
         # smart-release
         sys.exit(0)
