@@ -1,0 +1,36 @@
+[package]
+name = "airlab-web"
+version = "0.1.0"
+edition = "2021"
+authors = ["Lars Malmstroem <lars.malmstroem@uzh.ch>"]
+description = "airlab backend"
+license = "MIT"
+
+[dependencies]
+airlab-lib = { path = "../airlab-lib"}
+tokio = { version = "1", features = ["full"] }
+async-trait = "0.1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_with = "3"
+axum = { version = "0.7", features = ["macros", "multipart", "ws"] }
+tower-http = { version = "0.5", features = ["fs"] }
+tower-cookies = "0.10"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+uuid = {version = "1", features = ["v4","fast-rng",]}
+strum_macros = "0.25"
+derive_more = {version = "1.0.0-beta", features = ["from"] }
+recap = "0.1.2"
+chrono = { version = "0.4.31", features = ["serde"] }
+sqlx = { version = "0.7.3", features = ["chrono"] }
+modql = { version = "0.3.4", features = ["with-sea-query"] }
+reqwest = { version = "0.11.24", features = ["json"] }
+lettre = "0.11.4"
+tokio-util = "0.7.12"
+hyper = "1.5.0"
+
+[dev-dependencies]
+anyhow = "1"
+httpc-test = "0.1"
+serial_test = "2"

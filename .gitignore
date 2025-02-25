@@ -1,1 +1,6 @@
 /target/
+/.cargo/config.toml
+/*.sh
+/data/
+/web-airlab/
+/.env

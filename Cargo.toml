@@ -4,8 +4,6 @@ unsafe_code = "forbid"
 [workspace]
 resolver = "2"
 members = [
-    "crates/libs/lib-utils",
-    "crates/libs/lib-auth",
-    "crates/libs/lib-core",
-    "crates/services/web-airlab",
+    "crates/airlab-lib",
+    "crates/airlab-web",
 ]

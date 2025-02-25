@@ -1,4 +1,37 @@
-[tasks.watch]
+[env]
+AIRLAB_DEV_DB = "${AIRLAB_DEV_DB_NAME}"
+AIRLAB_DEV_OWNER = "${AIRLAB_DEV_OWNER_NAME}"
+
+[tasks.watch] # run airlab-web in watch mode
 workspace = false
 command = "cargo"
-args = ["watch", "-q", "-c", "-w", "crates/services/web-airlab/src/", "-w", "crates/libs/", "-w", ".cargo/", "-x", "run -p web-airlab"]
+args = ["watch", "-q", "-c", "-w", "${CARGO_MAKE_WORKING_DIRECTORY}/crates/airlab-web/src/", "-w", "${CARGO_MAKE_WORKING_DIRECTORY}/crates/airlab-lib/src/", "-w", ".cargo/", "-x", "run -p airlab-web"]
+
+[tasks.test] # run tests
+workspace = false
+command = "cargo"
+args = ["test"]
+
+[tasks.edit] # open main.rs for editing
+workspace = false
+command = "${EDITOR}"
+args = ["${CARGO_MAKE_WORKING_DIRECTORY}/crates/airlab-web/src/main.rs"]
+
+[tasks.recreate_dev_db] # recreates the dev database
+workspace = false
+dependencies = ["drop_dev_db", "create_dev_db", "migrate"]
+
+[tasks.migrate] # sqlx migrate
+workspace = false
+command = "sqlx"
+args = ["migrate", "run", "--source", "${CARGO_MAKE_WORKING_DIRECTORY}/crates/airlab-web/migrations"]
+
+[tasks.drop_dev_db] # WARNING: drops the dev database
+workspace = false
+command = "dropdb"
+args = ["${AIRLAB_DEV_DB}"]
+
+[tasks.create_dev_db] # creates the dev database
+workspace = false
+command = "createdb"
+args = ["${AIRLAB_DEV_DB}", "-O", "${AIRLAB_DEV_OWNER}", "-e", "utf-8"]

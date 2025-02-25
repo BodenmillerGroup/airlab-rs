@@ -1,0 +1,84 @@
+permissions:
+  contents: read
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron:  '7 7 * * *'
+env:
+  DATABASE_URL: "postgres://postgres:postgres@localhost:5432/postgres"
+name: rolling
+jobs:
+  nightly:
+    runs-on: ubuntu-latest
+    name: ubuntu / nightly
+    services:
+      postgres:
+        image: postgres
+
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Run SQLx Migrations
+        run: |
+          cargo install sqlx-cli
+          sqlx migrate run --source crates/airlab-web/migrations
+      - name: Install nightly
+        uses: dtolnay/rust-toolchain@nightly
+      - name: cargo generate-lockfile
+        if: hashFiles('Cargo.lock') == ''
+        run: cargo generate-lockfile
+      - name: cargo test --locked
+        run: cargo test --locked --all-features --all-targets
+  update:
+    runs-on: ubuntu-latest
+    name: ubuntu / beta / updated
+    services:
+      postgres:
+        image: postgres
+
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Run SQLx Migrations
+        run: |
+          cargo install sqlx-cli
+          sqlx migrate run --source crates/airlab-web/migrations
+      - name: Install beta
+        if: hashFiles('Cargo.lock') != ''
+        uses: dtolnay/rust-toolchain@beta
+      - name: cargo update
+        if: hashFiles('Cargo.lock') != ''
+        run: cargo update
+      - name: cargo test
+        if: hashFiles('Cargo.lock') != ''
+        run: cargo test --locked --all-features --all-targets
+        env:
+          RUSTFLAGS: -D deprecated
