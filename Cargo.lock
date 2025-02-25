@@ -42,6 +42,34 @@ dependencies = [
 [[package]]
 name = "airlab-lib"
 version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "72c1acf0c1c5a46b3f47ef69e4290ed69331899ca6019e32f37fcdac44af3351"
+dependencies = [
+ "argon2",
+ "base64 0.21.7",
+ "camino",
+ "chrono",
+ "derive_more",
+ "hmac",
+ "lazy-regex",
+ "modql",
+ "sea-query",
+ "sea-query-binder",
+ "serde",
+ "serde_json",
+ "serde_with",
+ "sha2",
+ "sqlx",
+ "time",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+ "uuid",
+]
+
+[[package]]
+name = "airlab-lib"
+version = "0.1.2"
 dependencies = [
  "anyhow",
  "argon2",
@@ -69,38 +97,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "airlab-lib"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "72c1acf0c1c5a46b3f47ef69e4290ed69331899ca6019e32f37fcdac44af3351"
-dependencies = [
- "argon2",
- "base64 0.21.7",
- "camino",
- "chrono",
- "derive_more",
- "hmac",
- "lazy-regex",
- "modql",
- "sea-query",
- "sea-query-binder",
- "serde",
- "serde_json",
- "serde_with",
- "sha2",
- "sqlx",
- "time",
- "tokio",
- "tracing",
- "tracing-subscriber",
- "uuid",
-]
-
-[[package]]
 name = "airlab-web"
 version = "0.1.2"
 dependencies = [
- "airlab-lib 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "airlab-lib 0.1.1",
  "anyhow",
  "async-trait",
  "axum",

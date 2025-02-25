@@ -1,6 +1,6 @@
 [package]
 name = "airlab-lib"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 authors = ["Lars Malmstroem <lars.malmstroem@uzh.ch>"]
 description = "airlab backend"
