@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 7 commits contributed to the release.
+ - 8 commits contributed to the release.
  - 0 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 0 issues like '(#ID)' were seen in commit messages
 
@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <details><summary>view details</summary>
 
  * **Uncategorized**
+    - Adjusting changelogs prior to release of airlab-lib v0.1.2, airlab-web v0.1.2 ([`b25230c`](https://github.com/BodenmillerGroup/airlab-rs/commit/b25230cfbbf6c97f464843ae8f44fda9221870e8))
     - Adjusting changelogs prior to release of airlab-lib v0.1.2, airlab-web v0.1.2 ([`3167d59`](https://github.com/BodenmillerGroup/airlab-rs/commit/3167d595de2653840a6e277ad0ec85d3618741c9))
     - Adjusting changelogs prior to release of airlab-lib v0.1.2, airlab-web v0.1.2 ([`69af4ee`](https://github.com/BodenmillerGroup/airlab-rs/commit/69af4ee86ae6120f6d9450e16cea2476f4c1e5a8))
     - Adjusting changelogs prior to release of airlab-lib v0.1.2, airlab-web v0.1.2 ([`ed04d0c`](https://github.com/BodenmillerGroup/airlab-rs/commit/ed04d0c7b610073e21a789caf902238619bef3fe))
