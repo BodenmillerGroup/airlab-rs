@@ -199,7 +199,6 @@ mod tests {
 
     #[tokio::test]
     async fn test_group_list_all_ok() -> Result<()> {
-        // -- Setup & Fixtures
         let mm = ModelManager::new().await?;
         let ctx = Ctx::root_ctx();
         let tname = "test_group_list_all_ok";
@@ -272,7 +271,6 @@ mod tests {
             .await?
             .remove(0);
 
-        // -- Exec
         GroupBmc::update(
             &ctx,
             &mm,
@@ -284,7 +282,6 @@ mod tests {
         )
         .await?;
 
-        // -- Check
         let group = GroupBmc::get(&ctx, &mm, fx_group.id).await?;
         assert_eq!(group.name, fx_name_new);
 
