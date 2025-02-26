@@ -1,7 +1,7 @@
 [package]
 name = "airlab-web"
 version = "0.1.2"
-edition = "2021"
+edition = "2024"
 authors = ["Lars Malmstroem <lars.malmstroem@uzh.ch>"]
 description = "airlab backend"
 license = "MIT"
