@@ -109,3 +109,76 @@ fn _token_sign_into_b64u(ident: &str, exp: &str, salt: Uuid, key: &[u8]) -> Resu
 
     Ok(result)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use anyhow::Result;
+    use std::thread;
+    use std::time::Duration;
+
+    #[test]
+    fn test_token_display_ok() -> Result<()> {
+        let fx_token_str = "ZngtaWRlbnQtMDE.MjAyMy0wNS0xN1QxNTozMDowMFo.some-sign-b64u-encoded";
+        let fx_token = Token {
+            ident: "fx-ident-01".to_string(),
+            exp: "2023-05-17T15:30:00Z".to_string(),
+            sign_b64u: "some-sign-b64u-encoded".to_string(),
+        };
+
+        assert_eq!(fx_token.to_string(), fx_token_str);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_token_from_str_ok() -> Result<()> {
+        let fx_token_str = "ZngtaWRlbnQtMDE.MjAyMy0wNS0xN1QxNTozMDowMFo.some-sign-b64u-encoded";
+        let fx_token = Token {
+            ident: "fx-ident-01".to_string(),
+            exp: "2023-05-17T15:30:00Z".to_string(),
+            sign_b64u: "some-sign-b64u-encoded".to_string(),
+        };
+
+        let token: Token = fx_token_str.parse()?;
+
+        assert_eq!(token, fx_token);
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_validate_web_token_ok() -> Result<()> {
+        let fx_user = "user_one";
+        let fx_salt = Uuid::parse_str("f05e8961-d6ad-4086-9e78-a6de065e5453").unwrap();
+        let fx_duration_sec = 0.02;
+        let token_key = &auth_config().TOKEN_KEY;
+        let fx_token = _generate_token(fx_user, fx_duration_sec, fx_salt, token_key)?;
+
+        thread::sleep(Duration::from_millis(10));
+        let res = validate_web_token(&fx_token, fx_salt);
+
+        res?;
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_validate_web_token_err_expired() -> Result<()> {
+        let fx_user = "user_one";
+        let fx_salt = Uuid::parse_str("f05e8961-d6ad-4086-9e78-a6de065e5453").unwrap();
+        let fx_duration_sec = 0.01;
+        let token_key = &auth_config().TOKEN_KEY;
+        let fx_token = _generate_token(fx_user, fx_duration_sec, fx_salt, token_key)?;
+
+        thread::sleep(Duration::from_millis(20));
+        let res = validate_web_token(&fx_token, fx_salt);
+
+        assert!(
+            matches!(res, Err(Error::Expired)),
+            "Should have matched `Err(Error::Expired)` but was `{res:?}`"
+        );
+
+        Ok(())
+    }
+}
