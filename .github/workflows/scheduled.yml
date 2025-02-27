@@ -12,7 +12,7 @@ env:
   SERVICE_WEB_FOLDER: "web-airlab/"
   SERVICE_DATA_PATH: "data/airlab-data"
   SERVICE_PWD_KEY: "KEY"
-  SERVICE_TOKEN_KEY: "TOKEN"
+  SERVICE_TOKEN_KEY: "SGVsbG8gd29ybGQt"
   SERVICE_DB_URL: "postgres://postgres:postgres@localhost:5432/postgres"
   SERVICE_EMAIL_FROM_ADDRESS: "admin@example.com"
   SERVICE_EMAIL_FROM_NAME: "Admin Example"
