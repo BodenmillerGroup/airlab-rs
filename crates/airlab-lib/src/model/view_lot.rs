@@ -1,18 +1,18 @@
 use crate::ctx::Ctx;
+use crate::model::ModelManager;
+use crate::model::Result;
 use crate::model::clone::CloneFilter;
 use crate::model::lot::{Lot, LotBmc, LotFilter};
 use crate::model::provider::{Provider, ProviderBmc, ProviderFilter};
 use crate::model::validation::Validation;
 use crate::model::validation::{ValidationBmc, ValidationFilter};
 use crate::model::view_clone::{ViewClone, ViewCloneBmc};
-use crate::model::ModelManager;
-use crate::model::Result;
 use modql::field::Fields;
 use modql::filter::ListOptions;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::FromRow;
-use std::collections::{hash_map::Entry, HashMap};
+use std::collections::{HashMap, hash_map::Entry};
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct ViewLot {
@@ -65,7 +65,7 @@ pub struct ViewLotDetails {
     #[serde(rename = "cloneId")]
     pub clone_id: i32,
     #[serde(rename = "providerId")]
-    pub provider_id: i32,
+    pub provider_id: Option<i32>,
     pub name: Option<String>,
     pub reference: Option<String>,
     #[serde(rename = "requestedBy")]
