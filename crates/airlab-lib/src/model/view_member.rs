@@ -1,8 +1,8 @@
 use crate::ctx::Ctx;
-use crate::model::member::{MemberBmc, MemberFilter};
-use crate::model::user::{User, UserBmc};
 use crate::model::ModelManager;
 use crate::model::Result;
+use crate::model::member::{MemberBmc, MemberFilter};
+use crate::model::user::{User, UserBmc};
 use modql::filter::ListOptions;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;

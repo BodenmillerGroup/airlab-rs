@@ -29,7 +29,7 @@ pub mod view_validation;
 
 pub use self::error::{Error, Result};
 
-use crate::model::store::{new_db_pool, Db};
+use crate::model::store::{Db, new_db_pool};
 
 #[derive(Clone)]
 pub struct ModelManager {

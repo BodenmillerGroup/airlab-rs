@@ -1,16 +1,16 @@
-use crate::web::mw_auth::CtxW;
 use crate::web::Result;
+use crate::web::mw_auth::CtxW;
 use crate::web_util::get_member_id;
+use airlab_lib::model::ModelManager;
 use airlab_lib::model::lot::{Lot, LotBmc, LotForCreate, LotForUpdate};
 use airlab_lib::model::validation::{Validation, ValidationBmc, ValidationFilter};
 use airlab_lib::model::view_conjugate::{ViewConjugateBmc, ViewConjugateForLot};
 use airlab_lib::model::view_lot::{ViewLotBmc, ViewLotDetails};
-use airlab_lib::model::ModelManager;
 use axum::extract::{Json as eJson, Path, State};
 use axum::routing::{get, patch, post, put};
 use axum::{Json, Router};
 use serde::Deserialize;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use tracing::debug;
 
 pub fn routes(mm: ModelManager) -> Router {

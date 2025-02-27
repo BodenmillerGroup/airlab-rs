@@ -2,7 +2,7 @@ use crate::model::store;
 use crate::pwd;
 use derive_more::From;
 use serde::Serialize;
-use serde_with::{serde_as, DisplayFromStr};
+use serde_with::{DisplayFromStr, serde_as};
 
 pub type Result<T> = core::result::Result<T, Error>;
 

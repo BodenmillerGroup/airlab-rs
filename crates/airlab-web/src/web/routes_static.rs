@@ -1,7 +1,7 @@
 use crate::web_config;
 use axum::handler::HandlerWithoutStateExt;
 use axum::response::{IntoResponse, Redirect, Response};
-use axum::routing::{any_service, MethodRouter};
+use axum::routing::{MethodRouter, any_service};
 use reqwest::Client;
 use serde::Serialize;
 use tower_http::services::ServeDir;

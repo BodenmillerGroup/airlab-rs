@@ -1,6 +1,7 @@
-use crate::web::mw_auth::CtxW;
 use crate::web::Result;
+use crate::web::mw_auth::CtxW;
 use crate::web_util::get_member_id;
+use airlab_lib::model::ModelManager;
 use airlab_lib::model::panel::{
     Panel, PanelBmc, PanelForCreate, PanelForUpdate, PanelPayloadForUpdate,
 };
@@ -9,13 +10,12 @@ use airlab_lib::model::panel_element::{
 };
 use airlab_lib::model::view_panel::{ViewPanel, ViewPanelBmc};
 use airlab_lib::model::view_panel_element::{ViewPanelElement, ViewPanelElementBmc};
-use airlab_lib::model::ModelManager;
 use axum::extract::{Json as eJson, Path, State};
 use axum::routing::{get, patch, post, put};
 use axum::{Json, Router};
 use modql::filter::ListOptions;
 use serde::Deserialize;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use std::collections::{HashMap, HashSet};
 #[allow(unused_imports)]
 use tracing::{debug, warn};

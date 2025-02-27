@@ -1,8 +1,8 @@
-use axum::extract::ws::{WebSocket, WebSocketUpgrade};
+use axum::Router;
 use axum::extract::Path;
+use axum::extract::ws::{WebSocket, WebSocketUpgrade};
 use axum::response::IntoResponse;
 use axum::routing::get;
-use axum::Router;
 use tracing::debug;
 
 pub fn routes() -> Router {

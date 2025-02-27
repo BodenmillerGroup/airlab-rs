@@ -1,14 +1,14 @@
 use crate::ctx::Ctx;
+use crate::model::ModelManager;
+use crate::model::Result;
 use crate::model::clone::{Clone, CloneBmc, CloneFilter};
 use crate::model::protein::{Protein, ProteinBmc, ProteinFilter};
 use crate::model::species::{Species, SpeciesBmc, SpeciesFilter};
 use crate::model::validation::{MinValidation, ValidationBmc, ValidationFilter};
-use crate::model::ModelManager;
-use crate::model::Result;
 use modql::filter::ListOptions;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use std::collections::{hash_map::Entry, HashMap};
+use std::collections::{HashMap, hash_map::Entry};
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct ViewClone {

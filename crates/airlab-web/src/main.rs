@@ -14,9 +14,9 @@ use crate::web::{
     routes_species, routes_static, routes_tag, routes_user, routes_validation,
     routes_validation_file, routes_ws,
 };
-use airlab_lib::model::user::{UserBmc, UserForCreate, UserForUpdate};
 use airlab_lib::model::ModelManager;
-use axum::{middleware, Router};
+use airlab_lib::model::user::{UserBmc, UserForCreate, UserForUpdate};
+use axum::{Router, middleware};
 use config::web_config;
 use tokio::net::TcpListener;
 use tower_cookies::CookieManagerLayer;

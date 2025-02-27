@@ -1,13 +1,13 @@
 use crate::ctx::Ctx;
+use crate::model::ModelManager;
+use crate::model::Result;
 use crate::model::member::{Member, MemberBmc};
 use crate::model::panel::{Panel, PanelBmc, PanelFilter};
 use crate::model::panel_element::{PanelElement, PanelElementBmc};
 use crate::model::user::{User, UserBmc};
-use crate::model::ModelManager;
-use crate::model::Result;
 use modql::filter::{ListOptions, OrderBy, OrderBys};
 use serde::{Deserialize, Serialize};
-use std::collections::{hash_map::Entry, HashMap};
+use std::collections::{HashMap, hash_map::Entry};
 use tracing::debug;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]

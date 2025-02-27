@@ -1,14 +1,14 @@
-use crate::web::{set_token_cookie, AUTH_TOKEN};
+use crate::web::{AUTH_TOKEN, set_token_cookie};
 use crate::web::{Error, Result};
 use airlab_lib::ctx::Ctx;
-use airlab_lib::model::user::{UserBmc, UserForAuth};
 use airlab_lib::model::ModelManager;
-use airlab_lib::token::{validate_web_token, Token};
+use airlab_lib::model::user::{UserBmc, UserForAuth};
+use airlab_lib::token::{Token, validate_web_token};
 use async_trait::async_trait;
 use axum::body::Body;
 use axum::extract::{FromRequestParts, State};
-use axum::http::request::Parts;
 use axum::http::Request;
+use axum::http::request::Parts;
 use axum::middleware::Next;
 use axum::response::Response;
 use serde::Serialize;

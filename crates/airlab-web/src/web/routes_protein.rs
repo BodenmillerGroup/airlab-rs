@@ -1,15 +1,15 @@
-use crate::web::mw_auth::CtxW;
 use crate::web::Result;
+use crate::web::mw_auth::CtxW;
 use crate::web_util::get_member_id;
+use airlab_lib::model::ModelManager;
 use airlab_lib::model::clone::CloneFilter;
 use airlab_lib::model::protein::{Protein, ProteinBmc, ProteinForCreate, ProteinForUpdate};
 use airlab_lib::model::view_clone::{ViewClone, ViewCloneBmc};
-use airlab_lib::model::ModelManager;
 use axum::extract::{Json as eJson, Path, State};
 use axum::routing::{get, patch, post};
 use axum::{Json, Router};
 use serde::Deserialize;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use tracing::debug;
 
 pub fn routes(mm: ModelManager) -> Router {

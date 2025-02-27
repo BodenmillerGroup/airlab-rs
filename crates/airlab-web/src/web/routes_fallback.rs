@@ -1,10 +1,10 @@
-use crate::web::mw_auth::CtxW;
 use crate::web::Result;
+use crate::web::mw_auth::CtxW;
 use crate::web_config;
 use airlab_lib::model::ModelManager;
 use axum::extract::State;
 use axum::routing::get;
-use axum::{response::Html, Router};
+use axum::{Router, response::Html};
 use std::fs;
 use tokio::task;
 #[allow(unused_imports)]
