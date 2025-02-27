@@ -170,3 +170,30 @@ impl ViewPanelBmc {
         Ok(returns)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use anyhow::Result;
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_view_panel_list_all_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+
+        let panels = ViewPanelBmc::list(&ctx, &mm, None, None).await?;
+
+        let _panels: Vec<ViewPanel> = panels
+            .into_iter()
+            .filter(|t| {
+                t.name
+                    .as_ref()
+                    .unwrap_or(&String::new())
+                    .starts_with("test_list_all_ok-panel")
+            })
+            .collect();
+
+        Ok(())
+    }
+}

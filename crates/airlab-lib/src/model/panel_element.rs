@@ -121,3 +121,180 @@ impl PanelElementBmc {
         base::delete::<Self>(ctx, mm, id).await
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::_dev_utils;
+    use crate::model::Error;
+    use anyhow::Result;
+    use serde_json::json;
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_panel_element_create_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let _fx_name = "test_create_ok name";
+
+        let panel_element_c = PanelElementForCreate {
+            panel_id: 1815,
+            conjugate_id: 4292,
+            dilution_type: 1,
+            concentration: None,
+        };
+        let id = PanelElementBmc::create(&ctx, &mm, panel_element_c).await?;
+
+        let panel_element = PanelElementBmc::get(&ctx, &mm, id).await?;
+        assert_eq!(panel_element.id, 1);
+
+        PanelElementBmc::delete(&ctx, &mm, id).await?;
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_panel_element_get_err_not_found() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let fx_id = 100;
+
+        let res = PanelElementBmc::get(&ctx, &mm, fx_id).await;
+
+        assert!(
+            matches!(
+                res,
+                Err(Error::EntityNotFound {
+                    entity: "panel_element",
+                    id: 100
+                })
+            ),
+            "EntityNotFound not matching"
+        );
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_panel_element_list_all_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let tname = "test_panel_element_list_all_ok";
+        let seeds = _dev_utils::get_panel_element_seed(tname);
+        _dev_utils::seed_panel_elements(&ctx, &mm, &seeds).await?;
+
+        let panel_elements = PanelElementBmc::list(&ctx, &mm, None, None).await?;
+
+        let panel_elements: Vec<PanelElement> =
+            panel_elements.into_iter().filter(|t| t.id == 1).collect();
+        assert_eq!(panel_elements.len(), 4, "number of seeded panel_elements.");
+
+        if false {
+            for panel_element in panel_elements.iter() {
+                PanelElementBmc::delete(&ctx, &mm, panel_element.id).await?;
+            }
+        }
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_panel_element_list_by_filter_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let tname = "test_panel_element_list_all_ok";
+        let seeds = _dev_utils::get_panel_element_seed(tname);
+        _dev_utils::seed_panel_elements(&ctx, &mm, &seeds).await?;
+
+        let filters: Vec<PanelElementFilter> = serde_json::from_value(json!([
+            {
+                "name": {
+                    "$endsWith": ".a",
+                    "$containsAny": ["01", "02"]
+                }
+            },
+            {
+                "name": {"$contains": "03"}
+            }
+        ]))?;
+        let list_options = serde_json::from_value(json!({
+            "order_bys": "!id"
+        }))?;
+        let panel_elements =
+            PanelElementBmc::list(&ctx, &mm, Some(filters), Some(list_options)).await?;
+
+        assert_eq!(panel_elements.len(), 3);
+        assert!(panel_elements[0].id == 3);
+
+        if false {
+            let panel_elements = PanelElementBmc::list(
+                &ctx,
+                &mm,
+                Some(serde_json::from_value(json!([{
+                    "name": {"$startsWith": "test_list_by_filter_ok"}
+                }]))?),
+                None,
+            )
+            .await?;
+            assert_eq!(panel_elements.len(), 5);
+            for panel_element in panel_elements.iter() {
+                PanelElementBmc::delete(&ctx, &mm, panel_element.id).await?;
+            }
+        }
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_panel_element_update_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let tname = "test_panel_element_list_all_ok";
+        let seeds = _dev_utils::get_panel_element_seed(tname);
+        let fx_panel_element = _dev_utils::seed_panel_elements(&ctx, &mm, &seeds)
+            .await?
+            .remove(0);
+
+        PanelElementBmc::update(
+            &ctx,
+            &mm,
+            fx_panel_element.id,
+            PanelElementForUpdate {
+                ..Default::default()
+            },
+        )
+        .await?;
+
+        let panel_element = PanelElementBmc::get(&ctx, &mm, fx_panel_element.id).await?;
+        assert_eq!(panel_element.id, 1);
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_panel_element_delete_err_not_found() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let fx_id = 100;
+
+        let res = PanelElementBmc::delete(&ctx, &mm, fx_id).await;
+
+        assert!(
+            matches!(
+                res,
+                Err(Error::EntityNotFound {
+                    entity: "panel_element",
+                    id: 100
+                })
+            ),
+            "EntityNotFound not matching"
+        );
+
+        Ok(())
+    }
+}

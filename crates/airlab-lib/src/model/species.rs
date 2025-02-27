@@ -111,3 +111,182 @@ impl SpeciesBmc {
         base::delete::<Self>(ctx, mm, id).await
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::_dev_utils;
+    use crate::model::Error;
+    use anyhow::Result;
+    use serde_json::json;
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_species_create_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let fx_name = "test_create_ok name";
+
+        let species_c = SpeciesForCreate {
+            name: fx_name.to_string(),
+            group_id: 1,
+            acronym: "bbb".to_string(),
+        };
+        let id = SpeciesBmc::create(&ctx, &mm, species_c).await?;
+
+        let species = SpeciesBmc::get(&ctx, &mm, id).await?;
+        assert_eq!(species.name, fx_name);
+
+        SpeciesBmc::delete(&ctx, &mm, id).await?;
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_species_get_err_not_found() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let fx_id = 100;
+
+        let res = SpeciesBmc::get(&ctx, &mm, fx_id).await;
+
+        assert!(
+            matches!(
+                res,
+                Err(Error::EntityNotFound {
+                    entity: "species",
+                    id: 100
+                })
+            ),
+            "EntityNotFound not matching"
+        );
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_species_list_all_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let tname = "test_species_list_all_ok";
+        let seeds = _dev_utils::get_species_seed(tname);
+        _dev_utils::seed_species(&ctx, &mm, &seeds).await?;
+
+        let species = SpeciesBmc::list(&ctx, &mm, None, None).await?;
+
+        let species: Vec<Species> = species
+            .into_iter()
+            .filter(|t| t.name.starts_with("test_list_all_ok-species"))
+            .collect();
+        assert_eq!(species.len(), 4, "number of seeded species.");
+
+        if false {
+            for species in species.iter() {
+                SpeciesBmc::delete(&ctx, &mm, species.id).await?;
+            }
+        }
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_species_list_by_filter_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let tname = "test_species_list_by_filter_ok";
+        let seeds = _dev_utils::get_species_seed(tname);
+        _dev_utils::seed_species(&ctx, &mm, &seeds).await?;
+
+        let filters: Vec<SpeciesFilter> = serde_json::from_value(json!([
+            {
+                "name": {
+                    "$endsWith": ".a",
+                    "$containsAny": ["01", "02"]
+                }
+            },
+            {
+                "name": {"$contains": "03"}
+            }
+        ]))?;
+        let list_options = serde_json::from_value(json!({
+            "order_bys": "!id"
+        }))?;
+        let species = SpeciesBmc::list(&ctx, &mm, Some(filters), Some(list_options)).await?;
+
+        assert_eq!(species.len(), 3);
+        assert!(species[0].name.ends_with("03"));
+        assert!(species[1].name.ends_with("02.a"));
+        assert!(species[2].name.ends_with("01.a"));
+
+        if false {
+            let species = SpeciesBmc::list(
+                &ctx,
+                &mm,
+                Some(serde_json::from_value(json!([{
+                    "name": {"$startsWith": "test_list_by_filter_ok"}
+                }]))?),
+                None,
+            )
+            .await?;
+            assert_eq!(species.len(), 5);
+            for species in species.iter() {
+                SpeciesBmc::delete(&ctx, &mm, species.id).await?;
+            }
+        }
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_species_update_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let species = SpeciesBmc::list(&ctx, &mm, None, None).await?;
+        let tname = "test_species_list_by_filter_ok";
+        let seeds = _dev_utils::get_species_seed(tname);
+        let _fx_species = _dev_utils::seed_species(&ctx, &mm, &seeds).await?.remove(0);
+
+        SpeciesBmc::update(
+            &ctx,
+            &mm,
+            species[0].id,
+            SpeciesForUpdate {
+                name: Some(tname.to_string()),
+                ..Default::default()
+            },
+        )
+        .await?;
+
+        let species = SpeciesBmc::get(&ctx, &mm, species[0].id).await?;
+        assert_eq!(species.name, tname);
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_species_delete_err_not_found() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let fx_id = 100;
+
+        let res = SpeciesBmc::delete(&ctx, &mm, fx_id).await;
+
+        assert!(
+            matches!(
+                res,
+                Err(Error::EntityNotFound {
+                    entity: "species",
+                    id: 100
+                })
+            ),
+            "EntityNotFound not matching"
+        );
+
+        Ok(())
+    }
+}

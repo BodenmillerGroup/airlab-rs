@@ -46,6 +46,256 @@ pub async fn init_test() -> ModelManager {
     mm.clone()
 }
 
+pub fn get_protein_seed(_unique_str: &str) -> Vec<ProteinForCreate> {
+    vec![
+        ProteinForCreate {
+            name: "test_list_all_ok-protein 01".to_string(),
+            description: Some("test_list_all_ok-protein 01".to_string()),
+            group_id: 1000,
+            created_by: 1303,
+        },
+        ProteinForCreate {
+            name: "test_list_all_ok-protein 02".to_string(),
+            description: Some("test_list_all_ok-protein 02".to_string()),
+            group_id: 1000,
+            created_by: 1303,
+        },
+    ]
+}
+
+pub fn get_conjugate_seed(_unique_str: &str) -> Vec<ConjugateForCreate> {
+    vec![ConjugateForCreate {
+        description: Some("test_list_all_ok-conjugate 01".to_string()),
+        group_id: 1000,
+        created_by: Some(1303),
+        labeled_by: None,
+        finished_by: None,
+        lot_id: 1007,
+        status: Some(1),
+        tag_id: 1005,
+        concentration: None,
+        finished_at: None,
+        is_archived: None,
+        custom_id: None,
+    }]
+}
+
+pub fn get_species_seed(_unique_str: &str) -> Vec<SpeciesForCreate> {
+    vec![
+        SpeciesForCreate {
+            name: "test_list_all_ok-species 01".to_string(),
+            group_id: 1,
+            acronym: "bb".to_string(),
+        },
+        SpeciesForCreate {
+            name: "test_list_all_ok-species 02".to_string(),
+            group_id: 1,
+            acronym: "bb".to_string(),
+        },
+    ]
+}
+
+pub fn get_provider_seed(_unique_str: &str) -> Vec<ProviderForCreate> {
+    vec![
+        ProviderForCreate {
+            name: "test_list_all_ok-provider 01".to_string(),
+            group_id: 1000,
+            description: None,
+            url: None,
+        },
+        ProviderForCreate {
+            name: "test_list_all_ok-provider 02".to_string(),
+            group_id: 1000,
+            description: None,
+            url: None,
+        },
+    ]
+}
+
+pub fn get_clone_seed(_unique_str: &str) -> Vec<CloneForCreate> {
+    vec![
+        CloneForCreate {
+            name: "test_list_all_ok-clone 01".to_string(),
+            group_id: 1000,
+            created_by: Some(1303),
+            epitope: String::new(),
+            is_archived: None,
+            is_phospho: false,
+            application: None,
+            reactivity: None,
+            is_polyclonal: false,
+            isotype: String::new(),
+            protein_id: 1002,
+            species_id: Some(1004),
+        },
+        CloneForCreate {
+            name: "test_list_all_ok-clone 02".to_string(),
+            group_id: 1000,
+            created_by: Some(1303),
+            epitope: String::new(),
+            is_archived: None,
+            is_phospho: false,
+            application: None,
+            reactivity: None,
+            is_polyclonal: false,
+            isotype: String::new(),
+            protein_id: 1002,
+            species_id: Some(1004),
+        },
+    ]
+}
+
+pub fn get_panel_element_seed(_unique_str: &str) -> Vec<PanelElementForCreate> {
+    vec![PanelElementForCreate {
+        panel_id: 1009,
+        conjugate_id: 1108,
+        dilution_type: 1,
+        concentration: None,
+    }]
+}
+
+pub fn get_validation_file_seed(_unique_str: &str) -> Vec<ValidationFileForCreate> {
+    vec![
+        ValidationFileForCreate {
+            name: Some("test_list_all_ok-validation_file 01".to_string()),
+            created_by: 1303,
+            validation_id: 1011,
+            hash: String::new(),
+            size: 0,
+            extension: "pdf".into(),
+            description: None,
+            created_at: chrono::offset::Utc::now(),
+        },
+        ValidationFileForCreate {
+            name: Some("test_list_all_ok-validation_file 02".to_string()),
+            created_by: 1303,
+            validation_id: 1011,
+            hash: String::new(),
+            size: 0,
+            extension: "pdf".into(),
+            description: None,
+            created_at: chrono::offset::Utc::now(),
+        },
+    ]
+}
+
+pub fn get_validation_seed(_unique_str: &str) -> Vec<ValidationForCreate> {
+    vec![ValidationForCreate {
+        group_id: 1000,
+        created_by: Some(1303),
+        clone_id: 1006,
+        lot_id: Some(1018),
+        conjugate_id: Some(1008),
+        species_id: Some(1004),
+        application: Some(1),
+        positive_control: None,
+        negative_control: None,
+        incubation_conditions: None,
+        concentration: None,
+        concentration_unit: None,
+        tissue: None,
+        fixation: None,
+        fixation_notes: None,
+        notes: None,
+        antigen_retrieval_type: None,
+        antigen_retrieval_time: None,
+        antigen_retrieval_temperature: None,
+        status: Some(1),
+        saponin: Some(false),
+        saponin_concentration: None,
+        methanol_treatment: Some(false),
+        methanol_treatment_concentration: None,
+        surface_staining: Some(false),
+        surface_staining_concentration: None,
+        file_id: Some(1),
+        is_archived: Some(false),
+        created_at: Some(chrono::offset::Utc::now()),
+        updated_at: Some(chrono::offset::Utc::now()),
+    }]
+}
+
+pub fn get_lot_seed(_unique_str: &str) -> Vec<LotForCreate> {
+    vec![LotForCreate {
+        name: "test_list_all_ok-lot 01".to_string(),
+        group_id: 1000,
+        created_by: Some(1303),
+        clone_id: 1006,
+        provider_id: Some(1003),
+        reference: None,
+        approved_by: None,
+        finished_by: None,
+        finished_at: None,
+        requested_by: None,
+        is_archived: Some(false),
+        ordered_at: None,
+        note: None,
+        ordered_by: None,
+        received_by: None,
+        price: None,
+        purpose: None,
+        status: None,
+        received_at: None,
+        requested_at: None,
+        url: None,
+    }]
+}
+
+pub fn get_tag_seed(_unique_str: &str) -> Vec<TagForCreate> {
+    vec![
+        TagForCreate {
+            name: "test_list_all_ok-tag 01".to_string(),
+            group_id: 1000,
+            description: None,
+            is_metal: false,
+            is_fluorophore: false,
+            is_enzyme: false,
+            is_biotin: false,
+            is_other: false,
+            mw: None,
+            emission: None,
+            excitation: None,
+            status: Some(0),
+        },
+        TagForCreate {
+            name: "test_list_all_ok-tag 02".to_string(),
+            group_id: 1000,
+            description: None,
+            is_metal: false,
+            is_fluorophore: false,
+            is_enzyme: false,
+            is_biotin: false,
+            is_other: false,
+            mw: None,
+            emission: None,
+            excitation: None,
+            status: Some(0),
+        },
+    ]
+}
+
+pub fn get_panel_seed(_unique_str: &str) -> Vec<PanelForCreate> {
+    vec![
+        PanelForCreate {
+            name: Some("test_list_all_ok-panel 01".to_string()),
+            group_id: 1000,
+            created_by: Some(1303),
+            description: None,
+            is_fluorophore: false,
+            is_locked: false,
+            application: None,
+        },
+        PanelForCreate {
+            name: Some("test_list_all_ok-panel 02".to_string()),
+            group_id: 1000,
+            created_by: Some(1303),
+            description: None,
+            is_fluorophore: false,
+            is_locked: false,
+            application: None,
+        },
+    ]
+}
+
 pub fn get_group_seed(unique_str: &str) -> Vec<GroupForCreate> {
     vec![
         GroupForCreate {

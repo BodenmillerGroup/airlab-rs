@@ -300,3 +300,197 @@ impl ValidationBmc {
         base::delete::<Self>(ctx, mm, id).await
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::_dev_utils;
+    use crate::model::Error;
+    use anyhow::Result;
+    use serde_json::json;
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_validation_create_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let validation_c = ValidationForCreate {
+            group_id: 1,
+            created_by: Some(261),
+            clone_id: 3124,
+            lot_id: Some(5495),
+            conjugate_id: Some(4291),
+            species_id: Some(44),
+            application: Some(1),
+            positive_control: None,
+            negative_control: None,
+            incubation_conditions: None,
+            concentration: None,
+            concentration_unit: None,
+            tissue: None,
+            fixation: None,
+            fixation_notes: None,
+            notes: None,
+            antigen_retrieval_type: None,
+            antigen_retrieval_time: None,
+            antigen_retrieval_temperature: None,
+            status: Some(1),
+            saponin: Some(false),
+            saponin_concentration: None,
+            methanol_treatment: Some(false),
+            methanol_treatment_concentration: None,
+            surface_staining: Some(false),
+            surface_staining_concentration: None,
+            file_id: Some(2909),
+            is_archived: Some(false),
+            created_at: Some(chrono::offset::Utc::now()),
+            updated_at: Some(chrono::offset::Utc::now()),
+        };
+        let id = ValidationBmc::create(&ctx, &mm, validation_c).await?;
+
+        let validation = ValidationBmc::get(&ctx, &mm, id).await?;
+        assert_eq!(validation.id, 3);
+
+        ValidationBmc::delete(&ctx, &mm, id).await?;
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_validation_get_err_not_found() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let fx_id = 100;
+
+        let res = ValidationBmc::get(&ctx, &mm, fx_id).await;
+
+        assert!(
+            matches!(
+                res,
+                Err(Error::EntityNotFound {
+                    entity: "validation",
+                    id: 100
+                })
+            ),
+            "EntityNotFound not matching"
+        );
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_validation_list_all_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let tname = "test_validation_list_all_ok";
+        let seeds = _dev_utils::get_validation_seed(tname);
+        _dev_utils::seed_validations(&ctx, &mm, &seeds).await?;
+
+        let validations = ValidationBmc::list(&ctx, &mm, None, None).await?;
+
+        let validations: Vec<Validation> = validations.into_iter().filter(|t| t.id == 1).collect();
+        assert_eq!(validations.len(), 4, "number of seeded validations.");
+
+        for validation in validations.iter() {
+            ValidationBmc::delete(&ctx, &mm, validation.id).await?;
+        }
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_validation_list_by_filter_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let tname = "test_validation_list_by_filter_ok";
+        let seeds = _dev_utils::get_validation_seed(tname);
+        _dev_utils::seed_validations(&ctx, &mm, &seeds).await?;
+
+        let filters: Vec<ValidationFilter> = serde_json::from_value(json!([
+            {
+                "name": {
+                    "$endsWith": ".a",
+                    "$containsAny": ["01", "02"]
+                }
+            },
+            {
+                "name": {"$contains": "03"}
+            }
+        ]))?;
+        let list_options = serde_json::from_value(json!({
+            "order_bys": "!id"
+        }))?;
+        let validations = ValidationBmc::list(&ctx, &mm, Some(filters), Some(list_options)).await?;
+
+        assert_eq!(validations.len(), 3);
+        assert!(validations[0].id == 1);
+
+        let validations = ValidationBmc::list(
+            &ctx,
+            &mm,
+            Some(serde_json::from_value(json!([{
+                "name": {"$startsWith": "test_list_by_filter_ok"}
+            }]))?),
+            None,
+        )
+        .await?;
+        assert_eq!(validations.len(), 5);
+        for validation in validations.iter() {
+            ValidationBmc::delete(&ctx, &mm, validation.id).await?;
+        }
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_validation_update_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let tname = "test_validation_update_ok";
+        let seeds = _dev_utils::get_validation_seed(tname);
+        let fx_validation = _dev_utils::seed_validations(&ctx, &mm, &seeds)
+            .await?
+            .remove(0);
+
+        ValidationBmc::update(
+            &ctx,
+            &mm,
+            fx_validation.id,
+            ValidationForUpdate {
+                ..Default::default()
+            },
+        )
+        .await?;
+
+        let validation = ValidationBmc::get(&ctx, &mm, fx_validation.id).await?;
+        assert_eq!(validation.id, 1);
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_validation_delete_err_not_found() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let fx_id = 100;
+
+        let res = ValidationBmc::delete(&ctx, &mm, fx_id).await;
+
+        assert!(
+            matches!(
+                res,
+                Err(Error::EntityNotFound {
+                    entity: "validation",
+                    id: 100
+                })
+            ),
+            "EntityNotFound not matching"
+        );
+
+        Ok(())
+    }
+}

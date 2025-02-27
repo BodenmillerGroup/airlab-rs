@@ -135,3 +135,63 @@ impl MemberBmc {
         base::delete::<Self>(ctx, mm, id).await
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::_dev_utils;
+    use anyhow::Result;
+    use serde_json::json;
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_member_create_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let fx_user_id = 1;
+        let fx_group_id = 1;
+
+        let member_c = MemberForCreate {
+            group_id: fx_group_id,
+            user_id: fx_user_id,
+            activation_key: None,
+            all_panels: false,
+            is_active: false,
+            role: 100,
+        };
+        let id = MemberBmc::create(&ctx, &mm, member_c).await?;
+
+        let member = MemberBmc::get(&ctx, &mm, id).await?;
+        assert_eq!(member.user_id, fx_user_id);
+
+        MemberBmc::delete(&ctx, &mm, id).await?;
+
+        Ok(())
+    }
+
+    #[allow(dead_code)]
+    fn get_seed() -> Vec<(i32, i32)> {
+        vec![(1000, 1000)]
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_member_list_by_filter_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let fx_names = get_seed();
+        _dev_utils::seed_members(&ctx, &mm, &fx_names).await?;
+
+        let filters: Vec<MemberFilter> = serde_json::from_value(json!([
+            {
+                "user_id": 1001
+            }
+        ]))?;
+        let members = MemberBmc::list(&ctx, &mm, Some(filters), None).await?;
+        println!("MEMBERS {members:?}");
+
+        assert_eq!(members.len(), 3);
+        assert!(members[0].id == 1);
+        Ok(())
+    }
+}

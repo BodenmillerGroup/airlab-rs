@@ -508,3 +508,30 @@ impl ViewValidationBmc {
         Ok(returns)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use anyhow::Result;
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_view_validation_list_all_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+
+        let validations = ViewValidationBmc::list(&ctx, &mm, 1000, None, None).await?;
+
+        let _validations: Vec<ViewValidation> = validations
+            .into_iter()
+            .filter(|t| {
+                t.tissue
+                    .as_ref()
+                    .unwrap_or(&String::new())
+                    .starts_with("test_list_all_ok-validation")
+            })
+            .collect();
+
+        Ok(())
+    }
+}

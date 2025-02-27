@@ -351,3 +351,25 @@ WHERE
         Ok(returns)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use anyhow::Result;
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_view_lot_list_all_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+
+        let lots = ViewLotBmc::list(&ctx, &mm, Some(1000), None, None).await?;
+
+        let _lots: Vec<ViewLot> = lots
+            .into_iter()
+            .filter(|t| t.name.starts_with("test_list_all_ok-lot"))
+            .collect();
+
+        Ok(())
+    }
+}

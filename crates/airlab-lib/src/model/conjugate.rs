@@ -105,7 +105,6 @@ pub struct ConjugateForCreate {
     pub is_archived: Option<bool>,
     #[serde(rename = "customId")]
     pub custom_id: Option<String>,
-    pub meta: Option<serde_json::Value>,
 }
 
 #[derive(Fields, Default, Deserialize, Debug)]
@@ -182,5 +181,185 @@ impl ConjugateBmc {
 
     pub async fn delete(ctx: &Ctx, mm: &ModelManager, id: i32) -> Result<()> {
         base::delete::<Self>(ctx, mm, id).await
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::_dev_utils;
+    use crate::model::Error;
+    use anyhow::Result;
+    use serde_json::json;
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_conjugate_create_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let fx_description = "test_create_ok description";
+
+        let conjugate_c = ConjugateForCreate {
+            description: Some(fx_description.to_string()),
+            group_id: 1,
+            created_by: Some(261),
+            labeled_by: None,
+            finished_by: None,
+            lot_id: 5495,
+            status: Some(1),
+            tag_id: 211,
+            concentration: None,
+            finished_at: None,
+            is_archived: None,
+            custom_id: None,
+        };
+        let id = ConjugateBmc::create(&ctx, &mm, conjugate_c).await?;
+
+        let conjugate = ConjugateBmc::get(&ctx, &mm, id).await?;
+        assert_eq!(conjugate.description.unwrap_or("".into()), fx_description);
+
+        ConjugateBmc::delete(&ctx, &mm, id).await?;
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_conjugate_get_err_not_found() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let fx_id = 100;
+
+        let res = ConjugateBmc::get(&ctx, &mm, fx_id).await;
+
+        assert!(
+            matches!(
+                res,
+                Err(Error::EntityNotFound {
+                    entity: "conjugate",
+                    id: 100
+                })
+            ),
+            "EntityNotFound not matching"
+        );
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_conjugate_list_all_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let tname = "test_conjugate_list_all_ok";
+        let seeds = _dev_utils::get_conjugate_seed(tname);
+        _dev_utils::seed_conjugates(&ctx, &mm, &seeds).await?;
+
+        let conjugates = ConjugateBmc::list(&ctx, &mm, None, None).await?;
+
+        let conjugates: Vec<Conjugate> = conjugates.into_iter().collect();
+        assert_eq!(conjugates.len(), 4, "number of seeded conjugates.");
+
+        for conjugate in conjugates.iter() {
+            ConjugateBmc::delete(&ctx, &mm, conjugate.id).await?;
+        }
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_conjugate_list_by_filter_ok() -> Result<()> {
+        let mm = _dev_utils::init_test().await;
+        let ctx = Ctx::root_ctx();
+        let tname = "test_conjugate_list_by_filter_ok";
+        let seeds = _dev_utils::get_conjugate_seed(tname);
+        _dev_utils::seed_conjugates(&ctx, &mm, &seeds).await?;
+
+        let filters: Vec<ConjugateFilter> = serde_json::from_value(json!([
+            {
+                "description": {
+                    "$endsWith": ".a",
+                    "$containsAny": ["01", "02"]
+                }
+            },
+            {
+                "description": {"$contains": "03"}
+            }
+        ]))?;
+        let list_options = serde_json::from_value(json!({
+            "order_bys": "!id"
+        }))?;
+        let conjugates = ConjugateBmc::list(&ctx, &mm, Some(filters), Some(list_options)).await?;
+
+        assert_eq!(conjugates.len(), 3);
+        //assert!(conjugates[0].description.unwrap().ends_with("03"));
+
+        let conjugates = ConjugateBmc::list(
+            &ctx,
+            &mm,
+            Some(serde_json::from_value(json!([{
+                "description": {"$startsWith": "test_list_by_filter_ok"}
+            }]))?),
+            None,
+        )
+        .await?;
+        assert_eq!(conjugates.len(), 5);
+        for conjugate in conjugates.iter() {
+            ConjugateBmc::delete(&ctx, &mm, conjugate.id).await?;
+        }
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_conjugate_update_ok() -> Result<()> {
+        let mm = _dev_utils::init_test().await;
+        let ctx = Ctx::root_ctx();
+        let tname = "test_conjugate_update_ok";
+        let seeds = _dev_utils::get_conjugate_seed(tname);
+        let fx_conjugate = _dev_utils::seed_conjugates(&ctx, &mm, &seeds)
+            .await?
+            .remove(0);
+
+        ConjugateBmc::update(
+            &ctx,
+            &mm,
+            fx_conjugate.id,
+            ConjugateForUpdate {
+                description: Some(tname.to_string()),
+                ..Default::default()
+            },
+        )
+        .await?;
+
+        let conjugate = ConjugateBmc::get(&ctx, &mm, fx_conjugate.id).await?;
+        assert_eq!(conjugate.description, Some(tname.into()));
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_conjugate_delete_err_not_found() -> Result<()> {
+        let mm = _dev_utils::init_test().await;
+        let ctx = Ctx::root_ctx();
+        let fx_id = 100;
+
+        let res = ConjugateBmc::delete(&ctx, &mm, fx_id).await;
+
+        assert!(
+            matches!(
+                res,
+                Err(Error::EntityNotFound {
+                    entity: "conjugate",
+                    id: 100
+                })
+            ),
+            "EntityNotFound not matching"
+        );
+
+        Ok(())
     }
 }

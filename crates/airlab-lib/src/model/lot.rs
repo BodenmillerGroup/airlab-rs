@@ -253,3 +253,201 @@ impl LotBmc {
         base::delete::<Self>(ctx, mm, id).await
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::_dev_utils;
+    use crate::model::Error;
+    use anyhow::Result;
+    use serde_json::json;
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_lot_create_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let fx_name = "test_create_ok name";
+
+        let lot_c = LotForCreate {
+            name: fx_name.to_string(),
+            created_by: Some(261),
+            group_id: 1,
+            clone_id: 3123,
+            provider_id: Some(103),
+            reference: None,
+            approved_by: None,
+            finished_by: None,
+            finished_at: None,
+            requested_by: None,
+            is_archived: Some(false),
+            ordered_at: None,
+            note: None,
+            ordered_by: None,
+            received_by: None,
+            price: None,
+            purpose: None,
+            status: None,
+            received_at: None,
+            requested_at: None,
+            url: None,
+        };
+        let id = LotBmc::create(&ctx, &mm, lot_c).await?;
+
+        let lot = LotBmc::get(&ctx, &mm, id).await?;
+        assert_eq!(lot.name, fx_name);
+
+        LotBmc::delete(&ctx, &mm, id).await?;
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_lot_get_err_not_found() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let fx_id = 100;
+
+        let res = LotBmc::get(&ctx, &mm, fx_id).await;
+
+        assert!(
+            matches!(
+                res,
+                Err(Error::EntityNotFound {
+                    entity: "lot",
+                    id: 100
+                })
+            ),
+            "EntityNotFound not matching"
+        );
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_lot_list_all_ok() -> Result<()> {
+        let mm = _dev_utils::init_test().await;
+        let ctx = Ctx::root_ctx();
+        let tname = "test_lot_update_ok";
+        let seeds = _dev_utils::get_lot_seed(tname);
+        _dev_utils::seed_lots(&ctx, &mm, &seeds).await?;
+
+        let lots = LotBmc::list(&ctx, &mm, None, None).await?;
+
+        let lots: Vec<Lot> = lots
+            .into_iter()
+            .filter(|t| t.name.starts_with("test_list_all_ok-lot"))
+            .collect();
+        assert_eq!(lots.len(), 4, "number of seeded lots.");
+
+        if false {
+            for lot in lots.iter() {
+                LotBmc::delete(&ctx, &mm, lot.id).await?;
+            }
+        }
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_lot_list_by_filter_ok() -> Result<()> {
+        let mm = _dev_utils::init_test().await;
+        let ctx = Ctx::root_ctx();
+        let tname = "test_lot_list_by_filter_ok";
+        let seeds = _dev_utils::get_lot_seed(tname);
+        _dev_utils::seed_lots(&ctx, &mm, &seeds).await?;
+
+        let filters: Vec<LotFilter> = serde_json::from_value(json!([
+            {
+                "name": {
+                    "$endsWith": ".a",
+                    "$containsAny": ["01", "02"]
+                }
+            },
+            {
+                "name": {"$contains": "03"}
+            }
+        ]))?;
+        let list_options = serde_json::from_value(json!({
+            "order_bys": "!id"
+        }))?;
+        let lots = LotBmc::list(&ctx, &mm, Some(filters), Some(list_options)).await?;
+
+        assert_eq!(lots.len(), 3);
+        assert!(lots[0].name.ends_with("03"));
+        assert!(lots[1].name.ends_with("02.a"));
+        assert!(lots[2].name.ends_with("01.a"));
+
+        if false {
+            let lots = LotBmc::list(
+                &ctx,
+                &mm,
+                Some(serde_json::from_value(json!([{
+                    "name": {"$startsWith": "test_list_by_filter_ok"}
+                }]))?),
+                None,
+            )
+            .await?;
+            assert_eq!(lots.len(), 5);
+            for lot in lots.iter() {
+                LotBmc::delete(&ctx, &mm, lot.id).await?;
+            }
+        }
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_lot_update_ok() -> Result<()> {
+        let mm = _dev_utils::init_test().await;
+        let ctx = Ctx::root_ctx();
+        let tname = "test_lot_update_ok";
+        let seeds = _dev_utils::get_lot_seed(tname);
+        let fx_lot = _dev_utils::seed_lots(&ctx, &mm, &seeds).await?.remove(0);
+        let member_id = 45;
+
+        LotBmc::update(
+            &ctx,
+            &mm,
+            fx_lot.id,
+            member_id,
+            LotForUpdate {
+                name: Some(tname.to_string()),
+                ..Default::default()
+            },
+        )
+        .await?;
+
+        let lot = LotBmc::get(&ctx, &mm, fx_lot.id).await?;
+        assert_eq!(lot.name, tname);
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_lot_delete_err_not_found() -> Result<()> {
+        let mm = _dev_utils::init_test().await;
+        let ctx = Ctx::root_ctx();
+        let fx_id = 100;
+
+        let res = LotBmc::delete(&ctx, &mm, fx_id).await;
+
+        assert!(
+            matches!(
+                res,
+                Err(Error::EntityNotFound {
+                    entity: "lot",
+                    id: 100
+                })
+            ),
+            "EntityNotFound not matching"
+        );
+
+        Ok(())
+    }
+}

@@ -162,3 +162,193 @@ impl CloneBmc {
         base::delete::<Self>(ctx, mm, id).await
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::_dev_utils;
+    use crate::model::Error;
+    use anyhow::Result;
+    use serde_json::json;
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_clone_create_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let fx_name = "test_create_ok name";
+
+        let clone_c = CloneForCreate {
+            name: fx_name.to_string(),
+            group_id: 1000,
+            created_by: Some(1303),
+            epitope: String::new(),
+            is_archived: None,
+            is_phospho: false,
+            reactivity: None,
+            application: None,
+            is_polyclonal: false,
+            isotype: String::new(),
+            protein_id: 1002,
+            species_id: Some(1004),
+        };
+        let id = CloneBmc::create(&ctx, &mm, clone_c).await?;
+
+        let clone = CloneBmc::get(&ctx, &mm, id).await?;
+        assert_eq!(clone.name, fx_name);
+
+        CloneBmc::delete(&ctx, &mm, id).await?;
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_clone_get_err_not_found() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let fx_id = 100;
+
+        let res = CloneBmc::get(&ctx, &mm, fx_id).await;
+
+        assert!(
+            matches!(
+                res,
+                Err(Error::EntityNotFound {
+                    entity: "clone",
+                    id: 100
+                })
+            ),
+            "EntityNotFound not matching"
+        );
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_clone_list_all_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let tname = "test_clone_list_all_ok";
+        let seeds = _dev_utils::get_clone_seed(tname);
+        _dev_utils::seed_clones(&ctx, &mm, &seeds).await?;
+
+        let clones = CloneBmc::list(&ctx, &mm, None, None).await?;
+        println!("n clones: {}", clones.len());
+
+        let clones: Vec<Clone> = clones
+            .into_iter()
+            .filter(|t| t.name.starts_with("test_list_all_ok-clone"))
+            .collect();
+        println!("n clones: {}", clones.len());
+
+        for clone in clones.iter() {
+            if false {
+                CloneBmc::delete(&ctx, &mm, clone.id).await?;
+            }
+        }
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_clone_list_by_filter_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let tname = "test_clone_list_by_filter_ok";
+        let seeds = _dev_utils::get_clone_seed(tname);
+        _dev_utils::seed_clones(&ctx, &mm, &seeds).await?;
+
+        let filters: Vec<CloneFilter> = serde_json::from_value(json!([
+            {
+                "name": {
+                    "$endsWith": ".a",
+                    "$containsAny": ["01", "02"]
+                }
+            },
+            {
+                "name": {"$contains": "03"}
+            }
+        ]))?;
+        let list_options = serde_json::from_value(json!({
+            "order_bys": "!id"
+        }))?;
+        let clones = CloneBmc::list(&ctx, &mm, Some(filters), Some(list_options)).await?;
+        println!("n clones: {}", clones.len());
+
+        assert_eq!(clones.len(), 3);
+        assert!(clones[0].name.ends_with("03"));
+        assert!(clones[1].name.ends_with("02.a"));
+        assert!(clones[2].name.ends_with("01.a"));
+
+        if false {
+            let clones = CloneBmc::list(
+                &ctx,
+                &mm,
+                Some(serde_json::from_value(json!([{
+                    "name": {"$startsWith": "test_list_by_filter_ok"}
+                }]))?),
+                None,
+            )
+            .await?;
+            assert_eq!(clones.len(), 5);
+            for clone in clones.iter() {
+                CloneBmc::delete(&ctx, &mm, clone.id).await?;
+            }
+        }
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_clone_update_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let tname = "test_clone_update_ok";
+        let seeds = _dev_utils::get_clone_seed(tname);
+        _dev_utils::seed_clones(&ctx, &mm, &seeds).await?;
+        let fx_clone = _dev_utils::seed_clones(&ctx, &mm, &seeds).await?.remove(0);
+
+        CloneBmc::update(
+            &ctx,
+            &mm,
+            fx_clone.id,
+            CloneForUpdate {
+                name: Some(tname.to_string()),
+                ..Default::default()
+            },
+        )
+        .await?;
+
+        let clone = CloneBmc::get(&ctx, &mm, fx_clone.id).await?;
+        assert_eq!(clone.name, tname);
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_clone_delete_err_not_found() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let fx_id = 100;
+
+        let res = CloneBmc::delete(&ctx, &mm, fx_id).await;
+
+        assert!(
+            matches!(
+                res,
+                Err(Error::EntityNotFound {
+                    entity: "clone",
+                    id: 100
+                })
+            ),
+            "EntityNotFound not matching"
+        );
+
+        Ok(())
+    }
+}

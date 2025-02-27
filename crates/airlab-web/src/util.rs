@@ -248,7 +248,6 @@ async fn create_conjugate(ctx: &Ctx, mm: &ModelManager, entity: &Entity) -> Resu
         finished_at: None,
         is_archived: Some(false),
         custom_id: None,
-        meta: None,
     };
     let id = ConjugateBmc::create(ctx, mm, fc).await?;
 

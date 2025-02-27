@@ -138,3 +138,189 @@ impl ValidationFileBmc {
         base::delete::<Self>(ctx, mm, id).await
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::_dev_utils;
+    use crate::model::Error;
+    use anyhow::Result;
+    use serde_json::json;
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_validation_file_create_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let fx_name = "test_create_ok name";
+
+        let validation_file_c = ValidationFileForCreate {
+            name: None,
+            created_by: 261,
+            validation_id: 2221,
+            hash: String::new(),
+            size: 0,
+            extension: "pdf".into(),
+            description: None,
+            created_at: chrono::offset::Utc::now(),
+        };
+        let id = ValidationFileBmc::create(&ctx, &mm, validation_file_c).await?;
+
+        let validation_file = ValidationFileBmc::get(&ctx, &mm, id).await?;
+        assert_eq!(validation_file.name, Some(fx_name.into()));
+
+        ValidationFileBmc::delete(&ctx, &mm, id).await?;
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_validation_file_get_err_not_found() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let fx_id = 100;
+
+        let res = ValidationFileBmc::get(&ctx, &mm, fx_id).await;
+
+        assert!(
+            matches!(
+                res,
+                Err(Error::EntityNotFound {
+                    entity: "validation_file",
+                    id: 100
+                })
+            ),
+            "EntityNotFound not matching"
+        );
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_validation_file_list_all_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let tname = "test_validation_file_list_all_ok";
+        let seeds = _dev_utils::get_validation_file_seed(tname);
+        _dev_utils::seed_validation_files(&ctx, &mm, &seeds).await?;
+
+        let validation_files = ValidationFileBmc::list(&ctx, &mm, None, None).await?;
+
+        let validation_files: Vec<ValidationFile> = validation_files.into_iter().collect();
+        assert_eq!(
+            validation_files.len(),
+            4,
+            "number of seeded validation_files."
+        );
+
+        if false {
+            for validation_file in validation_files.iter() {
+                ValidationFileBmc::delete(&ctx, &mm, validation_file.id).await?;
+            }
+        }
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_validation_file_list_by_filter_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let tname = "test_validation_file_list_by_filter_ok";
+        let seeds = _dev_utils::get_validation_file_seed(tname);
+        _dev_utils::seed_validation_files(&ctx, &mm, &seeds).await?;
+
+        let filters: Vec<ValidationFileFilter> = serde_json::from_value(json!([
+            {
+                "name": {
+                    "$endsWith": ".a",
+                    "$containsAny": ["01", "02"]
+                }
+            },
+            {
+                "name": {"$contains": "03"}
+            }
+        ]))?;
+        let list_options = serde_json::from_value(json!({
+            "order_bys": "!id"
+        }))?;
+        let validation_files =
+            ValidationFileBmc::list(&ctx, &mm, Some(filters), Some(list_options)).await?;
+
+        assert_eq!(validation_files.len(), 3);
+        assert_eq!(validation_files[0].name, Some("wrong".into()));
+
+        if false {
+            let validation_files = ValidationFileBmc::list(
+                &ctx,
+                &mm,
+                Some(serde_json::from_value(json!([{
+                    "name": {"$startsWith": "test_list_by_filter_ok"}
+                }]))?),
+                None,
+            )
+            .await?;
+            assert_eq!(validation_files.len(), 5);
+            for validation_file in validation_files.iter() {
+                ValidationFileBmc::delete(&ctx, &mm, validation_file.id).await?;
+            }
+        }
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_validation_file_update_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let tname = "test_validation_file_update_ok";
+        let seeds = _dev_utils::get_validation_file_seed(tname);
+        let fx_name_new = "test_update_ok - validation_file 01 - new";
+        let fx_validation_file = _dev_utils::seed_validation_files(&ctx, &mm, &seeds)
+            .await?
+            .remove(0);
+
+        ValidationFileBmc::update(
+            &ctx,
+            &mm,
+            fx_validation_file.id,
+            ValidationFileForUpdate {
+                name: Some(fx_name_new.to_string()),
+                ..Default::default()
+            },
+        )
+        .await?;
+
+        let validation_file = ValidationFileBmc::get(&ctx, &mm, fx_validation_file.id).await?;
+        assert_eq!(validation_file.name, Some(fx_name_new.into()));
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_validation_file_delete_err_not_found() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let fx_id = 100;
+
+        let res = ValidationFileBmc::delete(&ctx, &mm, fx_id).await;
+
+        assert!(
+            matches!(
+                res,
+                Err(Error::EntityNotFound {
+                    entity: "validation_file",
+                    id: 100
+                })
+            ),
+            "EntityNotFound not matching"
+        );
+
+        Ok(())
+    }
+}

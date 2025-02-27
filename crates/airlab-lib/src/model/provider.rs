@@ -116,3 +116,197 @@ impl ProviderBmc {
         base::delete::<Self>(ctx, mm, id).await
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::_dev_utils;
+    use crate::model::Error;
+    use anyhow::Result;
+    use serde_json::json;
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_provider_create_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let fx_name = "test_create_ok name";
+
+        let provider_c = ProviderForCreate {
+            name: fx_name.to_string(),
+            description: None,
+            url: None,
+            group_id: 1,
+        };
+        let id = ProviderBmc::create(&ctx, &mm, provider_c).await?;
+
+        let provider = ProviderBmc::get(&ctx, &mm, id).await?;
+        assert_eq!(provider.name, fx_name);
+
+        ProviderBmc::delete(&ctx, &mm, id).await?;
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_provider_get_err_not_found() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let fx_id = 100;
+
+        let res = ProviderBmc::get(&ctx, &mm, fx_id).await;
+
+        assert!(
+            matches!(
+                res,
+                Err(Error::EntityNotFound {
+                    entity: "provider",
+                    id: 100
+                })
+            ),
+            "EntityNotFound not matching"
+        );
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_provider_list_all_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let tname = "test_provider_list_all_ok";
+        let seeds = _dev_utils::get_provider_seed(tname);
+        _dev_utils::seed_providers(&ctx, &mm, &seeds).await?;
+
+        let providers = ProviderBmc::list(&ctx, &mm, None, None).await?;
+
+        let providers: Vec<Provider> = providers
+            .into_iter()
+            .filter(|t| t.name.starts_with("test_list_all_ok-provider"))
+            .collect();
+        assert_eq!(providers.len(), 4, "number of seeded providers.");
+
+        if false {
+            for provider in providers.iter() {
+                ProviderBmc::delete(&ctx, &mm, provider.id).await?;
+            }
+        }
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_provider_list_by_filter_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let tname = "test_provider_list_by_filter_ok";
+        let seeds = _dev_utils::get_provider_seed(tname);
+        _dev_utils::seed_providers(&ctx, &mm, &seeds).await?;
+
+        let filters: Vec<ProviderFilter> = serde_json::from_value(json!([
+            {
+                "name": {
+                    "$endsWith": ".a",
+                    "$containsAny": ["01", "02"]
+                }
+            },
+            {
+                "name": {"$contains": "03"}
+            }
+        ]))?;
+        let list_options = serde_json::from_value(json!({
+            "order_bys": "!id"
+        }))?;
+        let providers = ProviderBmc::list(&ctx, &mm, Some(filters), Some(list_options)).await?;
+
+        assert_eq!(providers.len(), 3);
+        assert!(providers[0].name.ends_with("03"));
+        assert!(providers[1].name.ends_with("02.a"));
+        assert!(providers[2].name.ends_with("01.a"));
+
+        if false {
+            let providers = ProviderBmc::list(
+                &ctx,
+                &mm,
+                Some(serde_json::from_value(json!([{
+                    "name": {"$startsWith": "test_list_by_filter_ok"}
+                }]))?),
+                None,
+            )
+            .await?;
+            assert_eq!(providers.len(), 5);
+            for provider in providers.iter() {
+                ProviderBmc::delete(&ctx, &mm, provider.id).await?;
+            }
+        }
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_provider_update_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+
+        let providers = ProviderBmc::list(
+            &ctx,
+            &mm,
+            None,
+            Some(ListOptions {
+                limit: Some(1),
+                offset: None,
+                order_bys: None,
+            }),
+        )
+        .await?;
+
+        let tname = "test_provider_update_ok";
+        let seeds = _dev_utils::get_provider_seed(tname);
+        let _fx_provider = _dev_utils::seed_providers(&ctx, &mm, &seeds)
+            .await?
+            .remove(0);
+
+        ProviderBmc::update(
+            &ctx,
+            &mm,
+            providers[0].id,
+            ProviderForUpdate {
+                name: Some(tname.to_string()),
+                ..Default::default()
+            },
+        )
+        .await?;
+
+        let provider = ProviderBmc::get(&ctx, &mm, providers[0].id).await?;
+        assert_eq!(provider.name, tname);
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_provider_delete_err_not_found() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let fx_id = 100;
+
+        let res = ProviderBmc::delete(&ctx, &mm, fx_id).await;
+
+        assert!(
+            matches!(
+                res,
+                Err(Error::EntityNotFound {
+                    entity: "provider",
+                    id: 100
+                })
+            ),
+            "EntityNotFound not matching"
+        );
+
+        Ok(())
+    }
+}

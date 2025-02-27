@@ -112,3 +112,184 @@ impl ProteinBmc {
         base::delete::<Self>(ctx, mm, id).await
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::_dev_utils;
+    use crate::model::Error;
+    use anyhow::Result;
+    use serde_json::json;
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_protein_create_ok() -> Result<()> {
+        let ctx = Ctx::root_ctx();
+        let mm = ModelManager::new().await?;
+        let fx_name = "test_create_ok name";
+
+        let protein_c = ProteinForCreate {
+            name: fx_name.to_string(),
+            description: Some(fx_name.to_string()),
+            group_id: 1,
+            created_by: 261,
+        };
+        let id = ProteinBmc::create(&ctx, &mm, protein_c).await?;
+
+        let protein = ProteinBmc::get(&ctx, &mm, id).await?;
+        assert_eq!(protein.name, fx_name);
+
+        ProteinBmc::delete(&ctx, &mm, id).await?;
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_protein_get_err_not_found() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let fx_id = 100;
+
+        let res = ProteinBmc::get(&ctx, &mm, fx_id).await;
+
+        assert!(
+            matches!(
+                res,
+                Err(Error::EntityNotFound {
+                    entity: "protein",
+                    id: 100
+                })
+            ),
+            "EntityNotFound not matching"
+        );
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_protein_list_all_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let tname = "test_protein_list_all_ok";
+        let seeds = _dev_utils::get_protein_seed(tname);
+        _dev_utils::seed_proteins(&ctx, &mm, &seeds).await?;
+
+        let proteins = ProteinBmc::list(&ctx, &mm, None, None).await?;
+
+        let proteins: Vec<Protein> = proteins
+            .into_iter()
+            .filter(|t| t.name.starts_with("test_list_all_ok-protein"))
+            .collect();
+        assert_eq!(proteins.len(), 4, "number of seeded proteins.");
+
+        if false {
+            for protein in proteins.iter() {
+                ProteinBmc::delete(&ctx, &mm, protein.id).await?;
+            }
+        }
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_protein_list_by_filter_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let tname = "test_protein_list_by_filter_ok";
+        let seeds = _dev_utils::get_protein_seed(tname);
+        _dev_utils::seed_proteins(&ctx, &mm, &seeds).await?;
+
+        let filters: Vec<ProteinFilter> = serde_json::from_value(json!([
+            {
+                "name": {
+                    "$endsWith": ".a",
+                    "$containsAny": ["01", "02"]
+                }
+            },
+            {
+                "name": {"$contains": "03"}
+            }
+        ]))?;
+        let list_options = serde_json::from_value(json!({
+            "order_bys": "!id"
+        }))?;
+        let proteins = ProteinBmc::list(&ctx, &mm, Some(filters), Some(list_options)).await?;
+
+        assert_eq!(proteins.len(), 3);
+        assert!(proteins[0].name.ends_with("03"));
+        assert!(proteins[1].name.ends_with("02.a"));
+        assert!(proteins[2].name.ends_with("01.a"));
+
+        if false {
+            let proteins = ProteinBmc::list(
+                &ctx,
+                &mm,
+                Some(serde_json::from_value(json!([{
+                    "name": {"$startsWith": "test_list_by_filter_ok"}
+                }]))?),
+                None,
+            )
+            .await?;
+            assert_eq!(proteins.len(), 5);
+            for protein in proteins.iter() {
+                ProteinBmc::delete(&ctx, &mm, protein.id).await?;
+            }
+        }
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_protein_update_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let tname = "test_protein_list_by_filter_ok";
+        let seeds = _dev_utils::get_protein_seed(tname);
+        let fx_protein = _dev_utils::seed_proteins(&ctx, &mm, &seeds)
+            .await?
+            .remove(0);
+
+        ProteinBmc::update(
+            &ctx,
+            &mm,
+            fx_protein.id,
+            ProteinForUpdate {
+                name: Some(tname.to_string()),
+                ..Default::default()
+            },
+        )
+        .await?;
+
+        let protein = ProteinBmc::get(&ctx, &mm, fx_protein.id).await?;
+        assert_eq!(protein.name, tname);
+
+        Ok(())
+    }
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_protein_delete_err_not_found() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let fx_id = 100;
+
+        let res = ProteinBmc::delete(&ctx, &mm, fx_id).await;
+
+        assert!(
+            matches!(
+                res,
+                Err(Error::EntityNotFound {
+                    entity: "protein",
+                    id: 100
+                })
+            ),
+            "EntityNotFound not matching"
+        );
+
+        Ok(())
+    }
+}

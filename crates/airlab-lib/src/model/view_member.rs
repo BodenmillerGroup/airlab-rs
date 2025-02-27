@@ -84,3 +84,37 @@ impl ViewMemberBmc {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use anyhow::Result;
+
+    #[ignore]
+    #[test]
+    fn test_view_member_deserialize() -> Result<()> {
+        let g: ViewMember = serde_json::from_str(
+            r###"
+    {
+      "created_at": "2021-03-04T17:37:27.391811",
+      "group_id": 1,
+      "id": 1,
+      "is_active": true,
+      "role": 100,
+      "updated_at": "2021-03-04T17:37:27.391811",
+      "user": {
+        "email": "anton.rau@gmail.com",
+        "id": 1,
+        "name": "Anton Rau"
+      },
+      "user_id": 1
+    }
+
+
+
+            "###,
+        )?;
+        println!("{g:?}");
+        Ok(())
+    }
+}

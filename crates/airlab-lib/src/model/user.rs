@@ -240,3 +240,25 @@ impl UserBmc {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use anyhow::{Context, Result};
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_first_ok_demo1() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+        let fx_username = "demo1@uzh.ch";
+
+        let user: User = UserBmc::first_by_username(&ctx, &mm, fx_username)
+            .await?
+            .context("Should have user 'demo1'")?;
+
+        assert_eq!(user.username, fx_username);
+
+        Ok(())
+    }
+}

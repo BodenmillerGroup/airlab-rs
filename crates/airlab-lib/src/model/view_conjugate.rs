@@ -266,3 +266,30 @@ WHERE
         Ok(returns)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use anyhow::Result;
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_view_conjugate_list_all_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+
+        let conjugates = ViewConjugateBmc::list(&ctx, &mm, Some(1000), None, None).await?;
+
+        let _conjugates: Vec<ViewConjugate> = conjugates
+            .into_iter()
+            .filter(|t| {
+                t.description
+                    .as_ref()
+                    .unwrap_or(&String::from("Not found"))
+                    .starts_with("test_list_all_ok-conjugate")
+            })
+            .collect();
+
+        Ok(())
+    }
+}

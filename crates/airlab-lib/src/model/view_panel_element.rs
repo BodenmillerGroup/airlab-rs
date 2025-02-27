@@ -121,3 +121,20 @@ impl ViewPanelElementBmc {
         Ok(returns)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use anyhow::Result;
+
+    #[ignore]
+    #[tokio::test]
+    async fn test_view_panel_list_all_ok() -> Result<()> {
+        let mm = ModelManager::new().await?;
+        let ctx = Ctx::root_ctx();
+
+        let _panels = ViewPanelElementBmc::list(&ctx, &mm, None, None).await?;
+
+        Ok(())
+    }
+}
