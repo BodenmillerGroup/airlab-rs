@@ -8,10 +8,11 @@ use airlab_lib::model::validation_file::{
 };
 use axum::body::Body;
 use axum::extract::{Json as eJson, Path, State};
-use axum::routing::{get, patch, post};
+use axum::routing::{delete, get, patch, post};
 use axum::{Json, Router};
+use camino::Utf8PathBuf;
 use serde_json::{Value, json};
-use tokio::{fs::File, io::BufReader};
+use tokio::{fs::File, io::BufReader, io::ErrorKind};
 use tokio_util::io::ReaderStream;
 use tracing::debug;
 
@@ -34,6 +35,10 @@ pub fn routes(mm: ModelManager) -> Router {
             get(api_validation_files_handler),
         )
         .route(
+            "/api/v1/validationFiles/:validation_file_id",
+            delete(api_delete_validation_file_handler),
+        )
+        .route(
             "/api/v1/validationFiles/:file_id/serve",
             get(api_serve_validation_handler),
         )
@@ -51,6 +56,22 @@ async fn api_post_validation_file_handler(
 
     let validation_file: ValidationFile = ValidationFileBmc::get(&ctx, &mm, v_file_id).await?;
     Ok(Json(json!(validation_file)))
+}
+
+async fn api_delete_validation_file_handler(
+    State(mm): State<ModelManager>,
+    ctx: CtxW,
+    Path(v_file_id): Path<i32>,
+) -> Result<Json<Value>> {
+    debug!(
+        "HANDLER - api_delete_validation_file_handler: {:?}",
+        v_file_id
+    );
+    let ctx = ctx.0;
+    ValidationFileBmc::delete(&ctx, &mm, v_file_id).await?;
+    // not deleting the file
+
+    Ok(Json(json!(v_file_id)))
 }
 
 async fn api_patch_validation_file_handler(
@@ -95,22 +116,32 @@ async fn api_serve_validation_handler(
     let validation: Validation =
         ValidationBmc::get(&ctx, &mm, validation_file.validation_id).await?;
 
-    let file_path = format!(
+    let file_path = Utf8PathBuf::from(format!(
         "{}/groups/{}/uploads/validation/{}/{}.{}",
         &web_config().DATA_PATH,
         validation.group_id,
         validation.id,
         validation_file.hash,
         validation_file.extension
-    );
-    let file = File::open(file_path).await?;
-
-    let reader = BufReader::new(file);
-
-    let stream = ReaderStream::new(reader);
-
-    let body = Body::from_stream(stream);
-    Ok(body)
+    ));
+    if !file_path.is_file() {
+        println!("Cannot find the file: {file_path}");
+    }
+    match File::open(&file_path).await {
+        Ok(file) => {
+            let reader = BufReader::new(file);
+            let stream = ReaderStream::new(reader);
+            Ok(Body::from_stream(stream))
+        }
+        Err(e) if e.kind() == ErrorKind::NotFound => {
+            let error_message = format!("File not found: ({file_path})");
+            Ok(Body::from(error_message))
+        }
+        Err(e) => {
+            let error_message = format!("error reading file: {e}");
+            Ok(Body::from(error_message))
+        }
+    }
 }
 
 async fn api_validation_files_handler(

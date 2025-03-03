@@ -385,7 +385,15 @@ async fn api_group_me_handler(
     ]))?;
 
     let member: Vec<Member> = MemberBmc::list(&ctx, &mm, Some(filters), None).await?;
-    Ok(Json(json!(member[0])))
+    let member = match member.first() {
+        Some(m) => m,
+        None => panic!(
+            "The group {} does not have a member with id {}",
+            group_id,
+            ctx.user_id()
+        ),
+    };
+    Ok(Json(json!(member)))
 }
 
 async fn api_group_members_handler(

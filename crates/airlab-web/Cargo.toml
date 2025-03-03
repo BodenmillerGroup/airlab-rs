@@ -17,6 +17,7 @@ serde_with = "3"
 axum = { version = "0.7", features = ["macros", "multipart", "ws"] }
 tower-http = { version = "0.5", features = ["fs"] }
 tower-cookies = "0.10"
+camino = "1.1.9"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 uuid = {version = "1", features = ["v4","fast-rng",]}
@@ -30,6 +31,8 @@ reqwest = { version = "0.11.24", features = ["json"] }
 lettre = "0.11.4"
 tokio-util = "0.7.12"
 hyper = "1.5.0"
+md5 = "0.7.0"
+hex = "0.4.3"
 
 [dev-dependencies]
 anyhow = "1"
