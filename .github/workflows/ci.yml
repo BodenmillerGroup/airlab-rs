@@ -31,7 +31,7 @@ jobs:
     name: Frontend
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/malmstroem/rust-ci:latest
+      image: ghcr.io/bodenmillergroup/rust-ci:latest
       credentials:
         username: ${{ secrets.GHCR_USERNAME || github.actor }}
         password: ${{ secrets.GHCR_READ_TOKEN || secrets.GITHUB_TOKEN }}
@@ -83,7 +83,7 @@ jobs:
     name: Rust Quality
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/malmstroem/rust-ci:latest
+      image: ghcr.io/bodenmillergroup/rust-ci:latest
       credentials:
         username: ${{ secrets.GHCR_USERNAME || github.actor }}
         password: ${{ secrets.GHCR_READ_TOKEN || secrets.GITHUB_TOKEN }}
@@ -193,7 +193,7 @@ jobs:
     name: Rust Tests
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/malmstroem/rust-ci:latest
+      image: ghcr.io/bodenmillergroup/rust-ci:latest
       credentials:
         username: ${{ secrets.GHCR_USERNAME || github.actor }}
         password: ${{ secrets.GHCR_READ_TOKEN || secrets.GITHUB_TOKEN }}
@@ -393,7 +393,7 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_e2e }}
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/malmstroem/rust-ci:latest
+      image: ghcr.io/bodenmillergroup/rust-ci:latest
       credentials:
         username: ${{ secrets.GHCR_USERNAME || github.actor }}
         password: ${{ secrets.GHCR_READ_TOKEN || secrets.GITHUB_TOKEN }}
@@ -448,7 +448,7 @@ jobs:
     if: ${{ always() }}
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/malmstroem/rust-ci:latest
+      image: ghcr.io/bodenmillergroup/rust-ci:latest
       credentials:
         username: ${{ secrets.GHCR_USERNAME || github.actor }}
         password: ${{ secrets.GHCR_READ_TOKEN || secrets.GITHUB_TOKEN }}
