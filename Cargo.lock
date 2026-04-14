@@ -13,7 +13,7 @@ dependencies = [
 
 [[package]]
 name = "airlab-lib"
-version = "0.1.4"
+version = "0.2.0"
 dependencies = [
  "argon2",
  "base64",
@@ -43,7 +43,7 @@ dependencies = [
 
 [[package]]
 name = "airlab-web"
-version = "0.1.4"
+version = "0.2.0"
 dependencies = [
  "airlab-lib",
  "axum",
