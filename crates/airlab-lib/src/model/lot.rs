@@ -2,93 +2,52 @@ use crate::ctx::Ctx;
 use crate::model::ModelManager;
 use crate::model::Result;
 use crate::model::base::{self, DbBmc};
+use crate::model::helpers::{i64_or, opt_bool, opt_datetime, opt_i64, opt_string, string_or};
 use chrono::prelude::*;
 use modql::field::Fields;
 use modql::filter::{FilterNodes, ListOptions, OpValsInt64, OpValsString};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use sqlx::FromRow;
-use tracing::warn;
-
-impl LotBmc {
-    #[must_use]
-    pub fn get_create_sql(drop_table: bool) -> String {
-        let table = Self::TABLE;
-        format!(
-            r##"{}
-create table if not exists "{table}" (
-  id serial primary key,
-  group_id integer NOT NULL,
-  created_by integer NOT NULL,
-  clone_id integer NOT NULL,
-  provider_id integer,
-  name character varying NOT NULL,
-  reference character varying,
-  requested_by integer,
-  approved_by integer,
-  ordered_by integer,
-  received_by integer,
-  finished_by integer,
-  number character varying,
-  status smallint DEFAULT 0 NOT NULL,
-  purpose character varying,
-  url character varying,
-  price character varying,
-  note character varying,
-  requested_at timestamp with time zone,
-  approved_at timestamp with time zone,
-  ordered_at timestamp with time zone,
-  received_at timestamp with time zone,
-  finished_at timestamp with time zone,
-  is_archived boolean DEFAULT false NOT NULL,
-  meta jsonb,
-  created_at timestamp with time zone DEFAULT now() NOT NULL,
-  updated_at timestamp with time zone DEFAULT now() NOT NULL
-);
-CREATE INDEX "IDX_lot_clone_id" ON lot USING btree (clone_id);
-CREATE INDEX "IDX_lot_created_by" ON lot USING btree (created_by);
-CREATE INDEX "IDX_lot_group_id" ON lot USING btree (group_id);
-CREATE INDEX "IDX_lot_provider_id" ON lot USING btree (provider_id);
-CREATE INDEX "IDX_lot_status" ON lot USING btree (status);
-        "##,
-            if drop_table {
-                format!("drop table if exists {table};")
-            } else {
-                String::new()
-            }
-        )
-    }
-}
+#[allow(unused_imports)]
+use tracing::{info, warn};
 
 #[derive(Debug, Clone, Fields, FromRow, Serialize, Default, Deserialize)]
 pub struct Lot {
-    pub id: i32,
+    pub id: i64,
     #[serde(rename = "groupId")]
-    pub group_id: i32,
+    pub group_id: i64,
     #[serde(rename = "createdBy")]
-    pub created_by: Option<i32>,
+    pub created_by: Option<i64>,
 
     #[serde(rename = "cloneId")]
-    pub clone_id: i32,
+    pub clone_id: i64,
     #[serde(rename = "providerId")]
-    pub provider_id: Option<i32>,
+    pub provider_id: Option<i64>,
+    #[serde(rename = "storageId")]
+    pub storage_id: Option<i64>,
+    #[serde(rename = "collectionId")]
+    pub collection_id: Option<i64>,
     pub name: String,
     pub reference: Option<String>,
     #[serde(rename = "requestedBy")]
-    pub requested_by: Option<i32>,
+    pub requested_by: Option<i64>,
     #[serde(rename = "approvedBy")]
-    pub approved_by: Option<i32>,
+    pub approved_by: Option<i64>,
     #[serde(rename = "orderedBy")]
-    pub ordered_by: Option<i32>,
+    pub ordered_by: Option<i64>,
     #[serde(rename = "receivedBy")]
-    pub received_by: Option<i32>,
+    pub received_by: Option<i64>,
     #[serde(rename = "finishedBy")]
-    pub finished_by: Option<i32>,
+    pub finished_by: Option<i64>,
     pub number: Option<String>,
-    pub status: Option<i16>,
+    pub status: Option<i64>,
     pub purpose: Option<String>,
     pub url: Option<String>,
     pub price: Option<String>,
     pub note: Option<String>,
+    #[serde(rename = "approvedAt")]
+    pub approved_at: Option<chrono::DateTime<chrono::Utc>>,
     #[serde(rename = "requestedAt")]
     pub requested_at: Option<chrono::DateTime<chrono::Utc>>,
     #[serde(rename = "orderedAt")]
@@ -110,25 +69,29 @@ pub struct Lot {
 pub struct LotForCreate {
     pub name: String,
     #[serde(rename = "groupId")]
-    pub group_id: i32,
+    pub group_id: i64,
     #[serde(rename = "cloneId")]
-    pub clone_id: i32,
+    pub clone_id: i64,
     #[serde(rename = "createdBy")]
-    pub created_by: Option<i32>,
+    pub created_by: Option<i64>,
     #[serde(rename = "providerId")]
-    pub provider_id: Option<i32>,
+    pub provider_id: Option<i64>,
+    #[serde(rename = "storageId")]
+    pub storage_id: Option<i64>,
+    #[serde(rename = "collectionId")]
+    pub collection_id: Option<i64>,
     pub reference: Option<String>,
     #[serde(rename = "requestedBy")]
-    pub requested_by: Option<i32>,
+    pub requested_by: Option<i64>,
     #[serde(rename = "approvedBy")]
-    pub approved_by: Option<i32>,
+    pub approved_by: Option<i64>,
     #[serde(rename = "orderedBy")]
-    pub ordered_by: Option<i32>,
+    pub ordered_by: Option<i64>,
     #[serde(rename = "receivedBy")]
-    pub received_by: Option<i32>,
+    pub received_by: Option<i64>,
     #[serde(rename = "finishedBy")]
-    pub finished_by: Option<i32>,
-    pub status: Option<i16>,
+    pub finished_by: Option<i64>,
+    pub status: Option<i64>,
     pub purpose: Option<String>,
     pub url: Option<String>,
     pub price: Option<String>,
@@ -143,7 +106,41 @@ pub struct LotForCreate {
     pub finished_at: Option<chrono::DateTime<chrono::Utc>>,
     #[serde(rename = "isArchived")]
     pub is_archived: Option<bool>,
-    //pub meta: Option<String>,
+}
+
+impl From<Value> for LotForCreate {
+    fn from(v: Value) -> Self {
+        let obj = match v {
+            Value::Object(map) => Value::Object(map),
+            _ => Value::Object(Default::default()),
+        };
+
+        LotForCreate {
+            name: string_or(&obj, "name"),
+            group_id: i64_or(&obj, "groupId", 0),
+            clone_id: i64_or(&obj, "cloneId", 0),
+            created_by: opt_i64(&obj, "createdBy"),
+            provider_id: opt_i64(&obj, "providerId"),
+            storage_id: opt_i64(&obj, "storageId").or_else(|| opt_i64(&obj, "storage_id")),
+            collection_id: opt_i64(&obj, "collectionId"),
+            reference: opt_string(&obj, "reference"),
+            requested_by: opt_i64(&obj, "requestedBy"),
+            approved_by: opt_i64(&obj, "approvedBy"),
+            ordered_by: opt_i64(&obj, "orderedBy"),
+            received_by: opt_i64(&obj, "receivedBy"),
+            finished_by: opt_i64(&obj, "finishedBy"),
+            status: opt_i64(&obj, "status"),
+            purpose: opt_string(&obj, "purpose"),
+            url: opt_string(&obj, "url"),
+            price: opt_string(&obj, "price"),
+            note: opt_string(&obj, "note"),
+            requested_at: opt_datetime(&obj, "requestedAt"),
+            ordered_at: opt_datetime(&obj, "orderedAt"),
+            received_at: opt_datetime(&obj, "receivedAt"),
+            finished_at: opt_datetime(&obj, "finishedAt"),
+            is_archived: opt_bool(&obj, "isArchived"),
+        }
+    }
 }
 
 #[derive(Fields, Default, Deserialize, Debug)]
@@ -151,18 +148,22 @@ pub struct LotForUpdate {
     pub name: Option<String>,
     pub reference: Option<String>,
     #[serde(rename = "createdBy")]
-    pub created_by: Option<i32>,
+    pub created_by: Option<i64>,
+    #[serde(rename = "storageId")]
+    pub storage_id: Option<i64>,
+    #[serde(rename = "collectionId")]
+    pub collection_id: Option<i64>,
     #[serde(rename = "requestedBy")]
-    pub requested_by: Option<i32>,
+    pub requested_by: Option<i64>,
     #[serde(rename = "approvedBy")]
-    pub approved_by: Option<i32>,
+    pub approved_by: Option<i64>,
     #[serde(rename = "orderedBy")]
-    pub ordered_by: Option<i32>,
+    pub ordered_by: Option<i64>,
     #[serde(rename = "receivedBy")]
-    pub received_by: Option<i32>,
+    pub received_by: Option<i64>,
     #[serde(rename = "finishedBy")]
-    pub finished_by: Option<i32>,
-    pub status: Option<i16>,
+    pub finished_by: Option<i64>,
+    pub status: Option<i64>,
     pub number: Option<String>,
     pub purpose: Option<String>,
     pub url: Option<String>,
@@ -182,15 +183,50 @@ pub struct LotForUpdate {
     pub updated_at: Option<chrono::DateTime<chrono::Utc>>,
     #[serde(rename = "isArchived")]
     pub is_archived: Option<bool>,
-    //pub meta: Option<String>,
+}
+impl From<Value> for LotForUpdate {
+    fn from(v: Value) -> Self {
+        let obj = match v {
+            Value::Object(map) => Value::Object(map),
+            _ => Value::Object(Default::default()),
+        };
+
+        LotForUpdate {
+            name: opt_string(&obj, "name"),
+            reference: opt_string(&obj, "reference"),
+            created_by: opt_i64(&obj, "createdBy"),
+            storage_id: opt_i64(&obj, "storageId").or_else(|| opt_i64(&obj, "storage_id")),
+            collection_id: opt_i64(&obj, "collectionId"),
+            requested_by: opt_i64(&obj, "requestedBy"),
+            approved_by: opt_i64(&obj, "approvedBy"),
+            ordered_by: opt_i64(&obj, "orderedBy"),
+            received_by: opt_i64(&obj, "receivedBy"),
+            finished_by: opt_i64(&obj, "finishedBy"),
+            status: opt_i64(&obj, "status"),
+            number: opt_string(&obj, "number"),
+            purpose: opt_string(&obj, "purpose"),
+            url: opt_string(&obj, "url"),
+            price: opt_string(&obj, "price"),
+            note: opt_string(&obj, "note"),
+            approved_at: opt_datetime(&obj, "approvedAt"),
+            requested_at: opt_datetime(&obj, "requestedAt"),
+            ordered_at: opt_datetime(&obj, "orderedAt"),
+            received_at: opt_datetime(&obj, "receivedAt"),
+            finished_at: opt_datetime(&obj, "finishedAt"),
+            updated_at: opt_datetime(&obj, "updatedAt"),
+            is_archived: opt_bool(&obj, "isArchived"),
+        }
+    }
 }
 
-#[derive(FilterNodes, Deserialize, Default, Debug)]
+#[derive(FilterNodes, Deserialize, Default, Debug, Clone)]
 pub struct LotFilter {
     id: Option<OpValsInt64>,
     group_id: Option<OpValsInt64>,
     clone_id: Option<OpValsInt64>,
     provider_id: Option<OpValsInt64>,
+    storage_id: Option<OpValsInt64>,
+    collection_id: Option<OpValsInt64>,
     status: Option<OpValsInt64>,
     name: Option<OpValsString>,
 }
@@ -202,14 +238,14 @@ impl DbBmc for LotBmc {
 }
 
 impl LotBmc {
-    pub async fn create(ctx: &Ctx, mm: &ModelManager, lot_c: LotForCreate) -> Result<i32> {
+    pub async fn create(ctx: &Ctx, mm: &ModelManager, lot_c: LotForCreate) -> Result<i64> {
         base::create::<Self, _>(ctx, mm, lot_c).await
     }
-    pub async fn create_full(ctx: &Ctx, mm: &ModelManager, lot_c: Lot) -> Result<i32> {
+    pub async fn create_full(ctx: &Ctx, mm: &ModelManager, lot_c: Lot) -> Result<i64> {
         base::create::<Self, _>(ctx, mm, lot_c).await
     }
 
-    pub async fn get(ctx: &Ctx, mm: &ModelManager, id: i32) -> Result<Lot> {
+    pub async fn get(ctx: &Ctx, mm: &ModelManager, id: i64) -> Result<Lot> {
         base::get::<Self, _>(ctx, mm, id).await
     }
 
@@ -222,26 +258,42 @@ impl LotBmc {
         base::list::<Self, _, _>(ctx, mm, filters, list_options).await
     }
 
+    pub async fn count(
+        ctx: &Ctx,
+        mm: &ModelManager,
+        filters: Option<Vec<LotFilter>>,
+    ) -> Result<i64> {
+        base::count::<Self, _>(ctx, mm, filters).await
+    }
+
     pub async fn update(
         ctx: &Ctx,
         mm: &ModelManager,
-        id: i32,
-        member_id: i32,
+        id: i64,
+        member_id: i64,
         mut lot_u: LotForUpdate,
     ) -> Result<()> {
-        warn!("{:?}", lot_u.status);
+        info!("Lot Status: {:?}", lot_u.status);
         if let Some(status) = lot_u.status {
             if status == 1 {
-                lot_u.approved_by = Some(member_id);
+                if member_id > 0 {
+                    lot_u.approved_by = Some(member_id);
+                }
                 lot_u.approved_at = Some(Utc::now());
             } else if status == 3 {
-                lot_u.ordered_by = Some(member_id);
+                if member_id > 0 {
+                    lot_u.ordered_by = Some(member_id);
+                }
                 lot_u.ordered_at = Some(Utc::now());
             } else if status == 4 {
-                lot_u.received_by = Some(member_id);
+                if member_id > 0 {
+                    lot_u.received_by = Some(member_id);
+                }
                 lot_u.received_at = Some(Utc::now());
             } else if status == 6 {
-                lot_u.finished_by = Some(member_id);
+                if member_id > 0 {
+                    lot_u.finished_by = Some(member_id);
+                }
                 lot_u.finished_at = Some(Utc::now());
             }
         }
@@ -249,7 +301,7 @@ impl LotBmc {
         base::update::<Self, _>(ctx, mm, id, lot_u).await
     }
 
-    pub async fn delete(ctx: &Ctx, mm: &ModelManager, id: i32) -> Result<()> {
+    pub async fn delete(ctx: &Ctx, mm: &ModelManager, id: i64) -> Result<()> {
         base::delete::<Self>(ctx, mm, id).await
     }
 }
@@ -259,13 +311,13 @@ mod tests {
     use super::*;
     use crate::_dev_utils;
     use crate::model::Error;
-    use anyhow::Result;
     use serde_json::json;
 
-    #[ignore]
+    type TestResult<T = ()> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
+
     #[tokio::test]
-    async fn test_lot_create_ok() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_lot_create_ok() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let fx_name = "test_create_ok name";
 
@@ -275,6 +327,8 @@ mod tests {
             group_id: 1,
             clone_id: 3123,
             provider_id: Some(103),
+            storage_id: None,
+            collection_id: None,
             reference: None,
             approved_by: None,
             finished_by: None,
@@ -302,10 +356,9 @@ mod tests {
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
-    async fn test_lot_get_err_not_found() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_lot_get_err_not_found() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let fx_id = 100;
 
@@ -325,12 +378,11 @@ mod tests {
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
-    async fn test_lot_list_all_ok() -> Result<()> {
+    async fn test_lot_list_all_ok() -> TestResult {
         let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
-        let tname = "test_lot_update_ok";
+        let tname = "test_lot_list_all_ok";
         let seeds = _dev_utils::get_lot_seed(tname);
         _dev_utils::seed_lots(&ctx, &mm, &seeds).await?;
 
@@ -338,7 +390,7 @@ mod tests {
 
         let lots: Vec<Lot> = lots
             .into_iter()
-            .filter(|t| t.name.starts_with("test_list_all_ok-lot"))
+            .filter(|t| t.name.starts_with(tname))
             .collect();
         assert_eq!(lots.len(), 4, "number of seeded lots.");
 
@@ -351,9 +403,8 @@ mod tests {
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
-    async fn test_lot_list_by_filter_ok() -> Result<()> {
+    async fn test_lot_list_by_filter_ok() -> TestResult {
         let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let tname = "test_lot_list_by_filter_ok";
@@ -400,12 +451,11 @@ mod tests {
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
-    async fn test_lot_update_ok() -> Result<()> {
+    async fn test_lot_update_ok() -> TestResult {
         let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
-        let tname = "test_lot_update_ok";
+        let tname = "test_lot_list_all_ok";
         let seeds = _dev_utils::get_lot_seed(tname);
         let fx_lot = _dev_utils::seed_lots(&ctx, &mm, &seeds).await?.remove(0);
         let member_id = 45;
@@ -428,7 +478,6 @@ mod tests {
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
     async fn test_lot_delete_err_not_found() -> Result<()> {
         let mm = _dev_utils::init_test().await;

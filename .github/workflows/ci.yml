@@ -1,0 +1,603 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      run_e2e:
+        description: "Run Playwright E2E tests"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/malmstroem/rust-ci:latest
+      credentials:
+        username: ${{ secrets.GHCR_USERNAME || github.actor }}
+        password: ${{ secrets.GHCR_READ_TOKEN || secrets.GITHUB_TOKEN }}
+    outputs:
+      failed_steps: ${{ steps.job_summary.outputs.failed_steps }}
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        id: setup_node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install frontend dependencies
+        id: install_dependencies
+        run: npm ci --include=dev --no-fund --no-audit --loglevel=error
+
+      - name: Typecheck and build
+        id: typecheck_build
+        run: npm run build
+
+      - name: Run unit tests
+        id: unit_tests
+        run: npm test
+
+      - name: Summarize frontend job
+        id: job_summary
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          failed_steps=()
+          [ "${{ steps.checkout.conclusion }}" = "failure" ] && failed_steps+=("Checkout")
+          [ "${{ steps.setup_node.conclusion }}" = "failure" ] && failed_steps+=("Set up Node.js")
+          [ "${{ steps.install_dependencies.conclusion }}" = "failure" ] && failed_steps+=("Install frontend dependencies")
+          [ "${{ steps.typecheck_build.conclusion }}" = "failure" ] && failed_steps+=("Typecheck and build")
+          [ "${{ steps.unit_tests.conclusion }}" = "failure" ] && failed_steps+=("Run unit tests")
+
+          if [ ${#failed_steps[@]} -eq 0 ]; then
+            echo "failed_steps=none" >> "$GITHUB_OUTPUT"
+          else
+            printf 'failed_steps=%s\n' "$(IFS=', '; echo "${failed_steps[*]}")" >> "$GITHUB_OUTPUT"
+          fi
+
+  rust-quality:
+    name: Rust Quality
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/malmstroem/rust-ci:latest
+      credentials:
+        username: ${{ secrets.GHCR_USERNAME || github.actor }}
+        password: ${{ secrets.GHCR_READ_TOKEN || secrets.GITHUB_TOKEN }}
+    env:
+      CARGO_TARGET_DIR: /tmp/airlab-ci-target
+    outputs:
+      failed_steps: ${{ steps.job_summary.outputs.failed_steps }}
+      warning_steps: ${{ steps.job_summary.outputs.warning_steps }}
+      warning_details: ${{ steps.job_summary.outputs.warning_details }}
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Rust toolchain
+        id: setup_rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Cache cargo artifacts
+        id: cache_cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install cargo-audit
+        id: install_cargo_audit
+        run: cargo install cargo-audit --locked --quiet
+
+      - name: Install cargo-deny
+        id: install_cargo_deny
+        run: cargo install cargo-deny --locked --quiet
+
+      - name: Check Rust formatting
+        id: rust_fmt
+        run: cargo fmt --all --check
+
+      - name: Run clippy
+        id: rust_clippy
+        run: cargo clippy --quiet --workspace --all-targets --all-features -- -D warnings
+
+      - name: Run cargo audit
+        id: rust_audit
+        continue-on-error: true
+        run: |
+          set +e
+          cargo audit --quiet > cargo-audit.log 2>&1
+          status=$?
+
+          if [ "$status" -ne 0 ]; then
+            echo "cargo audit reported vulnerabilities; tailing condensed output"
+            tail -n 80 cargo-audit.log
+          fi
+
+          exit "$status"
+
+      - name: Run cargo deny
+        id: rust_deny
+        run: cargo deny check
+
+      - name: Summarize rust quality job
+        id: job_summary
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          failed_steps=()
+          warning_steps=()
+          warning_details=()
+          [ "${{ steps.checkout.conclusion }}" = "failure" ] && failed_steps+=("Checkout")
+          [ "${{ steps.setup_rust.conclusion }}" = "failure" ] && failed_steps+=("Set up Rust toolchain")
+          [ "${{ steps.cache_cargo.conclusion }}" = "failure" ] && failed_steps+=("Cache cargo artifacts")
+          [ "${{ steps.install_cargo_audit.conclusion }}" = "failure" ] && failed_steps+=("Install cargo-audit")
+          [ "${{ steps.install_cargo_deny.conclusion }}" = "failure" ] && failed_steps+=("Install cargo-deny")
+          [ "${{ steps.rust_fmt.conclusion }}" = "failure" ] && failed_steps+=("Check Rust formatting")
+          [ "${{ steps.rust_clippy.conclusion }}" = "failure" ] && failed_steps+=("Run clippy")
+          [ "${{ steps.rust_audit.outcome }}" = "failure" ] && warning_steps+=("Run cargo audit")
+          [ "${{ steps.rust_deny.conclusion }}" = "failure" ] && failed_steps+=("Run cargo deny")
+
+          if [ -f cargo-audit.log ]; then
+            while IFS= read -r line; do
+              warning_details+=("$line")
+            done < <(rg "security vulnerability detected|Name: |Crate: |Title: |ID: " cargo-audit.log -N | tail -n 20 || true)
+          fi
+
+          if [ ${#failed_steps[@]} -eq 0 ]; then
+            echo "failed_steps=none" >> "$GITHUB_OUTPUT"
+          else
+            printf 'failed_steps=%s\n' "$(IFS=', '; echo "${failed_steps[*]}")" >> "$GITHUB_OUTPUT"
+          fi
+
+          if [ ${#warning_steps[@]} -eq 0 ]; then
+            echo "warning_steps=none" >> "$GITHUB_OUTPUT"
+          else
+            printf 'warning_steps=%s\n' "$(IFS=', '; echo "${warning_steps[*]}")" >> "$GITHUB_OUTPUT"
+          fi
+
+          if [ ${#warning_details[@]} -eq 0 ]; then
+            echo "warning_details=none" >> "$GITHUB_OUTPUT"
+          else
+            {
+              echo "warning_details<<EOF"
+              printf '%s\n' "${warning_details[@]}"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+  rust:
+    name: Rust Tests
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/malmstroem/rust-ci:latest
+      credentials:
+        username: ${{ secrets.GHCR_USERNAME || github.actor }}
+        password: ${{ secrets.GHCR_READ_TOKEN || secrets.GITHUB_TOKEN }}
+    outputs:
+      failed_steps: ${{ steps.job_summary.outputs.failed_steps }}
+      failure_details: ${{ steps.job_summary.outputs.failure_details }}
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: app_test
+        ports:
+          - 5432/tcp
+        options: >-
+          --health-cmd="pg_isready -U postgres -d app_test"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+    env:
+      RUST_BACKTRACE: "1"
+      AIRLAB_TEST_DB_CONCURRENCY: "1"
+      CARGO_TARGET_DIR: /tmp/airlab-ci-target
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/app_test
+      AIRLAB_TEST_DB_ADMIN_URL: postgres://postgres:postgres@postgres:5432/postgres
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Rust toolchain
+        id: setup_rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo artifacts
+        id: cache_cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Install PostgreSQL client
+        id: install_postgres_client
+        run: |
+          if command -v psql >/dev/null 2>&1; then
+            psql --version
+            exit 0
+          fi
+
+          if ! command -v apt-get >/dev/null 2>&1; then
+            echo "apt-get not available; expected PostgreSQL client tools to already be installed"
+            exit 1
+          fi
+
+          if command -v sudo >/dev/null 2>&1; then
+            SUDO="sudo"
+          else
+            SUDO=""
+          fi
+
+          for attempt in 1 2 3 4 5; do
+            if $SUDO apt-get update && $SUDO apt-get install -y postgresql-client; then
+              psql --version
+              exit 0
+            fi
+
+            echo "apt-get attempt ${attempt} failed, waiting for package manager lock to clear"
+            sleep 15
+          done
+
+          echo "Failed to install postgresql-client after multiple attempts"
+          exit 1
+
+      - name: Set up sqlx-cli
+        id: setup_sqlx
+        run: cargo install sqlx-cli --no-default-features --features rustls,postgres --locked --quiet
+
+      - name: Run database migrations
+        id: run_migrations
+        run: sqlx migrate run --source crates/airlab-web/migrations
+
+      - name: Run Rust tests
+        id: rust_tests
+        shell: bash
+        run: |
+          run_test_suite() {
+            local name="$1"
+            shift
+            local log_file="cargo-test-${name}.log"
+
+            echo "=== Running ${name} ==="
+            if "$@" 2>&1 | tee "$log_file"; then
+              return 0
+            fi
+
+            {
+              echo "=== ${name} failed ==="
+              tail -n 120 "$log_file"
+            } > rust-test-failure-summary.log
+            return 1
+          }
+
+          run_test_suite airlab-lib cargo test -p airlab-lib --lib --tests -- --test-threads=1
+          run_test_suite airlab-web cargo test -p airlab-web --lib --tests -- --test-threads=1
+
+      - name: Summarize rust job
+        id: job_summary
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          failed_steps=()
+          failure_details=()
+          [ "${{ steps.checkout.conclusion }}" = "failure" ] && failed_steps+=("Checkout")
+          [ "${{ steps.setup_rust.conclusion }}" = "failure" ] && failed_steps+=("Set up Rust toolchain")
+          [ "${{ steps.cache_cargo.conclusion }}" = "failure" ] && failed_steps+=("Cache cargo artifacts")
+          [ "${{ steps.install_postgres_client.conclusion }}" = "failure" ] && failed_steps+=("Install PostgreSQL client")
+          [ "${{ steps.setup_sqlx.conclusion }}" = "failure" ] && failed_steps+=("Set up sqlx-cli")
+          [ "${{ steps.run_migrations.conclusion }}" = "failure" ] && failed_steps+=("Run database migrations")
+          [ "${{ steps.rust_tests.conclusion }}" = "failure" ] && failed_steps+=("Run Rust tests")
+
+          if [ -f rust-test-failure-summary.log ]; then
+            while IFS= read -r line; do
+              failure_details+=("$line")
+            done < rust-test-failure-summary.log
+          fi
+
+          if [ ${#failed_steps[@]} -eq 0 ]; then
+            echo "failed_steps=none" >> "$GITHUB_OUTPUT"
+          else
+            printf 'failed_steps=%s\n' "$(IFS=', '; echo "${failed_steps[*]}")" >> "$GITHUB_OUTPUT"
+          fi
+
+          if [ ${#failure_details[@]} -eq 0 ]; then
+            echo "failure_details=none" >> "$GITHUB_OUTPUT"
+          else
+            {
+              echo "failure_details<<EOF"
+              printf '%s\n' "${failure_details[@]}"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+  macos-smoke:
+    name: macOS Smoke
+    runs-on: macos-latest
+    env:
+      CARGO_TARGET_DIR: target-macos-ci
+    outputs:
+      failed_steps: ${{ steps.job_summary.outputs.failed_steps }}
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        id: setup_node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install frontend dependencies
+        id: install_dependencies
+        run: npm ci --include=dev --no-fund --no-audit --loglevel=error
+
+      - name: Build frontend
+        id: build_frontend
+        run: npm run build
+
+      - name: Set up Rust toolchain
+        id: setup_rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build Rust workspace
+        id: build_rust
+        run: cargo build --workspace --all-features
+
+      - name: Summarize macOS smoke job
+        id: job_summary
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          failed_steps=()
+          [ "${{ steps.checkout.conclusion }}" = "failure" ] && failed_steps+=("Checkout")
+          [ "${{ steps.setup_node.conclusion }}" = "failure" ] && failed_steps+=("Set up Node.js")
+          [ "${{ steps.install_dependencies.conclusion }}" = "failure" ] && failed_steps+=("Install frontend dependencies")
+          [ "${{ steps.build_frontend.conclusion }}" = "failure" ] && failed_steps+=("Build frontend")
+          [ "${{ steps.setup_rust.conclusion }}" = "failure" ] && failed_steps+=("Set up Rust toolchain")
+          [ "${{ steps.build_rust.conclusion }}" = "failure" ] && failed_steps+=("Build Rust workspace")
+
+          if [ ${#failed_steps[@]} -eq 0 ]; then
+            echo "failed_steps=none" >> "$GITHUB_OUTPUT"
+          else
+            printf 'failed_steps=%s\n' "$(IFS=', '; echo "${failed_steps[*]}")" >> "$GITHUB_OUTPUT"
+          fi
+
+  e2e:
+    name: E2E
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_e2e }}
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/malmstroem/rust-ci:latest
+      credentials:
+        username: ${{ secrets.GHCR_USERNAME || github.actor }}
+        password: ${{ secrets.GHCR_READ_TOKEN || secrets.GITHUB_TOKEN }}
+    needs:
+      - frontend
+    outputs:
+      failed_steps: ${{ steps.job_summary.outputs.failed_steps }}
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        id: setup_node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install frontend dependencies
+        id: install_dependencies
+        run: npm ci --include=dev --no-fund --no-audit --loglevel=error
+
+      - name: Install Playwright browsers
+        id: install_playwright
+        run: npx playwright install --with-deps
+
+      - name: Run Playwright tests
+        id: playwright_tests
+        run: npm run test:visual
+
+      - name: Summarize e2e job
+        id: job_summary
+        if: ${{ always() }}
+        shell: bash
+        run: |
+          failed_steps=()
+          [ "${{ steps.checkout.conclusion }}" = "failure" ] && failed_steps+=("Checkout")
+          [ "${{ steps.setup_node.conclusion }}" = "failure" ] && failed_steps+=("Set up Node.js")
+          [ "${{ steps.install_dependencies.conclusion }}" = "failure" ] && failed_steps+=("Install frontend dependencies")
+          [ "${{ steps.install_playwright.conclusion }}" = "failure" ] && failed_steps+=("Install Playwright browsers")
+          [ "${{ steps.playwright_tests.conclusion }}" = "failure" ] && failed_steps+=("Run Playwright tests")
+
+          if [ ${#failed_steps[@]} -eq 0 ]; then
+            echo "failed_steps=none" >> "$GITHUB_OUTPUT"
+          else
+            printf 'failed_steps=%s\n' "$(IFS=', '; echo "${failed_steps[*]}")" >> "$GITHUB_OUTPUT"
+          fi
+
+  summary:
+    name: Summary
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/malmstroem/rust-ci:latest
+      credentials:
+        username: ${{ secrets.GHCR_USERNAME || github.actor }}
+        password: ${{ secrets.GHCR_READ_TOKEN || secrets.GITHUB_TOKEN }}
+    needs:
+      - frontend
+      - rust-quality
+      - rust
+      - macos-smoke
+      - e2e
+    steps:
+      - name: Write workflow summary
+        shell: bash
+        env:
+          FRONTEND_RESULT: ${{ needs.frontend.result }}
+          FRONTEND_FAILED_STEPS: ${{ needs.frontend.outputs.failed_steps || '' }}
+          RUST_QUALITY_RESULT: ${{ needs['rust-quality'].result }}
+          RUST_QUALITY_FAILED_STEPS: ${{ needs['rust-quality'].outputs.failed_steps || '' }}
+          RUST_QUALITY_WARNING_STEPS: ${{ needs['rust-quality'].outputs.warning_steps || '' }}
+          RUST_QUALITY_WARNING_DETAILS: ${{ needs['rust-quality'].outputs.warning_details || 'none' }}
+          RUST_RESULT: ${{ needs.rust.result }}
+          RUST_FAILED_STEPS: ${{ needs.rust.outputs.failed_steps || '' }}
+          RUST_FAILURE_DETAILS: ${{ needs.rust.outputs.failure_details || 'none' }}
+          MACOS_RESULT: ${{ needs['macos-smoke'].result }}
+          MACOS_FAILED_STEPS: ${{ needs['macos-smoke'].outputs.failed_steps || '' }}
+        run: |
+          normalize_failed() {
+            local result="$1"
+            local failed="$2"
+
+            if [ -z "$result" ]; then
+              echo "unsupported by act"
+              return
+            fi
+
+            if [ -z "$failed" ] || [ "$failed" = "none" ]; then
+              case "$result" in
+                failure) echo "job-level setup/container/service failure" ;;
+                cancelled) echo "cancelled before step summary" ;;
+                *) echo "none" ;;
+              esac
+            else
+              echo "$failed"
+            fi
+          }
+
+          normalize_warning() {
+            local warning="$1"
+            if [ -z "$warning" ]; then
+              echo "none"
+            else
+              echo "$warning"
+            fi
+          }
+
+          normalize_result() {
+            local result="$1"
+            if [ -z "$result" ]; then
+              echo "skipped"
+            else
+              echo "$result"
+            fi
+          }
+
+          frontend_result="$(normalize_result "$FRONTEND_RESULT")"
+          rust_quality_result="$(normalize_result "$RUST_QUALITY_RESULT")"
+          rust_result="$(normalize_result "$RUST_RESULT")"
+          macos_result="$(normalize_result "$MACOS_RESULT")"
+
+          frontend_failed="$(normalize_failed "$FRONTEND_RESULT" "$FRONTEND_FAILED_STEPS")"
+          rust_quality_failed="$(normalize_failed "$RUST_QUALITY_RESULT" "$RUST_QUALITY_FAILED_STEPS")"
+          rust_failed="$(normalize_failed "$RUST_RESULT" "$RUST_FAILED_STEPS")"
+          macos_failed="$(normalize_failed "$MACOS_RESULT" "$MACOS_FAILED_STEPS")"
+          rust_quality_warnings="$(normalize_warning "$RUST_QUALITY_WARNING_STEPS")"
+
+          {
+            echo "## CI summary"
+            echo ""
+            echo "| Job | Result | Failed tasks | Warnings |"
+            echo "| --- | --- | --- | --- |"
+            echo "| frontend | ${frontend_result} | ${frontend_failed} | none |"
+            echo "| rust-quality | ${rust_quality_result} | ${rust_quality_failed} | ${rust_quality_warnings} |"
+            echo "| rust | ${rust_result} | ${rust_failed} | none |"
+            echo "| macos-smoke | ${macos_result} | ${macos_failed} | none |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          {
+            echo ""
+            echo "### Primary Failures"
+            echo ""
+            if [ "$frontend_result" = "failure" ]; then
+              echo "- frontend: ${frontend_failed}"
+            fi
+            if [ "$rust_quality_result" = "failure" ]; then
+              echo "- rust-quality: ${rust_quality_failed}"
+            fi
+            if [ "$rust_result" = "failure" ]; then
+              echo "- rust: ${rust_failed}"
+            fi
+            if [ "$macos_result" = "failure" ]; then
+              echo "- macos-smoke: ${macos_failed}"
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$RUST_QUALITY_WARNING_DETAILS" != "none" ]; then
+            {
+              echo ""
+              echo "### Rust Quality Warning Details"
+              echo ""
+              echo '```text'
+              printf '%s\n' "$RUST_QUALITY_WARNING_DETAILS"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          if [ "$RUST_FAILURE_DETAILS" != "none" ]; then
+            {
+              echo ""
+              echo "### Rust Failure Details"
+              echo ""
+              echo '```text'
+              printf '%s\n' "$RUST_FAILURE_DETAILS"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Add e2e summary row
+        if: ${{ needs.e2e.result != 'skipped' }}
+        shell: bash
+        env:
+          E2E_RESULT: ${{ needs.e2e.result }}
+          E2E_FAILED_STEPS: ${{ needs.e2e.outputs.failed_steps || '' }}
+        run: |
+          if [ -z "$E2E_FAILED_STEPS" ] || [ "$E2E_FAILED_STEPS" = "none" ]; then
+            case "$E2E_RESULT" in
+              failure) e2e_failed="job-level setup/container/service failure" ;;
+              cancelled) e2e_failed="cancelled before step summary" ;;
+              *) e2e_failed="none" ;;
+            esac
+          else
+            e2e_failed="$E2E_FAILED_STEPS"
+          fi
+          {
+            echo "| e2e | ${E2E_RESULT} | ${e2e_failed} | none |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Add skipped e2e summary row
+        if: ${{ needs.e2e.result == 'skipped' }}
+        shell: bash
+        run: |
+          {
+            echo "| e2e | skipped | none | none |"
+          } >> "$GITHUB_STEP_SUMMARY"

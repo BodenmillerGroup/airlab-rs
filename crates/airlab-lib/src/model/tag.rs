@@ -2,53 +2,19 @@ use crate::ctx::Ctx;
 use crate::model::ModelManager;
 use crate::model::Result;
 use crate::model::base::{self, DbBmc};
+use crate::model::helpers::{bool_or, i64_or, opt_i64, opt_string, string_or};
 use modql::field::Fields;
 use modql::filter::{FilterNodes, ListOptions, OpValsInt64, OpValsString};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use sqlx::FromRow;
-
-impl TagBmc {
-    #[must_use]
-    pub fn get_create_sql(drop_table: bool) -> String {
-        let table = Self::TABLE;
-        format!(
-            r##"{}
-create table if not exists "{table}" (
-  id serial primary key,
-  group_id integer NOT NULL,
-  name character varying NOT NULL,
-  description character varying,
-  is_metal boolean DEFAULT false NOT NULL,
-  is_fluorophore boolean DEFAULT false NOT NULL,
-  is_enzyme boolean DEFAULT false NOT NULL,
-  is_biotin boolean DEFAULT false NOT NULL,
-  is_other boolean DEFAULT false NOT NULL,
-  mw smallint,
-  emission smallint,
-  excitation smallint,
-  status smallint DEFAULT 0 NOT NULL,
-  meta jsonb,
-  created_at timestamp with time zone DEFAULT now() NOT NULL
-);
-ALTER TABLE ONLY tag
-  ADD CONSTRAINT "UQ_tag_group_id_and_name_and_mw" UNIQUE (group_id, name, mw);
-CREATE INDEX "IDX_tag_group_id" ON tag USING btree (group_id);
-        "##,
-            if drop_table {
-                format!("drop table if exists {table};")
-            } else {
-                String::new()
-            }
-        )
-    }
-}
 
 #[allow(clippy::struct_excessive_bools)]
 #[derive(Debug, Clone, Fields, FromRow, Serialize, Deserialize, Default)]
 pub struct Tag {
-    pub id: i32,
+    pub id: i64,
     #[serde(rename = "groupId")]
-    pub group_id: i32,
+    pub group_id: i64,
     pub name: String,
     pub description: Option<String>,
     #[serde(rename = "isMetal")]
@@ -61,10 +27,10 @@ pub struct Tag {
     pub is_biotin: bool,
     #[serde(rename = "isOther")]
     pub is_other: bool,
-    pub mw: Option<i16>,
-    pub emission: Option<i16>,
-    pub excitation: Option<i16>,
-    pub status: Option<i16>,
+    pub mw: Option<i64>,
+    pub emission: Option<i64>,
+    pub excitation: Option<i64>,
+    pub status: Option<i64>,
     pub meta: Option<serde_json::Value>,
     #[serde(rename = "createdAt")]
     pub created_at: chrono::DateTime<chrono::Utc>,
@@ -75,7 +41,7 @@ pub struct Tag {
 pub struct TagForCreate {
     pub name: String,
     #[serde(rename = "groupId")]
-    pub group_id: i32,
+    pub group_id: i64,
     pub description: Option<String>,
     #[serde(rename = "isMetal")]
     pub is_metal: bool,
@@ -87,10 +53,34 @@ pub struct TagForCreate {
     pub is_biotin: bool,
     #[serde(rename = "isOther")]
     pub is_other: bool,
-    pub mw: Option<i16>,
-    pub emission: Option<i16>,
-    pub excitation: Option<i16>,
-    pub status: Option<i16>,
+    pub mw: Option<i64>,
+    pub emission: Option<i64>,
+    pub excitation: Option<i64>,
+    pub status: Option<i64>,
+}
+
+impl From<Value> for TagForCreate {
+    fn from(v: Value) -> Self {
+        let obj = match v {
+            Value::Object(map) => Value::Object(map),
+            _ => Value::Object(Default::default()),
+        };
+
+        TagForCreate {
+            name: string_or(&obj, "name"),
+            group_id: i64_or(&obj, "groupId", 0),
+            description: opt_string(&obj, "description"),
+            is_metal: bool_or(&obj, "isMetal", false),
+            is_fluorophore: bool_or(&obj, "isFluorophore", false),
+            is_enzyme: bool_or(&obj, "isEnzyme", false),
+            is_biotin: bool_or(&obj, "isBiotin", false),
+            is_other: bool_or(&obj, "isOther", false),
+            mw: opt_i64(&obj, "mw"),
+            emission: opt_i64(&obj, "emission"),
+            excitation: opt_i64(&obj, "excitation"),
+            status: opt_i64(&obj, "status"),
+        }
+    }
 }
 
 #[allow(clippy::struct_excessive_bools)]
@@ -108,13 +98,35 @@ pub struct TagForUpdate {
     pub is_biotin: bool,
     #[serde(rename = "isOther")]
     pub is_other: bool,
-    pub mw: Option<i16>,
-    pub emission: Option<i16>,
-    pub excitation: Option<i16>,
-    pub status: Option<i16>,
+    pub mw: Option<i64>,
+    pub emission: Option<i64>,
+    pub excitation: Option<i64>,
+    pub status: Option<i64>,
+}
+impl From<Value> for TagForUpdate {
+    fn from(v: Value) -> Self {
+        let obj = match v {
+            Value::Object(map) => Value::Object(map),
+            _ => Value::Object(Default::default()),
+        };
+
+        TagForUpdate {
+            name: string_or(&obj, "name"),
+            description: opt_string(&obj, "description"),
+            is_metal: bool_or(&obj, "isMetal", false),
+            is_fluorophore: bool_or(&obj, "isFluorophore", false),
+            is_enzyme: bool_or(&obj, "isEnzyme", false),
+            is_biotin: bool_or(&obj, "isBiotin", false),
+            is_other: bool_or(&obj, "isOther", false),
+            mw: opt_i64(&obj, "mw"),
+            emission: opt_i64(&obj, "emission"),
+            excitation: opt_i64(&obj, "excitation"),
+            status: opt_i64(&obj, "status"),
+        }
+    }
 }
 
-#[derive(FilterNodes, Deserialize, Default, Debug)]
+#[derive(FilterNodes, Deserialize, Default, Debug, Clone)]
 pub struct TagFilter {
     id: Option<OpValsInt64>,
     group_id: Option<OpValsInt64>,
@@ -129,14 +141,14 @@ impl DbBmc for TagBmc {
 }
 
 impl TagBmc {
-    pub async fn create(ctx: &Ctx, mm: &ModelManager, tag_c: TagForCreate) -> Result<i32> {
+    pub async fn create(ctx: &Ctx, mm: &ModelManager, tag_c: TagForCreate) -> Result<i64> {
         base::create::<Self, _>(ctx, mm, tag_c).await
     }
-    pub async fn create_full(ctx: &Ctx, mm: &ModelManager, tag_c: Tag) -> Result<i32> {
+    pub async fn create_full(ctx: &Ctx, mm: &ModelManager, tag_c: Tag) -> Result<i64> {
         base::create::<Self, _>(ctx, mm, tag_c).await
     }
 
-    pub async fn get(ctx: &Ctx, mm: &ModelManager, id: i32) -> Result<Tag> {
+    pub async fn get(ctx: &Ctx, mm: &ModelManager, id: i64) -> Result<Tag> {
         base::get::<Self, _>(ctx, mm, id).await
     }
 
@@ -149,11 +161,19 @@ impl TagBmc {
         base::list::<Self, _, _>(ctx, mm, filters, list_options).await
     }
 
-    pub async fn update(ctx: &Ctx, mm: &ModelManager, id: i32, tag_u: TagForUpdate) -> Result<()> {
+    pub async fn count(
+        ctx: &Ctx,
+        mm: &ModelManager,
+        filters: Option<Vec<TagFilter>>,
+    ) -> Result<i64> {
+        base::count::<Self, _>(ctx, mm, filters).await
+    }
+
+    pub async fn update(ctx: &Ctx, mm: &ModelManager, id: i64, tag_u: TagForUpdate) -> Result<()> {
         base::update::<Self, _>(ctx, mm, id, tag_u).await
     }
 
-    pub async fn delete(ctx: &Ctx, mm: &ModelManager, id: i32) -> Result<()> {
+    pub async fn delete(ctx: &Ctx, mm: &ModelManager, id: i64) -> Result<()> {
         base::delete::<Self>(ctx, mm, id).await
     }
 }
@@ -163,13 +183,13 @@ mod tests {
     use super::*;
     use crate::_dev_utils;
     use crate::model::Error;
-    use anyhow::Result;
     use serde_json::json;
 
-    #[ignore]
+    type TestResult<T = ()> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
+
     #[tokio::test]
-    async fn test_tag_create_ok() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_tag_create_ok() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let fx_name = "test_create_ok name";
 
@@ -197,10 +217,9 @@ mod tests {
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
-    async fn test_tag_get_err_not_found() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_tag_get_err_not_found() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let fx_id = 100;
 
@@ -220,10 +239,9 @@ mod tests {
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
-    async fn test_tag_list_all_ok() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_tag_list_all_ok() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let tname = "test_tag_list_all_ok";
         let seeds = _dev_utils::get_tag_seed(tname);
@@ -233,7 +251,7 @@ mod tests {
 
         let tags: Vec<Tag> = tags
             .into_iter()
-            .filter(|t| t.name.starts_with("test_list_all_ok-tag"))
+            .filter(|t| t.name.starts_with(tname))
             .collect();
         assert_eq!(tags.len(), 4, "number of seeded tags.");
 
@@ -246,10 +264,9 @@ mod tests {
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
     async fn test_tag_list_by_filter_ok() -> Result<()> {
-        let mm = ModelManager::new().await?;
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let tname = "test_tag_list_by_filter_ok";
         let seeds = _dev_utils::get_tag_seed(tname);
@@ -295,10 +312,9 @@ mod tests {
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
     async fn test_tag_update_ok() -> Result<()> {
-        let mm = ModelManager::new().await?;
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let tname = "test_tag_update_ok";
         let seeds = _dev_utils::get_tag_seed(tname);
@@ -321,10 +337,9 @@ mod tests {
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
     async fn test_tag_delete_err_not_found() -> Result<()> {
-        let mm = ModelManager::new().await?;
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let fx_id = 100;
 

@@ -1,0 +1,4071 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`vue templates > keeps the expected vue file inventory 1`] = `
+[
+  "App.vue",
+  "components/FilterField.vue",
+  "components/FilterSummary.vue",
+  "components/HelloWorld.vue",
+  "components/InfoView.vue",
+  "components/LoadingView.vue",
+  "components/MfaDialog.vue",
+  "components/MfaSetupDialog.vue",
+  "components/NotificationsManager.vue",
+  "components/RouterComponent.vue",
+  "components/ToolbarProgressBar.vue",
+  "components/UploadButton.vue",
+  "views/Login.vue",
+  "views/PasswordRecovery.vue",
+  "views/ResetPassword.vue",
+  "views/SignUp.vue",
+  "views/main/GroupCard.vue",
+  "views/main/GroupsView.vue",
+  "views/main/Main.vue",
+  "views/main/Start.vue",
+  "views/main/admin/Admin.vue",
+  "views/main/admin/group/CreateGroup.vue",
+  "views/main/admin/group/EditGroup.vue",
+  "views/main/admin/group/GroupsListView.vue",
+  "views/main/admin/user/CreateUser.vue",
+  "views/main/admin/user/EditUser.vue",
+  "views/main/admin/user/UsersListView.vue",
+  "views/main/group/GroupView.vue",
+  "views/main/group/clones/CloneDetailsView.vue",
+  "views/main/group/clones/CloneExpandedView.vue",
+  "views/main/group/clones/CloneLotExpandedView.vue",
+  "views/main/group/clones/CloneView.vue",
+  "views/main/group/clones/ClonesListView.vue",
+  "views/main/group/clones/CreateClone.vue",
+  "views/main/group/clones/EditClone.vue",
+  "views/main/group/collection/CollectionListView.vue",
+  "views/main/group/collection/CreateCollection.vue",
+  "views/main/group/collection/EditCollection.vue",
+  "views/main/group/conjugates/ConjugateDetailsView.vue",
+  "views/main/group/conjugates/ConjugateExpandedView.vue",
+  "views/main/group/conjugates/ConjugateView.vue",
+  "views/main/group/conjugates/ConjugatesListView.vue",
+  "views/main/group/conjugates/CreateConjugate.vue",
+  "views/main/group/conjugates/EditConjugate.vue",
+  "views/main/group/dashboard/DashboardView.vue",
+  "views/main/group/dashboard/FinishedLots.vue",
+  "views/main/group/dashboard/LowLots.vue",
+  "views/main/group/dashboard/RecentOrders.vue",
+  "views/main/group/lots/CreateLot.vue",
+  "views/main/group/lots/EditLot.vue",
+  "views/main/group/lots/LotDetailsView.vue",
+  "views/main/group/lots/LotExpandedView.vue",
+  "views/main/group/lots/LotView.vue",
+  "views/main/group/lots/LotsListView.vue",
+  "views/main/group/members/CreateMember.vue",
+  "views/main/group/members/EditMember.vue",
+  "views/main/group/members/MembersListView.vue",
+  "views/main/group/panels/AllConjugatesView.vue",
+  "views/main/group/panels/CreatePanel.vue",
+  "views/main/group/panels/EditPanel.vue",
+  "views/main/group/panels/PanelDetailsView.vue",
+  "views/main/group/panels/PanelExpandedView.vue",
+  "views/main/group/panels/PanelPreview.vue",
+  "views/main/group/panels/PanelTagsView.vue",
+  "views/main/group/panels/PanelView.vue",
+  "views/main/group/panels/PanelsListView.vue",
+  "views/main/group/panels/TagConjugatesView.vue",
+  "views/main/group/panels/ViewPanel.vue",
+  "views/main/group/proteins/CreateProtein.vue",
+  "views/main/group/proteins/EditProtein.vue",
+  "views/main/group/proteins/ProteinDetailsView.vue",
+  "views/main/group/proteins/ProteinExpandedView.vue",
+  "views/main/group/proteins/ProteinView.vue",
+  "views/main/group/proteins/ProteinsListView.vue",
+  "views/main/group/providers/CreateProvider.vue",
+  "views/main/group/providers/EditProvider.vue",
+  "views/main/group/providers/ProviderDetailsView.vue",
+  "views/main/group/providers/ProviderExpandedView.vue",
+  "views/main/group/providers/ProviderView.vue",
+  "views/main/group/providers/ProvidersListView.vue",
+  "views/main/group/species/CreateSpecies.vue",
+  "views/main/group/species/EditSpecies.vue",
+  "views/main/group/species/SpeciesDetailsView.vue",
+  "views/main/group/species/SpeciesExpandedView.vue",
+  "views/main/group/species/SpeciesListView.vue",
+  "views/main/group/species/SpeciesView.vue",
+  "views/main/group/storage/CreateStorage.vue",
+  "views/main/group/storage/EditStorage.vue",
+  "views/main/group/storage/StorageListView.vue",
+  "views/main/group/tags/CreateTag.vue",
+  "views/main/group/tags/EditTag.vue",
+  "views/main/group/tags/TagDetailsView.vue",
+  "views/main/group/tags/TagExpandedView.vue",
+  "views/main/group/tags/TagView.vue",
+  "views/main/group/tags/TagsListView.vue",
+  "views/main/group/validations/CreateValidation.vue",
+  "views/main/group/validations/EditValidation.vue",
+  "views/main/group/validations/ValidationDetailsView.vue",
+  "views/main/group/validations/ValidationView.vue",
+  "views/main/group/validations/ValidationsListView.vue",
+  "views/main/profile/UserProfile.vue",
+  "views/main/profile/UserProfileEdit.vue",
+  "views/main/profile/UserProfileEditPassword.vue",
+]
+`;
+
+exports[`vue templates > matches template snapshot for App.vue 1`] = `
+"<v-app id="app">
+    <v-main v-if="loggedIn === null">
+      <v-container fill-height>
+        <v-row align="center" justify="center">
+          <v-col>
+            <div class="text-center">
+              <div class="text-h5 my-12">Loading...</div>
+              <v-progress-circular size="100" indeterminate color="primary" />
+            </div>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-main>
+    <router-view v-else />
+    <NotificationsManager />
+  </v-app>"
+`;
+
+exports[`vue templates > matches template snapshot for components/FilterField.vue 1`] = `
+"<v-select
+    v-if="config && isCollectionFilter"
+    v-model="value"
+    class="filter-field"
+    :label="config.label"
+    :items="collectionOptions"
+    item-title="label"
+    item-value="value"
+    :clearable="true"
+    density="compact"
+    hide-details
+    variant="outlined"
+    prepend-icon="mdi-filter-outline"
+  />
+  <component
+    v-else-if="config"
+    :is="config.type === 'select' ? 'v-select' : 'v-text-field'"
+    v-model="value"
+    class="filter-field"
+    :label="config.label"
+    :items="config.options"
+    :item-title="'label'"
+    :item-value="'value'"
+    :multiple="config.multiple"
+    :clearable="true"
+    :type="config.type === 'number' ? 'number' : undefined"
+    density="compact"
+    hide-details
+    variant="outlined"
+    prepend-icon="mdi-filter-outline"
+  />"
+`;
+
+exports[`vue templates > matches template snapshot for components/FilterSummary.vue 1`] = `
+"<div class="filter-summary">
+    <span class="label">Filters</span>
+    <v-chip
+      v-for="chip in activeChips"
+      :key="\`\${chip.key}-\${String(chip.value)}\`"
+      closable
+      size="small"
+      density="compact"
+      class="chip"
+      @click.stop
+      @click:close.stop="removeChip(chip.key, chip.value)"
+    >
+      {{ chip.label }}: {{ displayValue(chip.key, chip.value) }}
+    </v-chip>
+  </div>"
+`;
+
+exports[`vue templates > matches template snapshot for components/HelloWorld.vue 1`] = `
+"<h1>{{ msg }}</h1>
+
+  <div class="card">
+    <button type="button" @click="count++">count is {{ count }}</button>
+    <p>
+      Edit
+      <code>components/HelloWorld.vue</code> to test HMR
+    </p>
+  </div>
+
+  <p>
+    Check out
+    <a href="https://vuejs.org/guide/quick-start.html#local" target="_blank"
+      >create-vue</a
+    >, the official Vue + Vite starter
+  </p>
+  <p>
+    Learn more about IDE Support for Vue in the
+    <a
+      href="https://vuejs.org/guide/scaling-up/tooling.html#ide-support"
+      target="_blank"
+      >Vue Docs Scaling up Guide</a
+    >.
+  </p>
+  <p class="read-the-docs">Click on the Vite and Vue logos to learn more</p>"
+`;
+
+exports[`vue templates > matches template snapshot for components/InfoView.vue 1`] = `
+"<v-list dense>
+    <template v-for="meta in metaProps" :key="meta.name">
+      <v-list-item dense two-line>
+        <v-list-item-title>{{ meta.name }}</v-list-item-title>
+        <v-list-item-subtitle v-if="meta.value.startsWith('http')">
+          <a :href="meta.value" target="_blank">{{ meta.value }}</a>
+        </v-list-item-subtitle>
+        <v-list-item-subtitle v-else>
+          {{ meta.value }}
+        </v-list-item-subtitle>
+      </v-list-item>"
+`;
+
+exports[`vue templates > matches template snapshot for components/LoadingView.vue 1`] = `
+"<v-container fluid>
+    <v-row>
+      <v-col align="center" justify="center">
+        <v-progress-circular indeterminate color="primary" />
+        <h5>{{ text }}</h5>
+      </v-col>
+    </v-row>
+  </v-container>"
+`;
+
+exports[`vue templates > matches template snapshot for components/MfaDialog.vue 1`] = `
+"<v-dialog v-model="dialogVisible" persistent max-width="400px">
+    <v-card>
+      <v-card-title>Enter OTP</v-card-title>
+      <v-card-text>
+        <v-text-field
+          label="Authentication Code"
+          v-model="otp"
+          autofocus
+          @keyup.enter="submitOtp"
+        />
+        <v-alert v-if="otpError" type="error" dense>
+          Invalid OTP. Please try again.
+        </v-alert>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer />
+        <v-btn color="primary" @click="submitOtp">Verify</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>"
+`;
+
+exports[`vue templates > matches template snapshot for components/MfaSetupDialog.vue 1`] = `
+"<v-dialog :model-value="modelValue" @update:model-value="closeDialog" max-width="500">
+    <v-card>
+      <v-card-title>
+        <span class="text-h6">Enable MFA</span>
+      </v-card-title>
+
+      <v-card-text>
+        <div v-if="loading">Generating secret...</div>
+
+        <div v-else>
+          <p>Scan this QR code with Microsoft Authenticator:</p>
+
+          <div v-html="qrCodeSvg" />
+
+          <v-text-field
+            class="mt-4"
+            label="One-Time Code"
+            v-model="otp"
+            maxlength="6"
+            required
+          />
+
+          <div
+            v-if="message"
+            :class="{ 'text-success': isSuccess, 'text-error': !isSuccess }"
+          >
+            {{ message }}
+          </div>
+        </div>
+      </v-card-text>
+
+      <v-card-actions>
+        <v-spacer />
+        <v-btn text @click="emit('update:modelValue', false)">Cancel</v-btn>
+        <v-btn color="primary" @click="verifyOtp" :disabled="!otp || loading">
+          Verify
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>"
+`;
+
+exports[`vue templates > matches template snapshot for components/NotificationsManager.vue 1`] = `
+"<v-snackbar :color="currentNotificationColor" v-model="show" bottom right>
+    <v-progress-circular class="ma-2" indeterminate v-if="showProgress" />
+    {{ currentNotificationContent }}
+    <template v-slot:actions>
+      <v-btn text @click="close">Close</v-btn>"
+`;
+
+exports[`vue templates > matches template snapshot for components/RouterComponent.vue 1`] = `"<router-view />"`;
+
+exports[`vue templates > matches template snapshot for components/ToolbarProgressBar.vue 1`] = `
+"<v-progress-linear
+    :active="processing"
+    :color="color"
+    :indeterminate="indeterminate"
+    :value="progress"
+    class="ma-0"
+    height="4"
+    style="top: -2px"
+  />"
+`;
+
+exports[`vue templates > matches template snapshot for components/UploadButton.vue 1`] = `
+"<span>
+    <v-btn @click="trigger" color="primary" text>
+      <v-icon small left>mdi-cloud-upload</v-icon>
+      Upload
+    </v-btn>
+    <input
+      :multiple="multiple"
+      class="visually-hidden"
+      type="file"
+      @change="onFiles"
+      ref="fileInput"
+    />
+  </span>"
+`;
+
+exports[`vue templates > matches template snapshot for views/Login.vue 1`] = `
+"<div>
+  <v-main>
+    <v-container fluid fill-height>
+      <v-row align="center" justify="center">
+        <v-col xs="12" sm="8" md="4">
+          <v-card elevation="12">
+            <v-toolbar dark color="primary">
+              <v-toolbar-title>{{ appName }}</v-toolbar-title>
+              <v-spacer />
+            </v-toolbar>
+            <v-card-text>
+              <v-form @keyup.enter="submit">
+                <v-text-field
+                  v-model="email"
+                  prepend-icon="mdi-account"
+                  name="email"
+                  label="Email"
+                  type="text"
+                  :rules="emailRules"
+                  @keyup.enter="submit"
+                />
+                <v-text-field
+                  id="password"
+                  v-model="password"
+                  prepend-icon="mdi-lock"
+                  name="password"
+                  label="Password"
+                  type="password"
+                  @keyup.enter="submit"
+                />
+              </v-form>
+              <div v-if="loginError">
+                <v-alert :value="loginError" transition="fade-transition" type="error">
+                  Incorrect email or password
+                </v-alert>
+              </div>
+              <v-row>
+                <v-col class="text-caption text-right py-0">
+                  <router-link to="/recover-password">Recover password</router-link>
+                </v-col>
+              </v-row>
+              <v-row>
+                <v-col class="text-caption text-right py-0">
+                  <router-link to="/signup">Register an account</router-link>
+                </v-col>
+              </v-row>
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer />
+              <v-btn @click.prevent="submit">Login</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-container>
+  </v-main>
+  <OtpDialog v-model="store.mfaPending" @close="store.mfaPending = false" />
+  </div>"
+`;
+
+exports[`vue templates > matches template snapshot for views/PasswordRecovery.vue 1`] = `
+"<v-main>
+    <v-container fluid fill-height>
+      <v-row align="center" justify="center">
+        <v-col xs="12" sm="8" md="4">
+          <v-card elevation="12">
+            <v-toolbar dark color="primary">
+              <v-toolbar-title>{{ appName }} - Password Recovery</v-toolbar-title>
+            </v-toolbar>
+            <v-card-text>
+              <p class="subtitle-3">
+                A password recovery email will be sent to the registered account
+              </p>
+              <v-form v-model="valid" ref="form" @keyup.enter="submit" lazy-validation>
+                <v-text-field
+                  label="Email"
+                  type="text"
+                  prepend-icon="mdi-account"
+                  v-model="email"
+                  :rules="emailRules"
+                />
+              </v-form>
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer />
+              <v-btn @click="cancel">Cancel</v-btn>
+              <v-btn @click.prevent="submit" :disabled="!valid">Recover Password</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-container>
+  </v-main>"
+`;
+
+exports[`vue templates > matches template snapshot for views/ResetPassword.vue 1`] = `
+"<v-main>
+    <v-container fluid fill-height>
+      <v-row align="center" justify="center">
+        <v-col xs="12" sm="8" md="4">
+          <v-card elevation="12">
+            <v-toolbar dark color="primary">
+              <v-toolbar-title>{{ appName }} - Reset Password</v-toolbar-title>
+            </v-toolbar>
+            <v-card-text>
+              <p class="subtitle-3">Enter your new password below</p>
+              <v-form ref="form" v-model="valid" @keyup.enter="submit" lazy-validation>
+                <v-text-field
+                  type="password"
+                  label="Password"
+                  v-model="password1"
+                  :rules="password1Rules"
+                />
+                <v-text-field
+                  type="password"
+                  label="Confirm Password"
+                  v-model="password2"
+                  :rules="password2Rules"
+                />
+              </v-form>
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer />
+              <v-btn @click="cancel">Cancel</v-btn>
+              <v-btn @click="clear">Clear</v-btn>
+              <v-btn @click="submit" :disabled="!valid">Save</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-container>
+  </v-main>"
+`;
+
+exports[`vue templates > matches template snapshot for views/SignUp.vue 1`] = `
+"<v-main>
+    <v-container fluid fill-height>
+      <v-row align="center" justify="center">
+        <v-col xs="12" sm="8" md="4">
+          <v-card elevation="12">
+            <v-toolbar dark color="primary">
+              <v-toolbar-title>Create {{ appName }} Account</v-toolbar-title>
+              <v-spacer />
+            </v-toolbar>
+            <v-card-text>
+              <v-form @keyup.enter="submit" v-model="valid" ref="form" @submit.prevent="" lazy-validation>
+                <v-text-field
+                  type="email"
+                  v-model="email"
+                  prepend-icon="mdi-account"
+                  label="Email"
+                  :rules="emailRules"
+                />
+                <v-text-field
+                  type="text"
+                  label="Name"
+                  prepend-icon="mdi-account"
+                  v-model="name"
+                />
+                <v-text-field
+                  type="password"
+                  ref="password"
+                  label="Password"
+                  :rules="password1Rules"
+                  v-model="password1"
+                  prepend-icon="mdi-lock"
+                />
+                <v-text-field
+                  type="password"
+                  label="Confirm Password"
+                  :rules="password2Rules"
+                  v-model="password2"
+                  prepend-icon="mdi-lock"
+                />
+              </v-form>
+              <v-row>
+                <v-col class="text-caption text-right py-0">
+                  <router-link to="/login">Already have an account?</router-link>
+                </v-col>
+              </v-row>
+            </v-card-text>
+            <v-card-actions>
+              <v-spacer />
+              <v-btn @click.prevent="submit">Sign Up</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-container>
+  </v-main>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/GroupCard.vue 1`] = `
+"<v-card tile class="group-card">
+    <div class="group-card__layout">
+      <div class="group-card__primary-action">
+        <v-btn
+          v-if="isMember || user.isAdmin"
+          class="group-card__action-button"
+          color="primary"
+          variant="outlined"
+          :to="{ name: 'main-group', params: { groupId: group.id } }"
+        >
+          Open
+        </v-btn>
+
+        <v-btn
+          v-else-if="group.isOpen"
+          class="group-card__action-button"
+          color="primary"
+          variant="outlined"
+          @click="joinGroup"
+        >
+          Request Access
+        </v-btn>
+
+        <div v-else class="group-card__action-spacer" aria-hidden="true" />
+      </div>
+
+      <div class="group-card__content">
+        <div class="group-card__title text-h5">{{ group.name }}</div>
+        <span v-if="group.url" class="text-caption group-card__link">
+          <v-icon small>mdi-link</v-icon>{{ group.url }}
+        </span>
+        <div v-if="group.institution" class="group-card__institution">
+          {{ group.institution }}
+        </div>
+      </div>
+    </div>
+  </v-card>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/GroupsView.vue 1`] = `
+"<v-container fluid>
+    <v-card v-if="!mfaEnabled" class="ma-6 pa-6">
+      <div class="text-h6 mb-2">Enable MFA To Access Groups</div>
+      <p class="text-body-1 mb-4">
+        Multi-factor authentication must be enabled before group access is available.
+      </p>
+      <v-btn color="primary" to="/main/profile/view">Go To Profile</v-btn>
+    </v-card>
+
+    <template v-else>
+    <v-row class="mt-6 mx-6">
+      <v-text-field
+        v-model="search"
+        append-icon="mdi-magnify"
+        label="Search"
+        single-line
+        hide-details
+        clearable
+        solo
+        class="mt-1"
+      />
+    </v-row>
+
+    <div class="group-list">
+      <div class="group-list-item" v-for="group in filteredGroups" :key="group.id">
+        <GroupCard :group="group" :user="userProfile" />
+      </div>
+    </div>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/Main.vue 1`] = `
+"<div>
+    <v-navigation-drawer v-model="showDrawer" fixed app width="180">
+      <v-list nav density="compact" class="main-drawer-list">
+        <template v-if="activeGroupId">
+          <v-list-subheader>Group</v-list-subheader>
+          <v-list-item :to="\`/main/groups/\${activeGroupId}/dashboard\`">
+            <template #prepend><v-icon>mdi-view-dashboard-outline</v-icon>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/Start.vue 1`] = `"<router-view />"`;
+
+exports[`vue templates > matches template snapshot for views/main/admin/Admin.vue 1`] = `"<router-view />"`;
+
+exports[`vue templates > matches template snapshot for views/main/admin/group/CreateGroup.vue 1`] = `
+"<v-container fluid>
+    <v-toolbar dense>
+      <v-toolbar-title>Create Group</v-toolbar-title>
+      <v-spacer />
+      <v-toolbar-items>
+        <v-btn @click="cancel" text color="primary">Cancel</v-btn>
+        <v-btn @click="reset" text color="primary">Reset</v-btn>
+        <v-btn @click="submit" text :disabled="!valid" color="primary">Save</v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+    <v-card class="mt-4 px-4">
+      <v-card-text>
+        <v-form v-model="valid" ref="form" lazy-validation>
+          <v-text-field label="Name" v-model="name" :rules="nameRules" />
+          <v-text-field label="Institution" v-model="institution" />
+          <v-text-field label="URL" v-model="url" />
+          <v-checkbox label="Public" v-model="isOpen" />
+        </v-form>
+      </v-card-text>
+    </v-card>
+  </v-container>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/admin/group/EditGroup.vue 1`] = `
+"<v-container fluid>
+    <v-toolbar dense>
+      <v-toolbar-title>Edit Group</v-toolbar-title>
+      <v-spacer />
+      <v-toolbar-items>
+        <v-btn @click="cancel" text color="primary">Cancel</v-btn>
+        <v-btn @click="reset" text color="primary">Reset</v-btn>
+        <v-btn @click="submit" text :disabled="!valid" color="primary">Save</v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+    <v-card class="mt-4 px-4">
+      <v-card-text>
+        <v-form v-model="valid" ref="form" lazy-validation>
+          <v-text-field label="Name" v-model="name" :rules="nameRules" />
+          <v-text-field label="Institution" v-model="institution" />
+          <v-text-field label="URL" v-model="url" />
+          <v-checkbox label="Public" v-model="isOpen" />
+        </v-form>
+      </v-card-text>
+    </v-card>
+  </v-container>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/admin/group/GroupsListView.vue 1`] = `
+"<v-col>
+    <v-toolbar dense class="toolbar">
+      <v-toolbar-title>Groups</v-toolbar-title>
+      <v-spacer />
+      <v-toolbar-items>
+        <v-btn v-if="isAdmin" text @click="exportAllData" color="primary">
+          <v-icon small left>mdi-cloud-download</v-icon>
+          Export All Data
+        </v-btn>
+        <v-btn v-if="isAdmin" text @click="importAllData" color="primary">
+          <v-icon small left>mdi-cloud-upload</v-icon>
+          Import All Data
+        </v-btn>
+        <v-divider vertical />
+        <v-btn v-if="isAdmin" text @click="importGroupData" color="primary">
+          <v-icon small left>mdi-cloud-upload</v-icon>
+          Import Group
+        </v-btn>
+        <v-btn v-if="isAdmin" text to="/main/admin/groups/create" color="primary">Create Group</v-btn>
+      </v-toolbar-items>
+      <input ref="groupFileInput" class="visually-hidden" type="file" @change="groupFiles" />
+      <input ref="allFileInput" class="visually-hidden" type="file" @change="allFiles" />
+    </v-toolbar>
+
+    <v-card>
+      <v-card-title>
+        <v-spacer />
+        <v-text-field v-model="search" append-icon="mdi-magnify" label="Search" single-line hide-details clearable />
+      </v-card-title>
+
+      <v-data-table
+        :headers="headers"
+        :items="groups"
+        :loading="!groups.length"
+        :search="search"
+        :items-per-page="15"
+        :footer-props="{
+          itemsPerPageOptions: [],
+          showFirstLastPage: true,
+          showCurrentPage: true,
+        }"
+        multi-sort
+      >
+        <template v-slot:item.isOpen="{ item }">
+          <v-icon v-if="item.isOpen">mdi-check</v-icon>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/admin/user/CreateUser.vue 1`] = `
+"<v-container fluid>
+    <v-toolbar density="compact">
+      <v-toolbar-title>Create User</v-toolbar-title>
+      <v-spacer />
+      <v-toolbar-items>
+        <v-btn @click="cancel" text color="primary">Cancel</v-btn>
+        <v-btn @click="reset" text color="primary">Reset</v-btn>
+        <v-btn @click="submit" text :disabled="!valid" color="primary">Save</v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+
+    <v-card class="mt-4 px-4">
+      <v-card-text>
+        <v-form v-model="valid" ref="form" lazy-validation>
+          <v-text-field label="Name" v-model="name" />
+          <v-text-field
+            label="E-mail"
+            type="email"
+            v-model="email"
+            :rules="emailRules"
+          />
+
+          <v-row align="center">
+            <v-col>
+              <v-text-field
+                type="password"
+                label="Set Password"
+                v-model="password1"
+                :rules="password1Rules"
+              />
+              <v-text-field
+                type="password"
+                label="Confirm Password"
+                v-model="password2"
+                :rules="password2Rules"
+              />
+            </v-col>
+          </v-row>
+        </v-form>
+      </v-card-text>
+    </v-card>
+  </v-container>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/admin/user/EditUser.vue 1`] = `
+"<v-container fluid>
+    <v-toolbar dense>
+      <v-toolbar-title>Edit User</v-toolbar-title>
+      <v-spacer />
+      <v-toolbar-items>
+        <v-btn @click="cancel" text color="primary">Cancel</v-btn>
+        <v-btn @click="reset" text color="primary">Reset</v-btn>
+        <v-btn @click="submit" text :disabled="!valid" color="primary">Save</v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+
+    <v-card class="mt-4 px-4">
+      <v-card-text>
+        <v-form v-model="valid" ref="form">
+          <v-text-field label="Name" v-model="name" />
+          <v-text-field label="E-mail" type="email" v-model="emailValue" :rules="emailRules" />
+          <v-checkbox label="Active" v-model="isActive" />
+          <v-checkbox label="Admin" v-model="isAdmin" />
+
+          <v-row align="center">
+            <v-col class="shrink">
+              <v-checkbox v-model="setPassword" />
+            </v-col>
+            <v-col>
+              <v-text-field
+                :disabled="!setPassword"
+                type="password"
+                label="Set Password"
+                v-model="password1"
+                :rules="password1Rules"
+              />
+              <v-text-field
+                v-if="setPassword"
+                type="password"
+                label="Confirm Password"
+                v-model="password2"
+                :rules="password2Rules"
+              />
+            </v-col>
+          </v-row>
+        </v-form>
+      </v-card-text>
+    </v-card>
+  </v-container>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/admin/user/UsersListView.vue 1`] = `
+"<v-col>
+    <v-toolbar dense class="toolbar">
+      <v-toolbar-title>Users</v-toolbar-title>
+      <v-spacer />
+      <v-toolbar-items>
+        <v-btn v-if="isAdmin" text to="/main/admin/users/create" color="primary">Create User</v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+
+    <v-card>
+      <v-card-title>
+        <v-spacer />
+        <v-text-field v-model="search" append-icon="mdi-magnify" label="Search" single-line hide-details clearable />
+      </v-card-title>
+
+      <v-data-table
+        :headers="headers"
+        :items="users"
+        :loading="!users.length"
+        :search="search"
+        :items-per-page="15"
+        :footer-props="{
+          itemsPerPageOptions: [],
+          showFirstLastPage: true,
+          showCurrentPage: true,
+        }"
+        multi-sort
+      >
+        <template v-slot:item.isActive="{ item }">
+          <v-icon v-if="item.isActive">mdi-check</v-icon>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/GroupView.vue 1`] = `
+"<v-container fluid class="px-1 py-0">
+    <router-view />
+  </v-container>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/clones/CloneDetailsView.vue 1`] = `
+"<v-card flat>
+    <v-card-title>Clone Details</v-card-title>
+    <v-card-text>
+      <v-tabs v-model="tab">
+        <v-tab>Info</v-tab>
+        <v-tab v-if="validations.length > 0">Validations</v-tab>
+      </v-tabs>
+      <v-window v-model="tab" class="mt-4">
+
+        <v-window-item value="info">
+          <CloneView :clone-id="clone.id" />
+        </v-window-item>
+
+        <v-window-item value="validations">
+
+        </v-window-item>
+      </v-window>
+    </v-card-text>
+  </v-card>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/clones/CloneExpandedView.vue 1`] = `
+"<v-card flat class="my-2">
+    <v-card-text class="text-subtitle-2">Lots</v-card-text>
+    <v-data-table
+      :headers="headers"
+      :items="items"
+      :loading="loading"
+      :items-per-page="-1"
+      hide-default-footer
+      disable-filtering
+      dense
+      show-expand
+    >
+      <template v-slot:item.id="{ item }">
+        <router-link
+          class="link"
+          :to="{
+            name: 'main-group-lots-edit',
+            params: { groupId: activeGroupId, id: item.id },
+          }"
+        >
+          {{ item.id }}
+        </router-link>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/clones/CloneLotExpandedView.vue 1`] = `
+"<v-card flat class="my-2">
+    <v-card-text class="text-subtitle-2">Conjugates</v-card-text>
+    <v-data-table
+      :headers="headers"
+      :items="items"
+      :loading="loading"
+      :items-per-page="-1"
+      hide-default-footer
+      disable-filtering
+      dense
+    >
+      <template v-slot:item.id="{ item }">
+        <router-link
+          class="link"
+          :to="{
+            name: 'main-group-conjugates-edit',
+            params: { groupId: activeGroupId, id: item.id },
+          }"
+        >
+          {{ item.id }}
+        </router-link>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/clones/CloneView.vue 1`] = `
+"<v-card tile elevation="1">
+    <v-card-text>
+      <div><span class="subheader">ID: </span>{{ clone.id }}</div>
+      <div><span class="subheader">Name: </span>{{ clone.name }}</div>
+      <div>
+        <span class="subheader">Protein: </span>
+        <router-link
+          class="link"
+          :to="{
+            name: 'main-group-proteins-edit',
+            params: { groupId: activeGroupId, id: clone.proteinId },
+          }"
+        >
+          {{ proteinName }}
+        </router-link>
+      </div>
+      <div v-if="clone.speciesId">
+        <span class="subheader">Host: </span>
+        <router-link
+          class="link"
+          :to="{
+            name: 'main-group-species-edit',
+            params: { groupId: activeGroupId, id: clone.speciesId },
+          }"
+        >
+          {{ speciesName }}
+        </router-link>
+      </div>
+      <div v-if="createdByUser">
+        <span class="subheader">Created by: </span>
+        <router-link
+          class="link"
+          :to="{
+            name: 'main-admin-users-edit',
+            params: { id: createdByUser.id },
+          }"
+        >
+          {{ createdByUser.name }}
+        </router-link>
+      </div>
+      <div><span class="subheader">Isotype: </span>{{ clone.isotype }}</div>
+      <div><span class="subheader">Epitope: </span>{{ clone.epitope }}</div>
+      <div><span class="subheader">Polyclonal: </span>{{ clone.isPolyclonal }}</div>
+      <div><span class="subheader">Phospho: </span>{{ clone.isPhospho }}</div>
+
+      <div class="subheader">Application:</div>
+      <v-chip-group multiple column active-class="primary--text">
+        <v-chip v-for="key in Object.keys(applicationMap)" :key="key" :color="getApplicationColor(applicationMap[key])" small disabled class="chip">
+          {{ key }}
+        </v-chip>
+      </v-chip-group>
+
+      <div class="subheader">Reactivity:</div>
+      <v-chip-group :value="clone.reactivity" multiple column active-class="primary--text">
+        <v-chip v-for="s in species" :key="s.id" :value="s.id" label small disabled class="chip">
+          {{ s.name }}
+        </v-chip>
+      </v-chip-group>
+    </v-card-text>
+
+    <v-card-actions>
+      <v-btn
+        color="primary"
+        text
+        :to="{
+          name: 'main-group-clones-edit',
+          params: { groupId: activeGroupId, id: clone.id },
+        }"
+      >
+        Edit
+      </v-btn>
+      <v-btn v-if="isGroupAdmin" color="secondary" text @click="deleteClone">Delete</v-btn>
+    </v-card-actions>
+  </v-card>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/clones/ClonesListView.vue 1`] = `
+"<v-col>
+      <v-toolbar dense class="toolbar">
+        <v-toolbar-title>Clones</v-toolbar-title>
+        <v-spacer />
+        <v-toolbar-items>
+          <v-btn text @click="exportFile" color="primary">Export CSV</v-btn>
+          <v-btn text :to="\`/main/groups/\${activeGroupId}/clones/create\`" color="primary">Create Clone</v-btn>
+        </v-toolbar-items>
+      </v-toolbar>
+
+      <v-expansion-panels>
+      <v-expansion-panel>
+        <v-expansion-panel-title>
+          <FilterSummary />
+        </v-expansion-panel-title>
+        <v-expansion-panel-text>
+          <FilterField key-name="proteinName" class="mb-1" />
+          <FilterField key-name="cloneName" class="mb-1" />
+          <FilterField key-name="speciesName" class="mb-1" />
+          <FilterField key-name="validationApplication" class="mb-1" />
+          <FilterField key-name="validationStatus" class="mb-1" />
+          <v-select
+            v-model="reactivityFilter"
+              :items="speciesOptions"
+              item-title="label"
+              item-value="value"
+              label="Reactivity"
+              multiple
+              clearable
+              dense
+              variant="solo"
+              prepend-icon="mdi-filter-outline"
+              class="mb-1"
+            />
+          </v-expansion-panel-text>
+        </v-expansion-panel>
+      </v-expansion-panels>
+
+      <v-text-field
+        v-model="globalSearch"
+        label="Search all clone fields"
+        variant="solo"
+        density="comfortable"
+        clearable
+        prepend-inner-icon="mdi-magnify"
+        class="mt-3 mb-3"
+      />
+
+      <v-card>
+
+        <v-data-table-server
+          :headers="headers"
+          :items="items"
+          :loading="loading"
+          :items-length="cloneStore.total"
+          v-model:items-per-page="tableItemsPerPage"
+          v-model:page="tablePage"
+          v-model:sort-by="sortBy"
+          :footer-props="tableFooterProps"
+          show-expand
+          v-model:expanded="expanded"
+          item-value="id"
+        >
+          <template #item.protein="{ item }">
+            <router-link
+              class="link"
+              :to="{
+                name: 'main-group-proteins-edit',
+                params: { groupId: item.groupId, id: item.proteinId }
+              }"
+            >
+              {{ item.proteinName }}
+            </router-link>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/clones/CreateClone.vue 1`] = `
+"<v-container fluid>
+    <v-toolbar density="compact">
+      <v-toolbar-title>Create Clone</v-toolbar-title>
+      <v-spacer />
+      <v-toolbar-items>
+        <v-btn @click="cancel" variant="text" color="primary">Cancel</v-btn>
+        <v-btn @click="reset" variant="text" color="primary">Reset</v-btn>
+        <v-btn @click="submit" variant="text" color="primary">Save</v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+
+    <v-card class="mt-4 px-4">
+      <v-card-text>
+        <v-form v-model="valid" ref="form" validate-on="submit lazy">
+          <v-text-field label="Clone Name" v-model="name" :rules="nameRules" />
+
+          <v-autocomplete
+            label="Protein"
+            v-model="proteinId"
+            :items="proteins"
+            item-title="name"
+            item-value="id"
+            :rules="proteinRules"
+            density="compact"
+          />
+
+          <v-autocomplete
+            label="Host"
+            v-model="speciesId"
+            :items="species"
+            item-title="name"
+            item-value="id"
+            :rules="hostRules"
+            density="compact"
+          />
+
+          <v-text-field label="Epitope" v-model="epitope" />
+          <v-text-field label="Isotype" v-model="isotype" />
+
+          <v-checkbox label="Polyclonal" v-model="isPolyclonal" />
+          <v-checkbox label="Phosphoantibody" v-model="isPhospho" />
+
+          <v-row>
+            <v-col cols="4">
+              <div class="text-subtitle-1">Reactivity</div>
+              <v-chip-group v-model="reactivity" multiple column class="reactivity-group">
+                <v-chip
+                  v-for="item in species"
+                  :key="item.id"
+                  :value="item.id"
+                  class="reactivity-chip"
+                  size="small"
+                  label
+                >
+                  {{ item.name }}
+                </v-chip>
+              </v-chip-group>
+            </v-col>
+
+            <v-col />
+            <v-col cols="7">
+              <div class="text-subtitle-1">Application</div>
+              <v-row v-for="app in appOptions" :key="app.key">
+                <v-col>
+                  <div class="subtitle-3">{{ app.label }}</div>
+                  <v-btn-toggle v-model="app.model.value" class="application-toggle">
+                    <v-btn size="small" :value="'true'" class="true">Yes</v-btn>
+                    <v-btn size="small" :value="'false'" class="false">No</v-btn>
+                  </v-btn-toggle>
+                </v-col>
+              </v-row>
+            </v-col>
+          </v-row>
+        </v-form>
+      </v-card-text>
+    </v-card>
+  </v-container>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/clones/EditClone.vue 1`] = `
+"<v-container fluid>
+    <v-toolbar dense>
+      <v-toolbar-title>Edit Clone</v-toolbar-title>
+      <v-spacer />
+      <v-toolbar-items>
+        <v-btn @click="cancel" text color="primary">Cancel</v-btn>
+        <v-btn @click="reset" text color="primary">Reset</v-btn>
+        <v-btn @click="submit" text :disabled="!valid" color="primary">Save</v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+
+    <v-card class="mt-4 px-4">
+      <v-card-text>
+        <v-form v-model="valid" ref="formRef">
+          <v-text-field label="Clone Name" v-model="name" :rules="nameRules" />
+          <v-autocomplete
+            label="Protein"
+            v-model="proteinId"
+            :items="proteins"
+            item-title="name"
+            item-value="id"
+            :rules="proteinRules"
+            dense
+          />
+          <v-autocomplete
+            label="Host"
+            v-model="speciesId"
+            :items="species"
+            item-title="name"
+            item-value="id"
+            :rules="hostRules"
+            dense
+          />
+          <v-text-field label="Epitope" v-model="epitope" />
+          <v-text-field label="Isotype" v-model="isotype" />
+          <v-checkbox label="Polyclonal" v-model="isPolyclonal" />
+          <v-checkbox label="Phosphoantibody" v-model="isPhospho" />
+
+          <v-row>
+            <v-col cols="4">
+              <div class="text-subtitle-1">Reactivity</div>
+              <v-chip-group v-model="reactivity" multiple column class="reactivity-group">
+                <v-chip v-for="item in species" :key="item.id" :value="item.id" class="reactivity-chip" small label>
+                  {{ item.name }}
+                </v-chip>
+              </v-chip-group>
+            </v-col>
+
+            <v-col />
+            <v-col cols="7">
+              <div class="text-subtitle-1">Application</div>
+              <v-row>
+                <v-col v-for="(label, key) in applicationFields" :key="key">
+                  <div class="subtitle-3">{{ label }}</div>
+                  <v-btn-toggle v-model="applications[key]" class="application-toggle">
+                    <v-btn small value="true" class="true">Yes</v-btn>
+                    <v-btn small value="false" class="false">No</v-btn>
+                  </v-btn-toggle>
+                </v-col>
+              </v-row>
+            </v-col>
+          </v-row>
+        </v-form>
+      </v-card-text>
+    </v-card>
+  </v-container>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/collection/CollectionListView.vue 1`] = `
+"<v-col>
+    <v-toolbar dense class="toolbar">
+      <v-toolbar-title>Collections</v-toolbar-title>
+      <v-spacer />
+      <v-toolbar-items>
+        <v-btn
+          text
+          :to="\`/main/groups/\${activeGroupId}/collections/create\`"
+          color="primary"
+        >
+          Add Collection
+        </v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+
+    <v-text-field
+      v-model="globalSearch"
+      label="Search all collection fields"
+      variant="solo"
+      density="comfortable"
+      clearable
+      prepend-inner-icon="mdi-magnify"
+      class="mb-3"
+    />
+
+    <v-card>
+      <v-data-table-server
+        :headers="headers"
+        :items="items"
+        :loading="collectionStore.loading"
+        :items-length="collectionStore.total"
+        v-model:items-per-page="tableItemsPerPage"
+        v-model:page="tablePage"
+        :footer-props="tableFooterProps"
+        v-model:sort-by="sortBy"
+        item-value="id"
+      >
+        <template #item.description="{ item }">
+          {{ item.description || '-' }}"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/collection/CreateCollection.vue 1`] = `
+"<v-container fluid>
+    <v-toolbar density="compact">
+      <v-toolbar-title>Create Collection</v-toolbar-title>
+      <v-spacer />
+      <v-btn text @click="cancel" color="primary">Cancel</v-btn>
+      <v-btn text @click="reset" color="primary">Reset</v-btn>
+      <v-btn text @click="submit" :disabled="!valid" color="primary">Save</v-btn>
+    </v-toolbar>
+
+    <v-card class="mt-4 px-4">
+      <v-card-text>
+        <v-form ref="formRef" v-model="valid" validate-on="lazy">
+          <v-text-field v-model="name" label="Name" :rules="requiredRules" />
+          <v-textarea v-model="description" label="Description" rows="3" auto-grow />
+        </v-form>
+      </v-card-text>
+    </v-card>
+  </v-container>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/collection/EditCollection.vue 1`] = `
+"<v-container fluid>
+    <v-toolbar density="compact">
+      <v-toolbar-title>Edit Collection</v-toolbar-title>
+      <v-spacer />
+      <v-btn text @click="cancel" color="primary">Cancel</v-btn>
+      <v-btn text @click="reset" color="primary">Reset</v-btn>
+      <v-btn text @click="submit" :disabled="!valid" color="primary">Save</v-btn>
+    </v-toolbar>
+
+    <v-card class="mt-4 px-4">
+      <v-card-text>
+        <v-form ref="formRef" v-model="valid" validate-on="lazy">
+          <v-text-field v-model="name" label="Name" :rules="requiredRules" />
+          <v-textarea v-model="description" label="Description" rows="3" auto-grow />
+        </v-form>
+      </v-card-text>
+    </v-card>
+  </v-container>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/conjugates/ConjugateDetailsView.vue 1`] = `
+"<v-card flat>
+    <v-card-title>Conjugate Details</v-card-title>
+    <v-card-text>
+      <v-tabs v-model="tab">
+        <v-tab :value="0">Info</v-tab>
+        <v-tab v-if="validations.length > 0" :value="1">Validations</v-tab>
+      </v-tabs>
+
+      <v-tabs-window v-model="tab">
+        <v-tabs-window-item :value="0">
+          <ConjugateView :conjugate-id="props.conjugate.id" />
+        </v-tabs-window-item>
+
+        <v-tabs-window-item v-if="validations.length > 0" :value="1">
+          <ValidationView
+            v-for="validation in validations"
+            :key="validation.id"
+            :group-id="activeGroupId"
+            :validation="validation"
+            :api-url="apiUrl"
+          />
+        </v-tabs-window-item>
+      </v-tabs-window>
+    </v-card-text>
+  </v-card>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/conjugates/ConjugateExpandedView.vue 1`] = `
+"<v-tabs v-model="tab" class="my-1">
+    <v-tab value="panels">Panels</v-tab>
+    <v-tab value="clones">Clones</v-tab>
+  </v-tabs>
+
+  <v-window v-model="tab">
+    <v-window-item value="panels">
+      <v-data-table
+        :headers="panelsHeaders"
+        :items="panels"
+        :loading="panelsLoading"
+        :items-per-page="-1"
+        hide-default-footer
+        dense
+      >
+        <template #item.id="{ item }">
+          <router-link
+            class="link"
+            :to="{ name: 'main-group-panels-edit', params: { groupId: activeGroupId, id: item.id } }"
+          >
+            {{ item.id }}
+          </router-link>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/conjugates/ConjugateView.vue 1`] = `
+"<v-card tile elevation="1">
+    <v-card-text v-if="conjugate">
+      <div><span class="subheader">ID: </span>{{ conjugate.id }}</div>
+      <div><span class="subheader">Tube Number: </span>{{ conjugate.tubeNumber }}</div>
+      <div>
+        <span class="subheader">Tag: </span>
+        <router-link
+          class="link"
+          :to="{
+            name: 'main-group-tags-edit',
+            params: {
+              groupId: activeGroupId,
+              id: conjugate.tagId,
+            },
+          }"
+        >
+          {{ conjugate.tagMw ? conjugate.tagName + conjugate.tagMw : conjugate.tagName }}
+        </router-link>
+      </div>
+      <div>
+        <span class="subheader">Lot: </span>
+        <router-link
+          class="link"
+          :to="{
+            name: 'main-group-lots-edit',
+            params: {
+              groupId: activeGroupId,
+              id: conjugate.lotId,
+            },
+          }"
+        >
+          {{ conjugate.lotName }}
+        </router-link>
+      </div>
+      <div>
+        <span class="subheader">Clone: </span>
+        <router-link
+          class="link"
+          :to="{
+            name: 'main-group-clones-edit',
+            params: {
+              groupId: activeGroupId,
+              id: conjugate.cloneId,
+            },
+          }"
+        >
+          {{ conjugate.cloneName }}
+        </router-link>
+      </div>
+      <div>
+        <span class="subheader">Protein: </span>
+        <router-link
+          class="link"
+          :to="{
+            name: 'main-group-proteins-edit',
+            params: {
+              groupId: activeGroupId,
+              id: conjugate.proteinId,
+            },
+          }"
+        >
+          {{ conjugate.proteinName }}
+        </router-link>
+      </div>
+      <div><span class="subheader">Concentration: </span>{{ conjugate.concentration }}</div>
+      <div><span class="subheader">Description: </span>{{ conjugate.description }}</div>
+      <div><span class="subheader">Custom ID: </span>{{ conjugate.customId }}</div>
+      <div><span class="subheader">Created: </span>{{ new Date(conjugate.createdAt).toUTCString() }}</div>
+      <div><span class="subheader">Updated: </span>{{ new Date(conjugate.updatedAt).toUTCString() }}</div>
+    </v-card-text>
+    <v-card-actions>
+      <v-btn
+        color="primary"
+        text
+        :to="{
+          name: 'main-group-conjugates-edit',
+          params: {
+            groupId: activeGroupId,
+            id: conjugate?.id ?? props.conjugateId,
+          },
+        }"
+      >
+        Edit
+      </v-btn>
+      <v-btn v-if="isGroupAdmin" color="secondary" text @click="deleteConjugate()">Delete</v-btn>
+    </v-card-actions>
+  </v-card>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/conjugates/ConjugatesListView.vue 1`] = `
+"<v-col>
+    <v-toolbar density="compact" class="toolbar">
+      <v-toolbar-title>Conjugates</v-toolbar-title>
+      <v-spacer />
+      <v-toolbar-items>
+        <v-btn
+          text
+          :to="\`/main/groups/\${activeGroupId}/conjugates/create\`"
+          color="primary"
+        >
+          Create Conjugate
+        </v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+    <v-expansion-panels>
+      <v-expansion-panel>
+        <v-expansion-panel-title>
+          <FilterSummary />
+        </v-expansion-panel-title>
+        <v-expansion-panel-text>
+          <FilterField key-name="tubeNumber" class="mb-1" />
+          <FilterField key-name="proteinName" class="mb-1" />
+          <FilterField key-name="cloneName" class="mb-1" />
+          <FilterField key-name="mass" class="mb-1" />
+          <FilterField key-name="collectionId" class="mb-1" />
+          <FilterField key-name="conjugateStatus" class="mb-1" />
+          <FilterField key-name="validationApplication" class="mb-1" />
+          <FilterField key-name="validationStatus" class="mb-1" />
+        </v-expansion-panel-text>
+      </v-expansion-panel>
+    </v-expansion-panels>
+
+    <v-text-field
+      v-model="globalSearch"
+      label="Search all conjugate fields"
+      variant="solo"
+      density="comfortable"
+      clearable
+      prepend-inner-icon="mdi-magnify"
+      class="mt-3 mb-3"
+    />
+
+    <v-card>
+
+      <v-data-table-server
+        :headers="headers"
+        :items="items"
+        :loading="conjugateStore.loading"
+        :items-length="conjugateStore.total"
+        v-model:items-per-page="tableItemsPerPage"
+        v-model:page="tablePage"
+        :footer-props="tableFooterProps"
+        show-expand
+        v-model:expanded="expanded"
+        v-model:sort-by="sortBy"
+        item-value="id"
+      >
+
+        <template #item.protein="{ item }">
+          <router-link
+            class="link"
+            :to="{
+              name: 'main-group-proteins-edit',
+              params: { groupId: item.groupId, id: item.proteinId }
+            }"
+          >
+            {{ item.proteinName }}
+          </router-link>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/conjugates/CreateConjugate.vue 1`] = `
+"<v-container fluid>
+    <v-toolbar dense>
+      <v-toolbar-title>Create Conjugate</v-toolbar-title>
+      <v-spacer />
+      <v-toolbar-items>
+        <v-btn @click="cancel" text color="primary">Cancel</v-btn>
+        <v-btn @click="reset" text color="primary">Reset</v-btn>
+        <v-btn @click="submit" text :disabled="!valid" color="primary">Save</v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+    <v-card class="mt-4 px-4">
+      <v-card-text>
+        <v-form v-model="valid" ref="form" lazy-validation>
+          <v-autocomplete
+            label="Lot"
+            v-model="lotId"
+            :items="lots"
+            item-title="name"
+            item-value="id"
+            :rules="lotRules"
+            dense
+          />
+          <v-text-field
+            label="Clone"
+            :model-value="selectedClone?.name ?? ''"
+            readonly
+          />
+          <v-text-field
+            label="Protein"
+            :model-value="selectedProtein?.name ?? ''"
+            readonly
+          />
+          <v-autocomplete
+            label="Tag"
+            v-model="tagId"
+            :items="tags"
+            item-title="name"
+            item-value="id"
+            :rules="tagRules"
+            dense
+          />
+          <v-autocomplete
+            label="Storage"
+            v-model="storageId"
+            :items="storages"
+            item-title="name"
+            item-value="id"
+            dense
+            clearable
+            open-on-clear
+          />
+          <v-text-field
+            label="Concentration (in µg/mL)"
+            v-model.number="concentration"
+            :rules="concentrationRules"
+            type="number"
+          />
+          <v-autocomplete
+            label="Labeled by"
+            v-model="labeledBy"
+            :items="memberOptions"
+            item-title="name"
+            item-value="id"
+            dense
+            clearable
+            open-on-clear
+          />
+          <v-text-field label="Description" v-model="description" />
+          <v-text-field label="Custom ID" v-model="customId" />
+        </v-form>
+      </v-card-text>
+    </v-card>
+  </v-container>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/conjugates/EditConjugate.vue 1`] = `
+"<v-container fluid>
+    <v-toolbar dense>
+      <v-toolbar-title>Edit Conjugate</v-toolbar-title>
+      <v-spacer />
+      <v-toolbar-items>
+        <v-btn @click="cancel" text color="primary">Cancel</v-btn>
+        <v-btn @click="reset" text color="primary">Reset</v-btn>
+        <v-btn @click="submit" text :disabled="!valid" color="primary">Save</v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+    <v-card class="mt-4 px-4">
+      <v-card-text>
+        <v-form v-model="valid" ref="form">
+          <v-autocomplete
+            label="Lot"
+            v-model="lotId"
+            :items="lots"
+            item-title="name"
+            item-value="id"
+            :rules="lotRules"
+            dense
+          />
+          <v-autocomplete
+            label="Tag"
+            v-model="tagId"
+            :items="tags"
+            item-title="name"
+            item-value="id"
+            :rules="tagRules"
+            dense
+          />
+          <v-autocomplete
+            label="Storage"
+            v-model="storageId"
+            :items="storages"
+            item-title="name"
+            item-value="id"
+            dense
+            clearable
+            open-on-clear
+          />
+          <v-text-field
+            label="Concentration (in µg/mL)"
+            v-model.number="concentration"
+            :rules="concentrationRules"
+            type="number"
+          />
+          <v-autocomplete
+            label="Labeled by"
+            v-model="labeledBy"
+            :items="memberOptions"
+            item-title="name"
+            item-value="id"
+            dense
+            clearable
+            open-on-clear
+          />
+          <v-text-field label="Description" v-model="description" />
+          <v-text-field label="Custom ID" v-model="customId" />
+        </v-form>
+      </v-card-text>
+    </v-card>
+  </v-container>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/dashboard/DashboardView.vue 1`] = `
+"<v-container fluid>
+    <v-row class="mt-6 mx-6">
+      <v-col>
+        <RecentOrders />
+      </v-col>
+      <v-col>
+        <FinishedLots />
+      </v-col>
+    </v-row>
+    <v-row class="mt-6 mx-6">
+      <v-col>
+        <LowLots />
+      </v-col>
+      <v-col />
+    </v-row>
+  </v-container>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/dashboard/FinishedLots.vue 1`] = `
+"<v-card>
+    <v-card-title>Finished Lots</v-card-title>
+    <v-card-text>
+      <v-data-table
+        :headers="headers"
+        :items="finishedItems"
+        :loading="loading"
+        disable-filtering
+        disable-sort
+        disable-pagination
+        hide-default-footer
+        dense
+      >
+        <template v-slot:item.provider="{ item }">
+          {{ providerStore.getProvider(item.providerId)?.name || 'Loading...' }}"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/dashboard/LowLots.vue 1`] = `
+"<v-card>
+    <v-card-title>Low Lots</v-card-title>
+    <v-card-text>
+      <v-data-table
+        :headers="headers"
+        :items="lowItems"
+        :loading="loading"
+        disable-filtering
+        disable-sort
+        disable-pagination
+        hide-default-footer
+        dense
+      >
+        <template v-slot:item.provider="{ item }">
+          {{ providerStore.getProvider(item.providerId)?.name || 'Loading...' }}"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/dashboard/RecentOrders.vue 1`] = `
+"<v-card>
+    <v-card-title>Recent Orders</v-card-title>
+    <v-card-text>
+      <v-data-table
+        :headers="headers"
+        :items="recentOrders"
+        :loading="loading"
+        disable-filtering
+        disable-sort
+        disable-pagination
+        hide-default-footer
+        dense
+      >
+        <template v-slot:item.provider="{ item }">
+          {{ providerStore.getProvider(item.providerId)?.name || 'Loading...' }}"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/lots/CreateLot.vue 1`] = `
+"<v-container fluid>
+    <v-toolbar dense>
+      <v-toolbar-title>Create Lot</v-toolbar-title>
+      <v-spacer />
+      <v-toolbar-items>
+        <v-btn @click="cancel" text color="primary">Cancel</v-btn>
+        <v-btn @click="reset" text color="primary">Reset</v-btn>
+        <v-btn @click="submit" text :disabled="!valid" color="primary">Save</v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+
+    <v-card class="mt-4 px-4">
+      <v-card-text>
+        <v-form v-model="valid" ref="form" lazy-validation>
+
+          <v-autocomplete
+            label="Clone"
+            v-model="cloneId"
+            :items="clones"
+            item-title="name"
+            item-value="id"
+            dense
+          />
+          <v-autocomplete
+            label="Protein"
+            :model-value="selectedProteinId"
+            :items="proteins"
+            item-title="name"
+            item-value="id"
+            disabled
+            dense
+          />
+          <v-autocomplete
+            label="Provider"
+            v-model="providerId"
+            :items="providers"
+            item-title="name"
+            item-value="id"
+            :rules="providerRules"
+            dense
+          />
+          <v-autocomplete
+            label="Collection"
+            v-model="collectionId"
+            :items="collections"
+            item-title="name"
+            item-value="id"
+            clearable
+            dense
+          />
+          <v-autocomplete
+            label="Storage"
+            v-model="storageId"
+            :items="storages"
+            item-title="name"
+            item-value="id"
+            clearable
+            dense
+          />
+          <v-text-field label="Name" v-model="name" :rules="nameRules" />
+          <v-text-field label="Catalog Number" v-model="reference" :rules="referenceRules" />
+          <v-text-field label="Lot Number" v-model="number" :rules="numberRules" />
+          <v-text-field label="URL" v-model="url" :rules="urlRules" />
+          <v-text-field label="Purpose" v-model="purpose" :rules="purposeRules" />
+          <v-text-field label="Price" v-model="price" />
+          <v-text-field label="Note" v-model="note" />
+        </v-form>
+      </v-card-text>
+    </v-card>
+  </v-container>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/lots/EditLot.vue 1`] = `
+"<v-container fluid>
+    <v-toolbar dense>
+      <v-toolbar-title>Edit Lot</v-toolbar-title>
+      <v-spacer />
+      <v-toolbar-items>
+        <v-btn @click="cancel" text color="primary">Cancel</v-btn>
+        <v-btn @click="reset" text color="primary">Reset</v-btn>
+        <v-btn @click="submit" text :disabled="!valid" color="primary">Save</v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+    <v-card class="mt-4 px-4">
+      <v-card-text>
+        <v-form v-model="valid" ref="form">
+          <v-autocomplete
+            label="Clone"
+            v-model="cloneId"
+            :items="clones"
+            item-title="name"
+            item-value="id"
+            :rules="cloneRules"
+            dense
+          />
+          <v-autocomplete
+            label="Provider"
+            v-model="providerId"
+            :items="providers"
+            item-title="name"
+            item-value="id"
+            :rules="providerRules"
+            dense
+          />
+          <v-autocomplete
+            label="Collection"
+            v-model="collectionId"
+            :items="collections"
+            item-title="name"
+            item-value="id"
+            clearable
+            dense
+          />
+          <v-autocomplete
+            label="Storage"
+            v-model="storageId"
+            :items="storages"
+            item-title="name"
+            item-value="id"
+            clearable
+            dense
+          />
+          <v-text-field label="Name" v-model="name" :rules="nameRules" />
+          <v-text-field label="Catalog Number" v-model="reference" :rules="referenceRules" />
+          <v-text-field label="Lot Number" v-model="number" :rules="numberRules" />
+          <v-text-field label="URL" v-model="url" :rules="urlRules" />
+          <v-text-field label="Purpose" v-model="purpose" :rules="purposeRules" />
+          <v-text-field label="Price" v-model="price" />
+          <v-text-field label="Note" v-model="note" />
+        </v-form>
+      </v-card-text>
+    </v-card>
+  </v-container>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/lots/LotDetailsView.vue 1`] = `
+"<v-card flat>
+    <v-card-title>Lot Details</v-card-title>
+    <v-card-text>
+      <v-tabs v-model="tab">
+        <v-tab>Info</v-tab>
+        <v-tab v-if="validations.length > 0">Validations</v-tab>
+        <v-tab v-if="lot.meta">Metadata</v-tab>
+      </v-tabs>
+      <v-window v-model="tab" class="mt-4">
+        <v-window-item value="info">
+
+          <LotView :lot-id="lot.id" />
+        </v-window-item>
+
+        <v-window-item v-if="validations.length > 0">
+          <p>Validations go heere -- fixme</p>
+
+          </v-window-item>
+        </v-window>
+    </v-card-text>
+  </v-card>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/lots/LotExpandedView.vue 1`] = `
+"<v-card flat class="my-2">
+    <v-card-text class="text-subtitle-2">Conjugates</v-card-text>
+    <v-data-table
+      :headers="headers"
+      :items="items"
+      :loading="loading"
+      :items-per-page="-1"
+      hide-default-footer
+      disable-filtering
+      dense
+    >
+      <template #item.id="{ item }">
+        <router-link
+          class="link"
+          :to="{
+            name: 'main-group-conjugates-edit',
+            params: {
+              groupId: activeGroupId,
+              id: item.id,
+            },
+          }"
+        >
+          {{ item.id }}
+        </router-link>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/lots/LotView.vue 1`] = `
+"<v-card tile elevation="1">
+    <v-card-text>
+      <div><span class="subheader">ID: </span>{{ lot.id }}</div>
+      <div><span class="subheader">Name: </span>{{ lot.name }}</div>
+      <div><span class="subheader">Lot Number: </span>{{ lot.number }}</div>
+      <div><span class="subheader">Reference: </span>{{ lot.reference }}</div>
+      <div>
+        <span class="subheader">Status: </span>
+        <v-chip :color="getLotStatusColor(lot.status as LotStatus)" class="mr-1" size="small" dark label>
+          {{ lotStatusToString(lot.status) }}
+        </v-chip>
+      </div>
+      <div><span class="subheader">Purpose: </span>{{ lot.purpose }}</div>
+      <div><span class="subheader">Price: </span>{{ lot.price }}</div>
+      <div v-if="provider">
+        <span class="subheader">Provider: </span>
+        <RouterLink
+          class="link"
+          :to="{
+            name: 'main-group-providers-edit',
+            params: { groupId: activeGroupId, id: lot.providerId },
+          }"
+        >
+          {{ provider.name }}
+        </RouterLink>
+      </div>
+      <div v-if="storage">
+        <span class="subheader">Storage: </span>
+        <RouterLink
+          class="link"
+          :to="{
+            name: 'main-group-storage-edit',
+            params: { groupId: activeGroupId, id: lot.storageId },
+          }"
+        >
+          {{ storage.name }}
+        </RouterLink>
+      </div>
+      <div><span class="subheader">Note: </span>{{ lot.note }}</div>
+      <div>
+        <span class="subheader">URL: </span>
+        <a v-if="lot.url" target="_blank" :href="lot.url">{{ lot.url }}</a>
+      </div>
+    </v-card-text>
+
+    <v-divider class="mx-4" />
+
+    <v-list v-if="historyItems.length > 0" density="compact">
+      <v-list-subheader>History</v-list-subheader>
+      <v-list-item v-for="entry in historyItems" :key="entry.label">
+        <template #prepend>
+          <v-icon :color="entry.color">mdi-calendar</v-icon>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/lots/LotsListView.vue 1`] = `
+"<v-col>
+    <v-toolbar dense class="toolbar">
+      <v-toolbar-title>Lots</v-toolbar-title>
+      <v-spacer />
+      <v-toolbar-items>
+        <v-btn text @click="exportFile" color="primary">Export CSV</v-btn>
+        <v-btn text :to="\`/main/groups/\${activeGroupId}/lots/create\`" color="primary">Create Lot</v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+
+    <v-expansion-panels>
+      <v-expansion-panel>
+        <v-expansion-panel-title>
+          <FilterSummary />
+        </v-expansion-panel-title>
+        <v-expansion-panel-text>
+          <FilterField key-name="proteinName" class="mb-1" />
+          <FilterField key-name="cloneName" class="mb-1" />
+          <FilterField key-name="statusName" class="mb-1" />
+          <FilterField key-name="providerName" class="mb-1" />
+          <FilterField key-name="collectionId" class="mb-1" />
+          <FilterField key-name="validationApplication" class="mb-1" />
+          <FilterField key-name="validationStatus" class="mb-1" />
+          <FilterField key-name="lotName" class="mb-1" />
+          <FilterField key-name="lotNumber" class="mb-1" />
+        </v-expansion-panel-text>
+      </v-expansion-panel>
+    </v-expansion-panels>
+
+    <v-text-field
+      v-model="globalSearch"
+      label="Search all lot fields"
+      variant="solo"
+      density="comfortable"
+      clearable
+      prepend-inner-icon="mdi-magnify"
+      class="mt-3 mb-3"
+    />
+
+    <v-card>
+
+      <v-data-table-server
+        :headers="headers"
+        :items="items"
+        :loading="lotStore.loading"
+        :items-length="lotStore.total"
+        v-model:items-per-page="tableItemsPerPage"
+        v-model:page="tablePage"
+        :footer-props="tableFooterProps"
+        show-expand
+        v-model:expanded="expanded"
+        v-model:sort-by="sortBy"
+        item-value="id"
+      >
+        <template #item.provider="{ item }">
+          <span v-if="item.providerId">
+            <router-link
+              v-if="item.providerId"
+              class="link"
+              :to="{
+                name: 'main-group-providers-edit',
+                params: { groupId: activeGroupId, id: item.providerId },
+              }"
+            >
+             {{ providerStore.getProvider(item.providerId)?.name || 'Unknown' }}
+          </router-link>
+
+          </span>
+          <span v-else>
+            No provider
+         </span>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/members/CreateMember.vue 1`] = `
+"<v-container fluid>
+    <v-toolbar dense>
+      <v-toolbar-title>Create Group Member</v-toolbar-title>
+      <v-spacer />
+      <v-toolbar-items>
+        <v-btn @click="cancel" text color="primary">Cancel</v-btn>
+        <v-btn @click="reset" text color="primary">Reset</v-btn>
+        <v-btn @click="submit" text :disabled="!valid" color="primary">Save</v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+    <v-card class="mt-4 px-4">
+      <v-card-text>
+        <v-form v-model="valid" ref="form" lazy-validation>
+          <v-autocomplete
+            label="User"
+            v-model="userId"
+            :items="userOptions"
+            item-text="name"
+            item-value="id"
+            :rules="userRules"
+            dense
+          />
+          <div class="text-subtitle-1">Role</div>
+          <v-btn-toggle v-model="role">
+            <v-btn small value="100">Admin</v-btn>
+            <v-btn small value="10">Standard</v-btn>
+            <v-btn small value="0">Guest</v-btn>
+          </v-btn-toggle>
+          <v-checkbox label="Active" v-model="isActive" hint="Access is permited" />
+          <v-row>
+            <v-checkbox label="Can access all panels" v-model="allPanels" class="mr-4" />
+          </v-row>
+        </v-form>
+      </v-card-text>
+    </v-card>
+  </v-container>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/members/EditMember.vue 1`] = `
+"<v-container fluid>
+    <v-card class="ma-4 pa-4">
+      <v-card-title primary-title>
+        <div class="text-h5 primary--text">Edit Group Member</div>
+      </v-card-title>
+      <v-card-text>
+        <v-form v-model="valid" ref="form" lazy-validation>
+          <div class="text-subtitle-1">Role</div>
+          <v-btn-toggle v-model="role">
+            <v-btn small value="100">Admin</v-btn>
+            <v-btn small value="10">Standard</v-btn>
+            <v-btn small value="0">Guest</v-btn>
+          </v-btn-toggle>
+          <v-checkbox label="Active" v-model="isActive" hint="Access is permited" />
+          <v-row>
+            <v-checkbox label="Can access all panels" v-model="allPanels" class="mr-4" />
+          </v-row>
+        </v-form>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer />
+        <v-btn @click="cancel">Cancel</v-btn>
+        <v-btn @click="reset">Reset</v-btn>
+        <v-btn @click="submit" :disabled="!valid">Save</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-container>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/members/MembersListView.vue 1`] = `
+"<v-col>
+    <v-toolbar dense class="toolbar">
+      <v-toolbar-title>Group Members</v-toolbar-title>
+      <v-spacer />
+      <v-toolbar-items>
+        <v-btn v-if="isGroupAdmin" text :to="\`/main/groups/\${activeGroupId}/members/create\`" color="primary">
+          Create Member
+        </v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+
+    <v-text-field
+      v-model="globalSearch"
+      label="Search all member fields"
+      variant="solo"
+      density="comfortable"
+      clearable
+      prepend-inner-icon="mdi-magnify"
+      class="mb-3"
+    />
+
+    <v-card>
+
+      <v-data-table-server
+        :headers="headers"
+        :items="items"
+        :loading="memberStore.loading"
+        :items-length="memberStore.total"
+        v-model:items-per-page="tableItemsPerPage"
+        v-model:page="tablePage"
+        :footer-props="tableFooterProps"
+        v-model:sort-by="sortBy"
+        item-value="id"
+      >
+
+        <template v-slot:item.user="{ item }">
+          <router-link
+            v-if="item.userId"
+            class="link"
+            :to="{
+              name: 'main-admin-users-edit',
+              params: { id: item.userId },
+            }"
+          >
+            {{ item.userName }}
+          </router-link>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/panels/AllConjugatesView.vue 1`] = `
+"<v-card tile>
+    <v-toolbar flat dense class="mb-2">
+      <v-text-field v-model="search" label="Search conjugates" single-line hide-details clearable dense>
+        <template #append>
+          <v-icon dense>mdi-magnify</v-icon>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/panels/CreatePanel.vue 1`] = `
+"<div class="mx-2 mt-2">
+    <v-tooltip left>
+      <template #activator="{ props }">
+        <v-btn v-bind="props" v-scroll="onScroll" v-show="fab" fab fixed bottom right color="primary" @click="toTop">
+          <v-icon>mdi-chevron-up</v-icon>
+        </v-btn>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/panels/EditPanel.vue 1`] = `
+"<div class="mx-2 mt-2">
+    <v-tooltip left>
+      <template #activator="{ props }">
+        <v-btn v-bind="props" v-show="fab" fab fixed bottom right color="primary" @click="toTop">
+          <v-icon>mdi-chevron-up</v-icon>
+        </v-btn>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/panels/PanelDetailsView.vue 1`] = `
+"<v-card flat>
+    <v-card-title>Panel Details</v-card-title>
+    <v-card-text>
+      <v-tabs v-model="tab" bg-color="transparent">
+        <v-tab :value="0">Info</v-tab>
+      </v-tabs>
+
+      <v-tabs-window v-model="tab">
+        <v-tabs-window-item :value="0">
+          <PanelView :panel-id="panel.id" />
+        </v-tabs-window-item>
+      </v-tabs-window>
+    </v-card-text>
+  </v-card>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/panels/PanelExpandedView.vue 1`] = `
+"<v-card flat class="my-2">
+    <v-card-text class="text-subtitle-2">Conjugate Elements</v-card-text>
+    <v-data-table
+      :headers="headers"
+      :items="items"
+      :loading="loading"
+      :items-per-page="-1"
+      hide-default-footer
+      density="compact"
+    >
+      <template #item.dilutionType="{ item }">
+        {{ dilutionTypeToString(item.dilutionType) }}"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/panels/PanelPreview.vue 1`] = `
+"<v-sheet elevation="2">
+    <v-data-table
+      :headers="headers"
+      :items="items"
+      :items-per-page="-1"
+      hide-default-footer
+      disable-filtering
+      disable-pagination
+      density="compact"
+      fixed-header
+      :height="height"
+      @click:row="clickRow"
+    >
+      <template #item.tag="{ item }">
+        <span :class="getClass(unwrapItem(item)?.status ?? 0)">
+          {{ unwrapItem(item)?.tagName ?? '' }}
+        </span>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/panels/PanelTagsView.vue 1`] = `
+"<v-card tile>
+    <v-toolbar dense flat>
+      <v-text-field
+        v-model="search"
+        label="Search tags"
+        single-line
+        hide-details
+        clearable
+        dense
+      >
+        <template #append>
+          <v-icon dense>mdi-magnify</v-icon>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/panels/PanelView.vue 1`] = `
+"<v-card v-if="panel" tile elevation="1">
+    <v-card-text>
+      <div><span class="subheader">ID: </span>{{ panel.id }}</div>
+      <div><span class="subheader">Name: </span>{{ panel.name }}</div>
+      <div><span class="subheader">Description: </span>{{ panel.description }}</div>
+      <div>
+        <span class="subheader">Created By: </span>
+        <router-link
+          class="link"
+          :to="{
+            name: 'main-admin-users-edit',
+            params: { id: panel.userId },
+          }"
+        >
+          {{ panel.userName }}
+        </router-link>
+      </div>
+      <div v-if="panel.application">
+        <span class="subheader">Application: </span>
+        <v-chip color="blue-lighten-3" size="small" class="chip" disabled>
+          {{ applicationToString(panel.application) }}
+        </v-chip>
+      </div>
+      <v-checkbox label="Fluorophore" v-model="panel.isFluorophore" readonly hide-details />
+      <v-checkbox label="Locked" v-model="panel.isLocked" readonly hide-details />
+    </v-card-text>
+
+    <v-card-actions>
+      <v-btn
+        color="primary"
+        variant="text"
+        :to="{
+          name: 'main-group-panels-edit',
+          params: {
+            groupId: activeGroupId,
+            id: panel.id,
+          },
+        }"
+      >
+        Edit
+      </v-btn>
+      <v-btn
+        v-if="isGroupAdmin"
+        color="secondary"
+        variant="text"
+        @click="deletePanel"
+      >
+        Delete
+      </v-btn>
+    </v-card-actions>
+  </v-card>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/panels/PanelsListView.vue 1`] = `
+"<v-col>
+    <v-toolbar density="compact" class="toolbar">
+      <v-toolbar-title>Panels</v-toolbar-title>
+      <v-spacer />
+      <v-btn variant="text" :to="\`/main/groups/\${activeGroupId}/panels/create\`" color="primary">
+        Create Panel
+      </v-btn>
+    </v-toolbar>
+
+    <v-expansion-panels>
+      <v-expansion-panel>
+        <v-expansion-panel-title>
+          <FilterSummary />
+        </v-expansion-panel-title>
+        <v-expansion-panel-text>
+          <FilterField key-name="panelName" class="mb-1" />
+          <FilterField key-name="panelApplication" class="mb-1" />
+        </v-expansion-panel-text>
+      </v-expansion-panel>
+    </v-expansion-panels>
+
+    <v-switch
+      v-model="showAllPanels"
+      label="Show all panels"
+      color="primary"
+      density="compact"
+      hide-details
+      class="mt-3 mb-2"
+    />
+
+    <v-text-field
+      v-model="globalSearch"
+      label="Search all panel fields"
+      variant="solo"
+      density="comfortable"
+      clearable
+      prepend-inner-icon="mdi-magnify"
+      class="mb-3"
+    />
+
+    <v-card>
+      <v-data-table-server
+        :headers="headers"
+        :items="items"
+        :loading="panelStore.loading"
+        :items-length="panelStore.total"
+        v-model:items-per-page="tableItemsPerPage"
+        v-model:page="tablePage"
+        :footer-props="tableFooterProps"
+        show-expand
+        v-model:expanded="expanded"
+        v-model:sort-by="sortBy"
+        item-value="id"
+      >
+        <template #item.name="{ item }">
+          <router-link class="link" :to="{ name: 'main-group-panels-view', params: { id: item.id } }">
+            {{ item.name }}
+          </router-link>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/panels/TagConjugatesView.vue 1`] = `
+"<v-card tile>
+    <v-toolbar flat dense class="mb-2">
+      <v-text-field v-model="search" label="Search conjugates" single-line hide-details clearable dense>
+        <template #append>
+          <v-icon dense>mdi-magnify</v-icon>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/panels/ViewPanel.vue 1`] = `
+"<v-container v-if="panel" fluid>
+    <v-tooltip left>
+        <template #activator="{ props }">
+        <v-btn v-bind="props" v-scroll="onScroll" v-show="fab" fab fixed bottom right color="primary" @click="toTop">
+          <v-icon>mdi-chevron-up</v-icon>
+        </v-btn>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/proteins/CreateProtein.vue 1`] = `
+"<v-container fluid>
+    <v-toolbar dense>
+      <v-toolbar-title>Create Protein</v-toolbar-title>
+      <v-spacer />
+      <v-toolbar-items>
+        <v-btn @click="cancel" text color="primary">Cancel</v-btn>
+        <v-btn @click="reset" text color="primary">Reset</v-btn>
+        <v-btn @click="submit" text :disabled="!valid" color="primary">Save</v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+
+    <v-card class="mt-4 px-4">
+      <v-card-text>
+        <v-form v-model="valid" ref="form" lazy-validation>
+          <v-text-field label="Name" v-model="name" :rules="nameRules" />
+          <v-text-field label="Description" v-model="description" />
+        </v-form>
+      </v-card-text>
+    </v-card>
+  </v-container>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/proteins/EditProtein.vue 1`] = `
+"<v-container fluid>
+    <v-toolbar density="compact">
+      <v-toolbar-title>Edit Protein</v-toolbar-title>
+      <v-spacer />
+      <v-toolbar-items>
+        <v-btn @click="cancel" variant="text" color="primary">Cancel</v-btn>
+        <v-btn @click="reset" variant="text" color="primary">Reset</v-btn>
+        <v-btn @click="submit" variant="text" color="primary" :disabled="!valid">Save</v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+
+    <v-card class="mt-4 px-4">
+      <v-card-text>
+        <v-form v-model="valid" ref="form">
+          <v-text-field label="Name" v-model="name" :rules="nameRules" />
+          <v-text-field label="Description" v-model="description" />
+        </v-form>
+      </v-card-text>
+    </v-card>
+  </v-container>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/proteins/ProteinDetailsView.vue 1`] = `
+"<v-card flat>
+    <v-card-title>Protein Details</v-card-title>
+    <v-card-text>
+      <v-tabs v-model="tab" class="mb-2">
+        <v-tab>Info</v-tab>
+      </v-tabs>
+
+      <v-window v-model="tab">
+        <v-window-item :value="0">
+          <ProteinView :protein-id="protein.id" />
+        </v-window-item>
+      </v-window>
+    </v-card-text>
+  </v-card>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/proteins/ProteinExpandedView.vue 1`] = `
+"<v-card flat class="my-2">
+    <v-card-text class="text-subtitle-2">Clones</v-card-text>
+
+    <v-data-table
+      :headers="headers"
+      :items="items"
+      :loading="loading"
+      :items-per-page="-1"
+      hide-default-footer
+      disable-filtering
+      density="compact"
+    >
+      <template #item.id="{ item }">
+        <router-link
+          class="link"
+          :to="{
+            name: 'main-group-clones-edit',
+            params: { groupId: activeGroupId, id: item.id },
+          }"
+        >
+          {{ item.id }}
+        </router-link>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/proteins/ProteinView.vue 1`] = `
+"<v-card elevation="1" flat>
+    <v-card-text>
+      <div><span class="subheader">ID:</span> {{ protein.id }}</div>
+      <div><span class="subheader">Name:</span> {{ protein.name }}</div>
+      <div><span class="subheader">Description:</span> {{ protein.description }}</div>
+      <div><span class="subheader">Created:</span> {{ new Date(protein.createdAt).toUTCString() }}</div>
+    </v-card-text>
+
+    <v-card-actions>
+      <v-btn
+        color="primary"
+        variant="text"
+        :to="{
+          name: 'main-group-proteins-edit',
+          params: {
+            groupId: activeGroupId,
+            id: protein.id,
+          },
+        }"
+      >
+        Edit
+      </v-btn>
+
+      <v-btn
+        v-if="isGroupAdmin"
+        color="secondary"
+        variant="text"
+        @click="deleteProtein"
+      >
+        Delete
+      </v-btn>
+    </v-card-actions>
+  </v-card>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/proteins/ProteinsListView.vue 1`] = `
+"<v-col>
+    <v-toolbar dense class="toolbar">
+      <v-toolbar-title>Proteins</v-toolbar-title>
+      <v-spacer />
+      <v-toolbar-items>
+         <v-btn text :to="\`/main/groups/\${activeGroupId}/proteins/create\`" color="primary">Create Protein</v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+
+    <v-expansion-panels>
+      <v-expansion-panel>
+        <v-expansion-panel-title>
+          <FilterSummary />
+        </v-expansion-panel-title>
+        <v-expansion-panel-text>
+          <FilterField key-name="proteinName" class="mb-1" />
+        </v-expansion-panel-text>
+      </v-expansion-panel>
+    </v-expansion-panels>
+
+    <v-text-field
+      v-model="globalSearch"
+      label="Search all protein fields"
+      variant="solo"
+      density="comfortable"
+      clearable
+      prepend-inner-icon="mdi-magnify"
+      class="mt-3 mb-3"
+    />
+
+    <v-card>
+
+      <v-data-table-server
+        :headers="headers"
+        :items="items"
+        :loading="proteinStore.loading"
+        :items-length="proteinStore.total"
+        v-model:items-per-page="tableItemsPerPage"
+        v-model:page="tablePage"
+        :footer-props="tableFooterProps"
+        show-expand
+        v-model:sort-by="sortBy"
+        item-value="id"
+      >
+
+        <template v-slot:item.action="{ item }">
+          <v-menu location="bottom left">
+            <template v-slot:activator="{ props }">
+              <v-btn icon v-bind="props">
+                <v-icon>mdi-dots-vertical</v-icon>
+              </v-btn>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/providers/CreateProvider.vue 1`] = `
+"<v-container fluid>
+    <v-toolbar dense>
+      <v-toolbar-title>Create Provider</v-toolbar-title>
+      <v-spacer />
+      <v-toolbar-items>
+        <v-btn @click="cancel" text color="primary">Cancel</v-btn>
+        <v-btn @click="reset" text color="primary">Reset</v-btn>
+        <v-btn @click="submit" text :disabled="!valid" color="primary">Save</v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+
+    <v-card class="mt-4 px-4">
+      <v-card-text>
+        <v-form v-model="valid" ref="form" lazy-validation>
+          <v-text-field label="Name" v-model="name" :rules="nameRules" />
+          <v-text-field label="Description" v-model="description" />
+          <v-text-field label="URL" v-model="url" :rules="urlRules" />
+        </v-form>
+      </v-card-text>
+    </v-card>
+  </v-container>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/providers/EditProvider.vue 1`] = `
+"<v-container fluid>
+    <v-toolbar dense>
+      <v-toolbar-title>Edit Provider</v-toolbar-title>
+      <v-spacer />
+      <v-toolbar-items>
+        <v-btn @click="cancel" text color="primary">Cancel</v-btn>
+        <v-btn @click="reset" text color="primary">Reset</v-btn>
+        <v-btn @click="submit" text :disabled="!valid" color="primary">Save</v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+
+    <v-card class="mt-4 px-4">
+      <v-card-text>
+        <v-form v-model="valid" ref="form" lazy-validation>
+          <v-text-field label="Name" v-model="name" :rules="nameRules" />
+          <v-text-field label="Description" v-model="description" />
+          <v-text-field label="URL" v-model="url" :rules="urlRules" />
+        </v-form>
+      </v-card-text>
+    </v-card>
+  </v-container>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/providers/ProviderDetailsView.vue 1`] = `
+"<v-card flat>
+    <v-card-title>Provider Details</v-card-title>
+
+    <v-card-text>
+      <v-tabs v-model="tab">
+        <v-tab value="info">Info</v-tab>
+      </v-tabs>
+
+      <v-window v-model="tab">
+        <v-window-item value="info">
+          <ProviderView :provider-id="provider.id" />
+        </v-window-item>
+      </v-window>
+    </v-card-text>
+  </v-card>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/providers/ProviderExpandedView.vue 1`] = `
+"<v-card flat class="my-2">
+    <v-card-text class="text-subtitle-2">Lots</v-card-text>
+    <v-data-table
+      :headers="headers"
+      :items="items"
+      :loading="loading"
+      :items-per-page="-1"
+      hide-default-footer
+      disable-filtering
+      dense
+    >
+      <template v-slot:item.id="{ item }">
+        <router-link
+          class="link"
+          :to="{
+            name: 'main-group-lots-edit',
+            params: {
+              groupId: activeGroupId,
+              id: item.id,
+            },
+          }"
+        >
+          {{ item.id }}
+        </router-link>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/providers/ProviderView.vue 1`] = `
+"<v-card tile elevation="1">
+    <v-card-text>
+      <div><span class="subheader">ID: </span>{{ provider.id }}</div>
+      <div><span class="subheader">Name: </span>{{ provider.name }}</div>
+      <div><span class="subheader">Description: </span>{{ provider.description }}</div>
+      <div>
+        <span class="subheader">URL: </span>
+        <a target="_blank" :href="provider.url">{{ provider.url }}</a>
+      </div>
+      <div><span class="subheader">Created: </span>{{ new Date(provider.createdAt).toUTCString() }}</div>
+    </v-card-text>
+    <v-card-actions>
+      <v-btn
+        color="primary"
+        text
+        :to="{
+          name: 'main-group-providers-edit',
+          params: {
+            groupId: activeGroupId,
+            id: provider.id,
+          },
+        }"
+      >
+        Edit
+      </v-btn>
+      <v-btn v-if="isGroupAdmin" color="secondary" text @click="deleteProvider">
+        Delete
+      </v-btn>
+    </v-card-actions>
+  </v-card>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/providers/ProvidersListView.vue 1`] = `
+"<v-col>
+    <v-toolbar dense class="toolbar">
+      <v-toolbar-title>Providers</v-toolbar-title>
+      <v-spacer />
+      <v-toolbar-items>
+        <v-btn text :to="\`/main/groups/\${activeGroupId}/providers/create\`" color="primary">
+          Create Provider
+        </v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+
+    <v-expansion-panels>
+      <v-expansion-panel>
+        <v-expansion-panel-title>
+          <FilterSummary />
+        </v-expansion-panel-title>
+        <v-expansion-panel-text>
+          <FilterField key-name="providerName" class="mb-1" />
+        </v-expansion-panel-text>
+      </v-expansion-panel>
+    </v-expansion-panels>
+
+    <v-text-field
+      v-model="globalSearch"
+      label="Search all provider fields"
+      variant="solo"
+      density="comfortable"
+      clearable
+      prepend-inner-icon="mdi-magnify"
+      class="mt-3 mb-3"
+    />
+
+    <v-card>
+
+      <v-data-table-server
+        :headers="headers"
+        :items="items"
+        :loading="providerStore.loading"
+        :items-length="providerStore.total"
+        v-model:items-per-page="providerItemsPerPage"
+        v-model:page="providerPage"
+        :footer-props="tableFooterProps"
+        show-expand
+        v-model:expanded="expanded"
+        v-model:sort-by="sortBy"
+        item-value="id"
+      >
+        <template v-slot:item.action="{ item }">
+          <v-menu bottom left>
+            <template v-slot:activator="{ props }">
+              <v-btn icon v-bind="props">
+                <v-icon>mdi-dots-vertical</v-icon>
+              </v-btn>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/species/CreateSpecies.vue 1`] = `
+"<v-container fluid>
+    <v-toolbar dense>
+      <v-toolbar-title>Create Species</v-toolbar-title>
+      <v-spacer />
+      <v-toolbar-items>
+        <v-btn @click="cancel" text color="primary">Cancel</v-btn>
+        <v-btn @click="reset" text color="primary">Reset</v-btn>
+        <v-btn @click="submit" text :disabled="!valid" color="primary">Save</v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+
+    <v-card class="mt-4 px-4">
+      <v-card-text>
+        <v-form v-model="valid" ref="form" lazy-validation>
+          <v-text-field label="Name" v-model="name" :rules="nameRules" />
+          <v-text-field label="Acronym" v-model="acronym" :rules="acronymRules" />
+        </v-form>
+      </v-card-text>
+    </v-card>
+  </v-container>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/species/EditSpecies.vue 1`] = `
+"<v-container fluid>
+    <v-toolbar density="compact">
+      <v-toolbar-title>Edit Species</v-toolbar-title>
+      <v-spacer />
+      <v-btn text @click="cancel" color="primary">Cancel</v-btn>
+      <v-btn text @click="reset" color="primary">Reset</v-btn>
+      <v-btn text @click="submit" :disabled="!valid" color="primary">Save</v-btn>
+    </v-toolbar>
+
+    <v-card class="mt-4 px-4">
+      <v-card-text>
+        <v-form v-model="valid" ref="formRef" validate-on="lazy">
+          <v-text-field
+            label="Name"
+            v-model="name"
+            :rules="nameRules"
+          />
+          <v-text-field
+            label="Acronym"
+            v-model="acronym"
+            :rules="acronymRules"
+          />
+        </v-form>
+      </v-card-text>
+    </v-card>
+  </v-container>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/species/SpeciesDetailsView.vue 1`] = `
+"<v-card flat>
+    <v-card-title>Species Details</v-card-title>
+    <v-card-text>
+      <v-tabs v-model="tab">
+        <v-tab value="info">Info</v-tab>
+      </v-tabs>
+      <v-window v-model="tab">
+        <v-window-item value="info">
+          <SpeciesView :species-id="species.id" />
+        </v-window-item>
+      </v-window>
+    </v-card-text>
+  </v-card>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/species/SpeciesExpandedView.vue 1`] = `
+"<v-tabs v-model="tab" class="my-1">
+    <v-tab>Hosts</v-tab>
+    <v-tab>Reactivity</v-tab>
+  </v-tabs>
+
+  <v-window v-model="tab">
+    <v-window-item :value="0">
+      <v-data-table
+        :headers="headers"
+        :items="hostItems"
+        :loading="loading"
+        :items-per-page="-1"
+        hide-default-footer
+        disable-filtering
+        dense
+      >
+        <template v-slot:item.id="{ item }">
+          <router-link
+            class="link"
+            :to="{
+              name: 'main-group-clones-edit',
+              params: { groupId: activeGroupId, id: item.id },
+            }"
+          >
+            {{ item.id }}
+          </router-link>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/species/SpeciesListView.vue 1`] = `
+"<v-col>
+    <v-toolbar dense class="toolbar">
+      <v-toolbar-title>Species</v-toolbar-title>
+      <v-spacer />
+      <v-toolbar-items>
+        <v-btn
+          text
+          :to="\`/main/groups/\${activeGroupId}/species/create\`"
+          color="primary"
+        >
+          Create Species
+        </v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+
+    <v-expansion-panels>
+      <v-expansion-panel>
+        <v-expansion-panel-title>
+          <FilterSummary />
+        </v-expansion-panel-title>
+        <v-expansion-panel-text>
+          <FilterField key-name="speciesName" class="mb-1" />
+        </v-expansion-panel-text>
+      </v-expansion-panel>
+    </v-expansion-panels>
+
+    <v-text-field
+      v-model="globalSearch"
+      label="Search all species fields"
+      variant="solo"
+      density="comfortable"
+      clearable
+      prepend-inner-icon="mdi-magnify"
+      class="mt-3 mb-3"
+    />
+
+    <v-card>
+      <v-data-table-server
+        :headers="headers"
+        :items="items"
+        :loading="speciesStore.loading"
+        :items-length="speciesStore.total"
+        v-model:items-per-page="tableItemsPerPage"
+        v-model:page="tablePage"
+        :footer-props="tableFooterProps"
+        show-expand
+        v-model:sort-by="sortBy"
+        item-value="id"
+      >
+        <template v-slot:item.action="{ item }">
+          <v-menu bottom left>
+            <template v-slot:activator="{ props }">
+              <v-btn icon v-bind="props">
+                <v-icon>mdi-dots-vertical</v-icon>
+              </v-btn>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/species/SpeciesView.vue 1`] = `
+"<v-card tile elevation="1">
+    <v-card-text>
+      <div><span class="subheader">ID: </span>{{ species.id }}</div>
+      <div><span class="subheader">Name: </span>{{ species.name }}</div>
+      <div><span class="subheader">Acronym: </span>{{ species.acronym }}</div>
+      <div><span class="subheader">Created: </span>{{ new Date(String(species.createdAt)).toUTCString() }}</div>
+    </v-card-text>
+    <v-card-actions>
+      <v-btn
+        color="primary"
+        text
+        :to="{
+          name: 'main-group-species-edit',
+          params: {
+            groupId: activeGroupId,
+            id: species.id,
+          },
+        }"
+      >
+        Edit
+      </v-btn>
+      <v-btn v-if="isGroupAdmin" color="secondary" text @click="deleteSpecies">Delete</v-btn>
+    </v-card-actions>
+  </v-card>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/storage/CreateStorage.vue 1`] = `
+"<v-container fluid>
+    <v-toolbar density="compact">
+      <v-toolbar-title>Create Storage</v-toolbar-title>
+      <v-spacer />
+      <v-btn text @click="cancel" color="primary">Cancel</v-btn>
+      <v-btn text @click="reset" color="primary">Reset</v-btn>
+      <v-btn text @click="submit" :disabled="!valid" color="primary">Save</v-btn>
+    </v-toolbar>
+
+    <v-card class="mt-4 px-4">
+      <v-card-text>
+        <v-form ref="formRef" v-model="valid" validate-on="lazy">
+          <v-text-field v-model="name" label="Name" :rules="requiredRules" />
+          <v-text-field v-model="storageType" label="Type" :rules="requiredRules" />
+          <v-text-field v-model="location" label="Location" :rules="requiredRules" />
+          <v-text-field
+            v-model="temperature_c"
+            label="Temperature (C)"
+            type="number"
+            :rules="temperatureRules"
+          />
+          <v-switch v-model="active" label="Active" color="primary" />
+        </v-form>
+      </v-card-text>
+    </v-card>
+  </v-container>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/storage/EditStorage.vue 1`] = `
+"<v-container fluid>
+    <v-toolbar density="compact">
+      <v-toolbar-title>Edit Storage</v-toolbar-title>
+      <v-spacer />
+      <v-btn text @click="cancel" color="primary">Cancel</v-btn>
+      <v-btn text @click="reset" color="primary">Reset</v-btn>
+      <v-btn text @click="submit" :disabled="!valid" color="primary">Save</v-btn>
+    </v-toolbar>
+
+    <v-card class="mt-4 px-4">
+      <v-card-text>
+        <v-form ref="formRef" v-model="valid" validate-on="lazy">
+          <v-text-field v-model="name" label="Name" :rules="requiredRules" />
+          <v-text-field v-model="storageType" label="Type" :rules="requiredRules" />
+          <v-text-field v-model="location" label="Location" :rules="requiredRules" />
+          <v-text-field
+            v-model="temperature_c"
+            label="Temperature (C)"
+            type="number"
+            :rules="temperatureRules"
+          />
+          <v-switch v-model="active" label="Active" color="primary" />
+        </v-form>
+      </v-card-text>
+    </v-card>
+  </v-container>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/storage/StorageListView.vue 1`] = `
+"<v-col>
+    <v-toolbar dense class="toolbar">
+      <v-toolbar-title>Storage</v-toolbar-title>
+      <v-spacer />
+      <v-toolbar-items>
+        <v-btn
+          text
+          :to="\`/main/groups/\${activeGroupId}/storage/create\`"
+          color="primary"
+        >
+          Add Storage
+        </v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+
+    <v-text-field
+      v-model="globalSearch"
+      label="Search all storage fields"
+      variant="solo"
+      density="comfortable"
+      clearable
+      prepend-inner-icon="mdi-magnify"
+      class="mb-3"
+    />
+
+    <v-card>
+      <v-data-table-server
+        :headers="headers"
+        :items="items"
+        :loading="storageStore.loading"
+        :items-length="storageStore.total"
+        v-model:items-per-page="tableItemsPerPage"
+        v-model:page="tablePage"
+        :footer-props="tableFooterProps"
+        v-model:sort-by="sortBy"
+        item-value="id"
+      >
+        <template #item.temperature_c="{ item }">
+          {{ item.temperature_c }} C"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/tags/CreateTag.vue 1`] = `
+"<v-container fluid>
+    <v-toolbar dense>
+      <v-toolbar-title>Create Tag</v-toolbar-title>
+      <v-spacer />
+      <v-toolbar-items>
+        <v-btn @click="cancel" text color="primary">Cancel</v-btn>
+        <v-btn @click="reset" text color="primary">Reset</v-btn>
+        <v-btn @click="submit" text :disabled="!valid" color="primary">Save</v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+
+    <v-card class="mt-4 px-4">
+      <v-card-text>
+        <v-form v-model="valid" ref="form" lazy-validation>
+          <v-text-field label="Name" v-model="name" :rules="nameRules" />
+          <v-text-field label="Description" v-model="description" />
+          <v-select
+            label="Status"
+            v-model="status"
+            :items="statuses"
+            item-value="value"
+            item-text="text"
+            dense
+          />
+
+          <v-checkbox label="Metal" v-model="isMetal" />
+          <v-text-field
+            v-if="isMetal"
+            label="Mass"
+            v-model.number="mw"
+            :rules="mwRules"
+            type="number"
+          />
+
+          <v-checkbox label="Fluorophore" v-model="isFluorophore" />
+          <v-checkbox label="Enzyme" v-model="isEnzyme" />
+          <v-checkbox label="Biotin" v-model="isBiotin" />
+          <v-checkbox label="Other" v-model="isOther" />
+
+          <v-text-field
+            v-if="isFluorophore"
+            label="Emission"
+            v-model.number="emission"
+            :rules="emissionRules"
+            type="number"
+          />
+          <v-text-field
+            v-if="isFluorophore"
+            label="Excitation"
+            v-model.number="excitation"
+            :rules="excitationRules"
+            type="number"
+          />
+        </v-form>
+      </v-card-text>
+    </v-card>
+  </v-container>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/tags/EditTag.vue 1`] = `
+"<v-container fluid>
+    <v-toolbar dense>
+      <v-toolbar-title>Edit Tag</v-toolbar-title>
+      <v-spacer />
+      <v-toolbar-items>
+        <v-btn @click="cancel" text color="primary">Cancel</v-btn>
+        <v-btn @click="reset" text color="primary">Reset</v-btn>
+        <v-btn @click="submit" text :disabled="!valid" color="primary">Save</v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+    <v-card class="mt-4 px-4">
+      <v-card-text>
+        <v-form v-model="valid" ref="form" lazy-validation>
+          <v-text-field label="Name" v-model="name" :rules="nameRules" />
+          <v-text-field label="Description" v-model="description" />
+          <v-select label="Status" v-model="status" :items="statuses" item-value="value" item-text="text" dense />
+          <v-checkbox label="Metal" v-model="isMetal" />
+          <v-text-field v-if="isMetal" label="Mass" v-model.number="mw" :rules="mwRules" type="number" />
+          <v-checkbox label="Fluorophore" v-model="isFluorophore" />
+          <v-checkbox label="Enzyme" v-model="isEnzyme" />
+          <v-checkbox label="Biotin" v-model="isBiotin" />
+          <v-checkbox label="Other" v-model="isOther" />
+          <v-text-field
+            v-if="isFluorophore"
+            label="Emission"
+            v-model.number="emission"
+            :rules="emissionRules"
+            type="number"
+          />
+          <v-text-field
+            v-if="isFluorophore"
+            label="Excitation"
+            v-model.number="excitation"
+            :rules="excitationRules"
+            type="number"
+          />
+        </v-form>
+      </v-card-text>
+    </v-card>
+  </v-container>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/tags/TagDetailsView.vue 1`] = `
+"<v-card flat>
+    <v-card-title>Tag Details</v-card-title>
+    <v-card-text>
+      <v-tabs v-model="tab" density="comfortable" grow>
+        <v-tab :value="0">Info</v-tab>
+      </v-tabs>
+
+      <v-tabs-window v-model="tab">
+        <v-tabs-window-item :value="0">
+          <TagView :tag-id="tag.id" />
+        </v-tabs-window-item>
+      </v-tabs-window>
+    </v-card-text>
+  </v-card>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/tags/TagExpandedView.vue 1`] = `
+"<v-card flat class="my-2">
+    <v-card-text class="text-subtitle-2">Conjugates</v-card-text>
+    <v-data-table
+      :headers="headers"
+      :items="items"
+      :loading="loading"
+      :items-per-page="-1"
+      hide-default-footer
+      disable-filtering
+      dense
+    >
+      <template v-slot:item.id="{ item }">
+        <router-link
+          class="link"
+          :to="{
+            name: 'main-group-conjugates-edit',
+            params: { groupId: activeGroupId, id: item.id },
+          }"
+        >
+          {{ item.id }}
+        </router-link>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/tags/TagView.vue 1`] = `
+"<v-card v-if="tag" tile elevation="1">
+    <v-card-text>
+      <div><span class="subheader">ID: </span>{{ tag.id }}</div>
+      <div><span class="subheader">Name: </span>{{ tag.name }}</div>
+      <div>
+        <span class="subheader">Status: </span>
+        <v-chip :color="getTagStatusColor(tag)" class="mr-1" size="x-small" label>
+          {{ tagStatusToString(tag.status) }}
+        </v-chip>
+      </div>
+      <div v-if="tag.isMetal"><span class="subheader">Mass: </span>{{ tag.mw }}</div>
+      <div v-if="tag.isFluorophore"><span class="subheader">Emission: </span>{{ tag.emission }}</div>
+      <div v-if="tag.isFluorophore"><span class="subheader">Excitation: </span>{{ tag.excitation }}</div>
+      <div><span class="subheader">Created: </span>{{ new Date(tag.createdAt).toUTCString() }}</div>
+
+      <v-checkbox label="Metal" v-model="tag.isMetal" readonly hide-details />
+      <v-checkbox label="Fluorophore" v-model="tag.isFluorophore" readonly hide-details />
+      <v-checkbox label="Enzyme" v-model="tag.isEnzyme" readonly hide-details />
+      <v-checkbox label="Biotin" v-model="tag.isBiotin" readonly hide-details />
+      <v-checkbox label="Other" v-model="tag.isOther" readonly hide-details />
+
+      <div v-if="tag.description"><span class="subheader">Description: </span>{{ tag.description }}</div>
+    </v-card-text>
+
+    <v-card-actions>
+      <v-btn
+        color="primary"
+        variant="text"
+        :to="{
+          name: 'main-group-tags-edit',
+          params: {
+            groupId: activeGroupId,
+            id: tag.id,
+          },
+        }"
+      >
+        Edit
+      </v-btn>
+      <v-btn v-if="isGroupAdmin" color="secondary" variant="text" @click="deleteTag">
+        Delete
+      </v-btn>
+    </v-card-actions>
+  </v-card>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/tags/TagsListView.vue 1`] = `
+"<v-col>
+    <v-toolbar density="compact">
+      <v-toolbar-title>Tags</v-toolbar-title>
+      <v-spacer />
+      <v-btn :to="\`/main/groups/\${activeGroupId}/tags/create\`" variant="text" color="primary">
+        Create Tag
+      </v-btn>
+    </v-toolbar>
+
+    <v-expansion-panels>
+      <v-expansion-panel>
+        <v-expansion-panel-title>
+          <FilterSummary />
+        </v-expansion-panel-title>
+        <v-expansion-panel-text>
+          <FilterField key-name="tagName" class="mb-1" />
+        </v-expansion-panel-text>
+      </v-expansion-panel>
+    </v-expansion-panels>
+
+    <v-text-field
+      v-model="globalSearch"
+      label="Search all tag fields"
+      variant="solo"
+      density="comfortable"
+      clearable
+      prepend-inner-icon="mdi-magnify"
+      class="mt-3 mb-3"
+    />
+
+    <v-card>
+
+      <v-data-table-server
+        :headers="headers"
+        :items="items"
+        :loading="tagStore.loading"
+        :items-length="tagStore.total"
+        v-model:items-per-page="tableItemsPerPage"
+        v-model:page="tablePage"
+        :footer-props="tableFooterProps"
+        show-expand
+        v-model:expanded="expanded"
+        v-model:sort-by="sortBy"
+        item-value="id"
+      >
+
+        <template #item.isMetal="{ item }">
+          <v-icon v-if="item.isMetal">mdi-check</v-icon>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/validations/CreateValidation.vue 1`] = `
+"<v-container fluid>
+    <v-toolbar dense>
+      <v-toolbar-title>Create Validation</v-toolbar-title>
+      <v-spacer />
+      <v-toolbar-items>
+        <v-btn @click="cancel" text color="primary">Cancel</v-btn>
+        <v-btn @click="reset" text color="primary">Reset</v-btn>
+        <v-btn @click="submit" text :disabled="!valid" color="primary">Save</v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+
+    <v-card class="mt-4 px-4">
+      <v-card-text>
+        <v-form v-model="valid" ref="form" lazy-validation>
+          <v-row>
+            <v-col>
+              <div class="text-subtitle-1">Application</div>
+              <v-btn-toggle v-model="application" mandatory>
+                <v-btn small value="0">SMC</v-btn>
+                <v-btn small value="1">IMC</v-btn>
+                <v-btn small value="2">FC</v-btn>
+                <v-btn small value="3">IF</v-btn>
+                <v-btn small value="4">IHC</v-btn>
+                <v-btn small value="5">IHCF</v-btn>
+                <v-btn small value="6">WB</v-btn>
+              </v-btn-toggle>
+            </v-col>
+            <v-col>
+              <div class="text-subtitle-1">Status</div>
+              <v-btn-toggle v-model="status" mandatory>
+                <v-btn small value="0">Yes</v-btn>
+                <v-btn small value="1">So-So</v-btn>
+                <v-btn small value="2">No</v-btn>
+                <v-btn small value="3">Undefined</v-btn>
+              </v-btn-toggle>
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col>
+              <v-autocomplete
+                label="Protein"
+                v-model="proteinId"
+                :items="proteins"
+                item-title="name"
+                item-value="id"
+                :rules="requiredRules"
+                clearable
+                open-on-clear
+                dense
+                @update:model-value="handleProteinChange"
+              />
+            </v-col>
+            <v-col>
+              <v-autocomplete
+                label="Clone"
+                v-model="cloneId"
+                :items="clones"
+                item-title="name"
+                item-value="id"
+                :rules="requiredRules"
+                :disabled="!proteinId"
+                clearable
+                open-on-clear
+                dense
+                @update:model-value="handleCloneChange"
+              />
+            </v-col>
+            <v-col>
+              <v-autocomplete
+                label="Lot"
+                v-model="lotId"
+                v-model:search-input="lotSearchInput"
+                :items="lots"
+                item-title="displayName"
+                item-value="id"
+                :rules="requiredRules"
+                :disabled="!cloneId"
+                clearable
+                open-on-clear
+                dense
+                @update:model-value="handleLotChange"
+              />
+            </v-col>
+            <v-col>
+              <v-autocomplete
+                label="Conjugate"
+                v-model="conjugateId"
+                :items="conjugates"
+                :filter="filterConjugates"
+                item-title="tubeNumber"
+                item-value="id"
+                :disabled="!lotId"
+                clearable
+                open-on-clear
+                dense
+              />
+            </v-col>
+          </v-row>
+
+          <v-autocomplete
+            label="Species"
+            v-model="speciesId"
+            :items="species"
+            item-title="name"
+            item-value="id"
+            clearable
+            open-on-clear
+            dense
+          />
+
+          <v-row>
+            <v-col>
+              <v-text-field label="Positive control" v-model="positiveControl" :rules="requiredRules" />
+            </v-col>
+            <v-col>
+              <v-text-field label="Negative control" v-model="negativeControl" :rules="requiredRules" />
+            </v-col>
+          </v-row>
+
+          <v-text-field label="Incubation conditions" v-model="incubationConditions" hint="e.g. Overnight, 4°C" />
+          <v-text-field label="Tissue" v-model="tissue" hint="e.g. Liver, Lymph node" />
+
+          <v-row>
+            <v-col>
+              <v-text-field
+                label="Concentration"
+                v-model="concentration"
+                dense
+                hint="e.g. 1:100 if dilution or 0.2 if ug/mL"
+              />
+            </v-col>
+            <v-col>
+              <v-select
+                label="Units"
+                v-model="concentrationUnit"
+                :items="['dilution', 'ug/mL']"
+                clearable
+                open-on-clear
+                dense
+              />
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col>
+              <v-select
+                label="Fixation"
+                v-model="fixation"
+                :items="fixations"
+                item-title="name"
+                item-value="id"
+                clearable
+                open-on-clear
+                dense
+              />
+            </v-col>
+            <v-col>
+              <v-text-field label="Fixation notes" v-model="fixationNotes" dense />
+            </v-col>
+          </v-row>
+
+          <v-text-field label="Notes" v-model="notes" />
+
+          <v-row v-if="application === '1' || application === '3' || application === '4'">
+            <v-col>
+              <v-select
+                label="Protocol"
+                v-model="antigenRetrievalType"
+                :items="availableARtypes"
+                clearable
+                open-on-clear
+                dense
+              />
+            </v-col>
+            <v-col>
+              <v-text-field label="Time" v-model="antigenRetrievalTime" dense hint="minutes" />
+            </v-col>
+            <v-col>
+              <v-text-field label="Temperature" v-model="antigenRetrievalTemperature" dense hint="°C" />
+            </v-col>
+          </v-row>
+
+          <div v-else>
+            <v-row>
+              <v-col cols="2">Saponin</v-col>
+              <v-col cols="3">
+                <v-btn-toggle v-model="saponin" mandatory>
+                  <v-btn small value="true">Yes</v-btn>
+                  <v-btn small value="false">No</v-btn>
+                  <v-btn small value="null">Not tested</v-btn>
+                </v-btn-toggle>
+              </v-col>
+              <v-col>
+                <v-text-field label="Concentration" v-model="saponinConcentration" dense hint="ug/mL" />
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col cols="2">Methanol treatment</v-col>
+              <v-col cols="3">
+                <v-btn-toggle v-model="methanolTreatment" mandatory>
+                  <v-btn small value="true">Yes</v-btn>
+                  <v-btn small value="false">No</v-btn>
+                  <v-btn small value="null">Not tested</v-btn>
+                </v-btn-toggle>
+              </v-col>
+              <v-col>
+                <v-text-field label="Concentration" v-model="methanolTreatmentConcentration" dense hint="ug/mL" />
+              </v-col>
+            </v-row>
+
+            <v-row>
+              <v-col cols="2">Surface staining</v-col>
+              <v-col cols="3">
+                <v-btn-toggle v-model="surfaceStaining" mandatory>
+                  <v-btn small value="true">Yes</v-btn>
+                  <v-btn small value="false">No</v-btn>
+                  <v-btn small value="null">Not tested</v-btn>
+                </v-btn-toggle>
+              </v-col>
+              <v-col>
+                <v-text-field label="Concentration" v-model="surfaceStainingConcentration" dense hint="ug/mL" />
+              </v-col>
+            </v-row>
+          </div>
+        </v-form>
+      </v-card-text>
+    </v-card>
+
+    <v-card class="mt-4 px-4">
+      <v-card-title primary-title>
+        <div class="text-h5">Validation File</div>
+      </v-card-title>
+      <v-card-text>
+        <v-form>
+          <v-file-input v-model="file" label="File upload" show-size />
+        </v-form>
+      </v-card-text>
+    </v-card>
+  </v-container>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/validations/EditValidation.vue 1`] = `
+"<v-container fluid>
+    <v-toolbar dense>
+      <v-toolbar-title>Edit Validation</v-toolbar-title>
+      <v-spacer />
+      <v-toolbar-items>
+        <v-btn @click="cancel" text color="primary">Cancel</v-btn>
+        <v-btn @click="reset" text color="primary">Reset</v-btn>
+        <v-btn @click="submit" text :disabled="!valid" color="primary">Save</v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+
+    <v-card class="mt-4 px-4">
+      <v-card-text>
+        <v-form v-model="valid" ref="form">
+          <v-row>
+            <v-col>
+              <div class="text-subtitle-1">Application</div>
+              <v-btn-toggle v-model="application" mandatory>
+                <v-btn small value="0">SMC</v-btn>
+                <v-btn small value="1">IMC</v-btn>
+                <v-btn small value="2">FC</v-btn>
+                <v-btn small value="3">IF</v-btn>
+                <v-btn small value="4">IHC</v-btn>
+                <v-btn small value="5">IHCF</v-btn>
+                <v-btn small value="6">WB</v-btn>
+              </v-btn-toggle>
+            </v-col>
+            <v-col>
+              <div class="text-subtitle-1">Status</div>
+              <v-btn-toggle v-model="status" mandatory>
+                <v-btn small value="0">Yes</v-btn>
+                <v-btn small value="1">So-So</v-btn>
+                <v-btn small value="2">No</v-btn>
+                <v-btn small value="3">Undefined</v-btn>
+              </v-btn-toggle>
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col>
+              <v-autocomplete
+                label="Clone"
+                v-model="cloneId"
+                :items="clones"
+                item-text="name"
+                item-value="id"
+                :rules="requiredRules"
+                dense
+                @change="resetLotId"
+              />
+            </v-col>
+            <v-col>
+              <v-autocomplete
+                label="Lot"
+                v-model="lotId"
+                :search-input.sync="lotSearchInput"
+                :items="lots"
+                item-text="name"
+                item-value="id"
+                clearable
+                open-on-clear
+                dense
+                @change="resetConjugateId"
+              />
+            </v-col>
+            <v-col>
+              <v-autocomplete
+                label="Conjugate"
+                v-model="conjugateId"
+                :items="conjugates"
+                :filter="filterConjugates"
+                item-text="tubeNumber"
+                item-value="id"
+                clearable
+                open-on-clear
+                dense
+              />
+            </v-col>
+          </v-row>
+
+          <v-autocomplete
+            label="Species"
+            v-model="speciesId"
+            :items="species"
+            item-text="name"
+            item-value="id"
+            clearable
+            open-on-clear
+            dense
+          />
+
+          <v-row>
+            <v-col>
+              <v-text-field label="Positive control" v-model="positiveControl" :rules="requiredRules" />
+            </v-col>
+            <v-col>
+              <v-text-field label="Negative control" v-model="negativeControl" :rules="requiredRules" />
+            </v-col>
+          </v-row>
+
+          <v-text-field label="Incubation conditions" v-model="incubationConditions" hint="e.g. Overnight, 4°C" />
+          <v-text-field label="Tissue" v-model="tissue" hint="e.g. Liver, Lymph node" />
+
+          <v-row>
+            <v-col>
+              <v-text-field
+                label="Concentration"
+                v-model="concentration"
+                dense
+                hint="e.g. 1:100 if dilution or 0.2 if ug/mL"
+              />
+            </v-col>
+            <v-col>
+              <v-select
+                label="Units"
+                v-model="concentrationUnit"
+                :items="['dilution', 'ug/mL']"
+                clearable
+                open-on-clear
+                dense
+              />
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col>
+              <v-select
+                label="Fixation"
+                v-model="fixation"
+                :items="fixations"
+                item-value="id"
+                item-text="name"
+                clearable
+                open-on-clear
+                dense
+              />
+            </v-col>
+            <v-col>
+              <v-text-field label="Fixation notes" v-model="fixationNotes" dense />
+            </v-col>
+          </v-row>
+
+          <v-text-field label="Notes" v-model="notes" />
+
+          <v-row v-if="application === '1' || application === '3' || application === '4'">
+            <v-col>
+              <v-select
+                label="Protocol"
+                v-model="antigenRetrievalType"
+                :items="antigenRetrievalTypesList"
+                clearable
+                open-on-clear
+                dense
+              />
+            </v-col>
+            <v-col>
+              <v-text-field label="Time" v-model="antigenRetrievalTime" dense hint="minutes" />
+            </v-col>
+            <v-col>
+              <v-text-field label="Temperature" v-model="antigenRetrievalTemperature" dense hint="°C" />
+            </v-col>
+          </v-row>
+
+          <div v-else>
+            <v-row>
+              <v-col cols="2">Saponin</v-col>
+              <v-col cols="3">
+                <v-btn-toggle v-model="saponin" mandatory>
+                  <v-btn small value="true">Yes</v-btn>
+                  <v-btn small value="false">No</v-btn>
+                  <v-btn small value="null">Not tested</v-btn>
+                </v-btn-toggle>
+              </v-col>
+              <v-col>
+                <v-text-field label="Concentration" v-model="saponinConcentration" dense hint="ug/mL" />
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="2">Methanol treatment</v-col>
+              <v-col cols="3">
+                <v-btn-toggle v-model="methanolTreatment" mandatory>
+                  <v-btn small value="true">Yes</v-btn>
+                  <v-btn small value="false">No</v-btn>
+                  <v-btn small value="null">Not tested</v-btn>
+                </v-btn-toggle>
+              </v-col>
+              <v-col>
+                <v-text-field label="Concentration" v-model="methanolTreatmentConcentration" dense hint="ug/mL" />
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="2">Surface staining</v-col>
+              <v-col cols="3">
+                <v-btn-toggle v-model="surfaceStaining" mandatory>
+                  <v-btn small value="true">Yes</v-btn>
+                  <v-btn small value="false">No</v-btn>
+                  <v-btn small value="null">Not tested</v-btn>
+                </v-btn-toggle>
+              </v-col>
+              <v-col>
+                <v-text-field label="Concentration" v-model="surfaceStainingConcentration" dense hint="ug/mL" />
+              </v-col>
+            </v-row>
+          </div>
+        </v-form>
+      </v-card-text>
+    </v-card>
+
+    <v-card class="mt-4 px-4">
+      <v-card-title primary-title>
+        <div class="text-h5">Validation Files</div>
+      </v-card-title>
+      <v-card-text>
+        <v-list dense>
+          <template v-for="(f, index) in validationFiles" :key="index">
+            <v-list-item dense two-line>
+              <v-col cols="3">{{ f.id }}</v-col>
+              <v-col>{{ f.name }}</v-col>
+              <v-col cols="1">
+                <v-tooltip bottom>
+                  <template #activator="{ props }">
+                    <v-btn v-bind="props" fab x-small color="secondary lighten-3" @click.stop="deleteFile(f)">
+                      <v-icon>mdi-minus</v-icon>
+                    </v-btn>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/validations/ValidationDetailsView.vue 1`] = `
+"<v-card flat>
+    <v-card-title>Validation Details</v-card-title>
+    <v-card-text>
+      <ValidationView
+        v-if="validation"
+        :validation="validation"
+        :group-id="activeGroupId"
+        :api-url="apiUrl"
+      />
+    </v-card-text>
+  </v-card>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/validations/ValidationView.vue 1`] = `
+"<v-card tile elevation="1" class="mb-3">
+    <v-card-text>
+      <div><span class="subheader">ID: </span>{{ validation.id }}</div>
+
+      <div>
+        <span class="subheader">Application: </span>
+        <v-chip class="mr-1" small label>
+          {{ applicationToString(validation.application ) }}
+        </v-chip>
+      </div>
+
+      <div>
+        <span class="subheader">Works: </span>
+        <v-chip :color="getColor(validation)" class="mr-1" dark x-small label>
+          {{ validationStatusToString(validation.status) }}
+        </v-chip>
+      </div>
+
+      <div>
+        <span class="subheader">Clone: </span>
+        <router-link
+          v-if="validation.cloneId"
+          class="link"
+          :to="{
+            name: 'main-group-clones-edit',
+            params: { groupId, id: validation.cloneId },
+          }"
+        >
+          {{ validation.cloneName }}
+        </router-link>
+        <span v-else>{{ validation.cloneName }}</span>
+      </div>
+
+      <div v-if="validation.lotId">
+        <span class="subheader">Lot: </span>
+        <router-link
+          class="link"
+          :to="{
+            name: 'main-group-lots-edit',
+            params: { groupId, id: validation.lotId },
+          }"
+        >
+          {{ validation.lotName }}
+        </router-link>
+      </div>
+
+      <div v-if="validation.conjugateId">
+        <span class="subheader">Conjugate: </span>
+        <router-link
+          class="link"
+          :to="{
+            name: 'main-group-lots-edit',
+            params: { groupId, id: validation.conjugateId },
+          }"
+        >
+          {{ validation.tubeNumber }}
+        </router-link>
+      </div>
+
+      <div>
+        <span class="subheader">Created by: </span>
+        <router-link
+          v-if="validation.userId"
+          class="link"
+          :to="{
+            name: 'main-admin-users-edit',
+            params: { id: validation.userId },
+          }"
+        >
+          {{ validation.userName }}
+        </router-link>
+        <span v-else>{{ validation.userName ?? '—' }}</span>
+      </div>
+
+      <div><span class="subheader">Positive control: </span>{{ validation.positiveControl }}</div>
+      <div><span class="subheader">Negative control: </span>{{ validation.negativeControl }}</div>
+
+      <div v-if="validation.speciesId">
+        <span class="subheader">Species tested: </span>{{ validation.speciesName }}
+      </div>
+
+      <div><span class="subheader">Tissue: </span>{{ validation.tissue }}</div>
+      <div><span class="subheader">Incubation conditions: </span>{{ validation.incubationConditions }}</div>
+      <div><span class="subheader">Concentration: </span>{{ validation.concentration }}</div>
+      <div><span class="subheader">Concentration unit: </span>{{ validation.concentrationUnit }}</div>
+      <div><span class="subheader">Fixation: </span>{{ validation.fixation }}</div>
+
+      <div v-if="validation.fixationNotes">
+        <span class="subheader">Fixation notes: </span>{{ validation.fixationNotes }}
+      </div>
+
+      <div v-if="validation.notes"><span class="subheader">Notes: </span>{{ validation.notes }}</div>
+
+      <div v-if="validation.antigenRetrievalType">
+        <span class="subheader">Protocol: </span>{{ validation.antigenRetrievalType }}
+      </div>
+
+      <div v-if="validation.antigenRetrievalTime">
+        <span class="subheader">Antigen retrieval time: </span>{{ validation.antigenRetrievalTime }}
+      </div>
+
+      <div v-if="validation.antigenRetrievalTemperature">
+        <span class="subheader">Antigen retrieval temperature: </span>{{ validation.antigenRetrievalTemperature }}
+      </div>
+
+      <div v-if="validation.saponin !== null">
+        <v-checkbox label="Saponin" v-model="validation.saponin" readonly hide-details />
+        <span class="subheader">Saponin concentration: </span>{{ validation.saponinConcentration }}
+      </div>
+
+      <div v-if="validation.methanolTreatment !== null">
+        <v-checkbox label="Methanol treatment" v-model="validation.methanolTreatment" readonly hide-details />
+        <span class="subheader">Methanol treatment concentration: </span>{{ validation.methanolTreatmentConcentration }}
+      </div>
+
+      <div v-if="validation.surfaceStaining !== null">
+        <v-checkbox label="Surface staining" v-model="validation.surfaceStaining" readonly hide-details />
+        <span class="subheader">Surface staining concentration: </span>{{ validation.surfaceStainingConcentration }}
+      </div>
+
+      <div v-for="file in validation.validationFiles" :key="file.id">
+        <iframe :src="\`\${apiUrl}/validationFiles/\${file.id}/serve\`" allowfullscreen class="iframe" />
+        <a target="_blank" :href="\`\${apiUrl}/validationFiles/\${file.id}/serve\`">{{ file.name }}</a>
+      </div>
+    </v-card-text>
+
+    <v-card-actions>
+      <v-btn
+        v-if="validation.id"
+        color="primary"
+        text
+        :to="{
+          name: 'main-group-validations-edit',
+          params: { groupId, id: validation.id },
+        }"
+      >
+        Edit
+      </v-btn>
+    </v-card-actions>
+  </v-card>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/group/validations/ValidationsListView.vue 1`] = `
+"<v-col>
+    <v-toolbar dense class="toolbar">
+      <v-toolbar-title>Validations</v-toolbar-title>
+      <v-spacer />
+      <v-toolbar-items>
+        <v-btn text @click="exportFile()" color="primary">Export CSV</v-btn>
+        <v-btn
+          text
+          :to="\`/main/groups/\${activeGroupId}/validations/create\`"
+          color="primary"
+        >
+          Create Validation
+        </v-btn>
+      </v-toolbar-items>
+    </v-toolbar>
+
+    <v-expansion-panels>
+      <v-expansion-panel>
+        <v-expansion-panel-title>
+          <FilterSummary />
+        </v-expansion-panel-title>
+        <v-expansion-panel-text>
+          <FilterField key-name="proteinName" class="mb-1" />
+          <FilterField key-name="cloneName" class="mb-1" />
+          <FilterField key-name="speciesName" class="mb-1" />
+          <FilterField key-name="validationApplication" class="mb-1" />
+          <FilterField key-name="validationStatus" class="mb-1" />
+          <FilterField key-name="validationProtocol" class="mb-1" />
+        </v-expansion-panel-text>
+      </v-expansion-panel>
+    </v-expansion-panels>
+
+    <v-text-field
+      v-model="globalSearch"
+      label="Search all validation fields"
+      variant="solo"
+      density="comfortable"
+      clearable
+      prepend-inner-icon="mdi-magnify"
+      class="mt-3 mb-3"
+    />
+
+    <v-card>
+
+      <v-data-table-server
+        :headers="headers"
+        :items="items"
+        :loading="validationStore.loading"
+        :items-length="validationStore.total"
+        v-model:items-per-page="tableItemsPerPage"
+        v-model:page="tablePage"
+        :footer-props="tableFooterProps"
+        show-expand
+        v-model:expanded="expanded"
+        v-model:sort-by="sortBy"
+        item-value="id"
+      >
+        <template #item.species="{ item }">
+          <router-link
+            v-if="item.speciesId"
+            class="link"
+            :to="{
+              name: 'main-group-species-edit',
+              params: {
+                groupId: activeGroupId,
+                id: item.speciesId,
+              },
+            }"
+          >
+            {{ item.speciesName }}
+          </router-link>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/profile/UserProfile.vue 1`] = `
+"<v-container fluid>
+    <v-card class="ma-4 pa-4">
+      <v-card-title>
+        <div class="text-h5">User Profile</div>
+      </v-card-title>
+      <v-card-text>
+        <div class="my-6">
+          <div class="text-subtitle-1 text--lighten-2">Name</div>
+          <div class="text-h6 text--darken-2" v-if="userProfile?.name">
+            {{ userProfile.name }}
+          </div>
+          <div class="text-h6 text--darken-2" v-else>-----</div>
+        </div>
+        <div class="my-4">
+          <div class="text-subtitle-1 text--lighten-2">Email</div>
+          <div class="text-h6 text--darken-2" v-if="userProfile?.email">
+            {{ userProfile.email }}
+          </div>
+          <div class="text-h6 text--darken-2" v-else>-----</div>
+        </div>
+      </v-card-text>
+      <v-card-actions>
+        <v-btn to="/main/profile/edit">Edit</v-btn>
+        <v-btn to="/main/profile/password">Change password</v-btn>
+        <MfaSetupDialog v-model:modelValue="showMfaDialog" :email="userProfile?.email" />
+        <v-btn color="info" @click="showMfaDialog = true">Enable MFA</v-btn>
+        <v-spacer />
+        <v-btn color="secondary" @click="resetSettings">Reset Settings</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-container>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/profile/UserProfileEdit.vue 1`] = `
+"<v-container fluid>
+    <v-card class="ma-4 pa-4">
+      <v-card-title>
+        <div class="text-h5 primary--text">Edit User Profile</div>
+      </v-card-title>
+      <v-card-text>
+        <v-form v-model="valid" ref="form" lazy-validation>
+          <v-text-field label="Name" v-model="name" />
+          <v-text-field
+            label="E-mail"
+            type="email"
+            v-model="email"
+            :rules="emailRules"
+          />
+        </v-form>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer />
+        <v-btn @click="cancel">Cancel</v-btn>
+        <v-btn @click="reset">Reset</v-btn>
+        <v-btn @click="submit" :disabled="!valid">Save</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-container>"
+`;
+
+exports[`vue templates > matches template snapshot for views/main/profile/UserProfileEditPassword.vue 1`] = `
+"<v-container fluid>
+    <v-card class="ma-4 pa-4">
+      <v-card-title>
+        <div class="text-h5 primary--text">Set Password</div>
+      </v-card-title>
+      <v-card-text>
+        <div class="my-4">
+          <div class="subtitle-1 primary--text text--lighten-2">User</div>
+          <div class="text-h6 primary--text text--darken-2">
+            {{ userProfile.email }}
+          </div>
+        </div>
+        <v-form ref="form">
+          <v-text-field
+            type="password"
+            label="Password"
+            v-model="password1"
+            :rules="password1Rules"
+          />
+          <v-text-field
+            type="password"
+            label="Confirm Password"
+            v-model="password2"
+            :rules="password2Rules"
+          />
+        </v-form>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer />
+        <v-btn @click="cancel">Cancel</v-btn>
+        <v-btn @click="reset">Reset</v-btn>
+        <v-btn @click="submit" :disabled="!valid">Save</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-container>"
+`;

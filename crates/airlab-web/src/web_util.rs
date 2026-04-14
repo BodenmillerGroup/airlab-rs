@@ -7,9 +7,9 @@ use serde_json::json;
 pub async fn get_member_id(
     ctx: &Ctx,
     mm: &ModelManager,
-    group_id: i32,
-    user_id: i32,
-) -> Result<i32> {
+    group_id: i64,
+    user_id: i64,
+) -> Result<i64> {
     let filters: Vec<MemberFilter> = serde_json::from_value(json!([
         {
             "group_id": {"$eq":group_id},

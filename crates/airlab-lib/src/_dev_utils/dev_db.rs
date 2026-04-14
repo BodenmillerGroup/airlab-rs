@@ -10,6 +10,8 @@ use std::time::Duration;
 use tracing::info;
 
 type Db = Pool<Postgres>;
+type BoxError = Box<dyn std::error::Error + Send + Sync>;
+type Result<T> = std::result::Result<T, BoxError>;
 
 // NOTE: Hardcode to prevent deployed system db update.
 const PG_DEV_POSTGRES_URL: &str = "postgres://postgres:welcome@localhost/postgres";
@@ -21,10 +23,10 @@ const SQL_DIR: &str = "sql/dev_initial";
 const DEMO1_PWD: &str = "welcome1";
 const DEMO2_PWD: &str = "welcome2";
 
-pub async fn init_dev_db() -> Result<(), Box<dyn std::error::Error>> {
+pub async fn init_dev_db() -> Result<()> {
     info!("DEV init_dev_db()");
 
-    let current_dir = std::env::current_dir().unwrap();
+    let current_dir = std::env::current_dir()?;
     let v: Vec<_> = current_dir.components().collect();
     let path_comp = v.get(v.len().wrapping_sub(3));
     let base_dir = if Some(true) == path_comp.map(|c| c.as_os_str() == "crates") {
@@ -60,12 +62,12 @@ pub async fn init_dev_db() -> Result<(), Box<dyn std::error::Error>> {
 
     let demo1_user: User = UserBmc::first_by_username(&ctx, &mm, "demo1@uzh.ch")
         .await?
-        .unwrap();
+        .ok_or_else(|| std::io::Error::other("demo user demo1@uzh.ch not found after dev db init"))?;
     UserBmc::update_pwd(&ctx, &mm, demo1_user.id, DEMO1_PWD).await?;
     info!("DEV init_dev_db - set demo1 pwd");
     let demo2_user: User = UserBmc::first_by_username(&ctx, &mm, "lars.malmstroem@uzh.ch")
         .await?
-        .unwrap();
+        .ok_or_else(|| std::io::Error::other("demo user lars.malmstroem@uzh.ch not found after dev db init"))?;
     UserBmc::update_pwd(&ctx, &mm, demo2_user.id, DEMO2_PWD).await?;
     info!("DEV init_dev_db - set demo2 pwd");
     info!("{:?}", demo2_user);

@@ -2,42 +2,16 @@ use crate::ctx::Ctx;
 use crate::model::ModelManager;
 use crate::model::Result;
 use crate::model::base::{self, DbBmc};
+use crate::model::helpers::{bool_or, opt_string, opt_vec_string, string_or};
 use modql::field::Fields;
 use modql::filter::{FilterNodes, ListOptions, OpValsInt64, OpValsString};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use sqlx::FromRow;
-
-impl GroupBmc {
-    #[must_use]
-    pub fn get_create_sql(drop_table: bool) -> String {
-        let table = Self::TABLE;
-        format!(
-            r##"{}
-create table if not exists "{table}" (
-  id serial primary key,
-  name character varying NOT NULL,
-  institution character varying,
-  description character varying,
-  location character varying,
-  tags character varying(64)[],
-  url character varying,
-  is_open boolean DEFAULT false NOT NULL,
-  meta jsonb,
-  created_at timestamp with time zone DEFAULT now() NOT NULL
-);
-        "##,
-            if drop_table {
-                format!("drop table if exists {table};")
-            } else {
-                String::new()
-            }
-        )
-    }
-}
 
 #[derive(Debug, Clone, Fields, FromRow, Serialize, Deserialize)]
 pub struct AirLabGroup {
-    pub id: i32,
+    pub id: i64,
 
     pub name: String,
     pub institution: String,
@@ -51,7 +25,7 @@ pub struct AirLabGroup {
 
 #[derive(Debug, Clone, Fields, FromRow, Serialize, Deserialize)]
 pub struct Group {
-    pub id: i32,
+    pub id: i64,
 
     pub name: String,
     pub institution: String,
@@ -76,17 +50,49 @@ pub struct GroupForCreate {
     pub tags: Option<Vec<String>>,
 }
 
+impl From<Value> for GroupForCreate {
+    fn from(v: Value) -> Self {
+        let obj = match v {
+            Value::Object(map) => Value::Object(map),
+            _ => Value::Object(Default::default()),
+        };
+
+        GroupForCreate {
+            name: string_or(&obj, "name"),
+            institution: string_or(&obj, "institution"),
+            url: opt_string(&obj, "url"),
+            is_open: bool_or(&obj, "isOpen", false),
+            tags: opt_vec_string(&obj, "tags"),
+        }
+    }
+}
+
 #[derive(Fields, Default, Deserialize, Debug)]
 pub struct GroupForUpdate {
     pub name: String,
     pub institution: String,
     pub url: String,
-    //pub meta: Option<String>,
     #[serde(rename = "isOpen")]
     pub is_open: bool,
 }
 
-#[derive(FilterNodes, Deserialize, Default, Debug)]
+impl From<Value> for GroupForUpdate {
+    fn from(v: Value) -> Self {
+        let obj = match v {
+            Value::Object(map) => Value::Object(map),
+            _ => Value::Object(Default::default()),
+        };
+
+        GroupForUpdate {
+            name: string_or(&obj, "name"),
+            institution: string_or(&obj, "institution"),
+            url: string_or(&obj, "url"),
+            is_open: bool_or(&obj, "isOpen", false),
+        }
+    }
+}
+
+#[derive(FilterNodes, Deserialize, Default, Debug, Clone)]
 pub struct GroupFilter {
     id: Option<OpValsInt64>,
 
@@ -100,15 +106,23 @@ impl DbBmc for GroupBmc {
 }
 
 impl GroupBmc {
-    pub async fn create(ctx: &Ctx, mm: &ModelManager, group_c: GroupForCreate) -> Result<i32> {
+    pub async fn create(ctx: &Ctx, mm: &ModelManager, group_c: GroupForCreate) -> Result<i64> {
         base::create::<Self, _>(ctx, mm, group_c).await
     }
-    pub async fn create_full(ctx: &Ctx, mm: &ModelManager, group_c: Group) -> Result<i32> {
+    pub async fn create_full(ctx: &Ctx, mm: &ModelManager, group_c: Group) -> Result<i64> {
         base::create::<Self, _>(ctx, mm, group_c).await
     }
 
-    pub async fn get(ctx: &Ctx, mm: &ModelManager, id: i32) -> Result<Group> {
+    pub async fn get(ctx: &Ctx, mm: &ModelManager, id: i64) -> Result<Group> {
         base::get::<Self, _>(ctx, mm, id).await
+    }
+
+    pub async fn count(
+        ctx: &Ctx,
+        mm: &ModelManager,
+        filters: Option<Vec<GroupFilter>>,
+    ) -> Result<i64> {
+        base::count::<Self, _>(ctx, mm, filters).await
     }
 
     pub async fn list(
@@ -132,13 +146,13 @@ impl GroupBmc {
     pub async fn update(
         ctx: &Ctx,
         mm: &ModelManager,
-        id: i32,
+        id: i64,
         group_u: GroupForUpdate,
     ) -> Result<()> {
         base::update::<Self, _>(ctx, mm, id, group_u).await
     }
 
-    pub async fn delete(ctx: &Ctx, mm: &ModelManager, id: i32) -> Result<()> {
+    pub async fn delete(ctx: &Ctx, mm: &ModelManager, id: i64) -> Result<()> {
         base::delete::<Self>(ctx, mm, id).await
     }
 }
@@ -148,12 +162,13 @@ mod tests {
     use super::*;
     use crate::_dev_utils;
     use crate::model::Error;
-    use anyhow::Result;
     use serde_json::json;
 
+    type TestResult<T = ()> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
+
     #[tokio::test]
-    async fn test_group_create_ok() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_group_create_ok() -> TestResult {
+        let mm = _dev_utils::init_test().await;
 
         let ctx = Ctx::root_ctx();
         let fx_name = "test_create_ok name";
@@ -176,8 +191,8 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_group_get_err_not_found() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_group_get_err_not_found() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let fx_id = 100;
 
@@ -198,8 +213,8 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_group_list_all_ok() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_group_list_all_ok() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let tname = "test_group_list_all_ok";
         let gseeds = _dev_utils::get_group_seed(tname);
@@ -221,8 +236,8 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_group_list_by_filter_ok() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_group_list_by_filter_ok() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let tname = "test_group_list_by_filter_ok";
         let fx_names = _dev_utils::get_group_seed(tname);
@@ -262,7 +277,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_group_update_ok() -> Result<()> {
-        let mm = ModelManager::new().await?;
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let tname = "test_group_update_ok";
         let fx_names = _dev_utils::get_group_seed(tname);
@@ -290,7 +305,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_group_delete_err_not_found() -> Result<()> {
-        let mm = ModelManager::new().await?;
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let fx_id = 100;
 

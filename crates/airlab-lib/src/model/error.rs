@@ -1,4 +1,4 @@
-use crate::model::store;
+use crate::model::store::dbx;
 use crate::pwd;
 use derive_more::From;
 use serde::Serialize;
@@ -11,26 +11,37 @@ pub type Result<T> = core::result::Result<T, Error>;
 pub enum Error {
     EntityNotFound {
         entity: &'static str,
-        id: i32,
+        id: i64,
     },
     ListLimitOverMax {
         max: i64,
         actual: i64,
     },
 
-    // -- Modules
-    #[from]
-    Pwd(pwd::Error),
-    #[from]
-    Store(store::Error),
+    CountFail,
 
-    // -- Externals
+    CantCreateModelManagerProvider(String),
+
+    #[from]
+    Env(crate::envs::Error),
+
     #[from]
     Sqlx(#[serde_as(as = "DisplayFromStr")] sqlx::Error),
+
+    #[from]
+    Dbx(dbx::Error),
+
     #[from]
     SeaQuery(#[serde_as(as = "DisplayFromStr")] sea_query::error::Error),
+
     #[from]
     ModqlIntoSea(#[serde_as(as = "DisplayFromStr")] modql::filter::IntoSeaError),
+
+    #[from]
+    Pwd(pwd::Error),
+
+    #[from]
+    SerdeJson(#[serde_as(as = "DisplayFromStr")] serde_json::Error),
 }
 
 impl core::fmt::Display for Error {
@@ -40,3 +51,27 @@ impl core::fmt::Display for Error {
 }
 
 impl std::error::Error for Error {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn display_uses_debug_output() {
+        let error = Error::EntityNotFound {
+            entity: "provider",
+            id: 7,
+        };
+
+        assert_eq!(
+            error.to_string(),
+            "EntityNotFound { entity: \"provider\", id: 7 }"
+        );
+    }
+
+    #[test]
+    fn result_alias_uses_model_error() {
+        let result: Result<()> = Err(Error::CountFail);
+        assert!(matches!(result, Err(Error::CountFail)));
+    }
+}

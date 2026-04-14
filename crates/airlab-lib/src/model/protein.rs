@@ -2,47 +2,21 @@ use crate::ctx::Ctx;
 use crate::model::ModelManager;
 use crate::model::Result;
 use crate::model::base::{self, DbBmc};
+use crate::model::helpers::{i64_or, opt_i64, opt_string, string_or};
 use modql::field::Fields;
 use modql::filter::{FilterNodes, ListOptions, OpValsInt64, OpValsString};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use sqlx::FromRow;
-
-impl ProteinBmc {
-    #[must_use]
-    pub fn get_create_sql(drop_table: bool) -> String {
-        let table = Self::TABLE;
-        format!(
-            r##"{}
-create table if not exists "{table}" (
-  id serial primary key,
-  group_id integer NOT NULL,
-  created_by integer NOT NULL,
-  name character varying NOT NULL,
-  description character varying,
-  meta jsonb,
-  created_at timestamp with time zone DEFAULT now() NOT NULL
-);
-CREATE INDEX "IDX_protein_created_by" ON protein USING btree (created_by);
-CREATE INDEX "IDX_protein_group_id" ON protein USING btree (group_id);
-CREATE INDEX "IDX_protein_name" ON protein USING btree (name);
-        "##,
-            if drop_table {
-                format!("drop table if exists {table};")
-            } else {
-                String::new()
-            }
-        )
-    }
-}
 
 #[derive(Debug, Clone, Fields, FromRow, Serialize, Deserialize, Default)]
 pub struct Protein {
-    pub id: i32,
+    pub id: i64,
     #[serde(rename = "groupId")]
-    pub group_id: i32,
+    pub group_id: i64,
 
     #[serde(rename = "createdBy")]
-    pub created_by: i32,
+    pub created_by: i64,
     pub name: String,
     pub description: Option<String>,
     pub meta: Option<serde_json::Value>,
@@ -50,21 +24,50 @@ pub struct Protein {
     pub created_at: chrono::DateTime<chrono::Utc>, //String
 }
 
-#[derive(Fields, Deserialize, Clone)]
+#[derive(Fields, Deserialize, Clone, Debug)]
 pub struct ProteinForCreate {
     pub name: String,
     pub description: Option<String>,
-    pub group_id: i32,
-    pub created_by: i32,
+    pub group_id: i64,
+    pub created_by: i64,
 }
 
-#[derive(Fields, Default, Deserialize)]
+impl From<Value> for ProteinForCreate {
+    fn from(v: Value) -> Self {
+        let obj = match v {
+            Value::Object(map) => Value::Object(map),
+            _ => Value::Object(Default::default()),
+        };
+
+        ProteinForCreate {
+            name: string_or(&obj, "name"),
+            description: opt_string(&obj, "description"),
+            group_id: opt_i64(&obj, "groupId").unwrap_or(i64_or(&obj, "group_id", 0)),
+            created_by: opt_i64(&obj, "createdBy").unwrap_or(i64_or(&obj, "created_by", 0)),
+        }
+    }
+}
+
+#[derive(Fields, Default, Deserialize, Debug)]
 pub struct ProteinForUpdate {
     pub name: Option<String>,
     pub description: Option<String>,
 }
+impl From<Value> for ProteinForUpdate {
+    fn from(v: Value) -> Self {
+        let obj = match v {
+            Value::Object(map) => Value::Object(map),
+            _ => Value::Object(Default::default()),
+        };
 
-#[derive(FilterNodes, Deserialize, Default, Debug)]
+        ProteinForUpdate {
+            name: opt_string(&obj, "name"),
+            description: opt_string(&obj, "description"),
+        }
+    }
+}
+
+#[derive(FilterNodes, Deserialize, Default, Debug, Clone)]
 pub struct ProteinFilter {
     id: Option<OpValsInt64>,
     group_id: Option<OpValsInt64>,
@@ -79,14 +82,14 @@ impl DbBmc for ProteinBmc {
 }
 
 impl ProteinBmc {
-    pub async fn create(ctx: &Ctx, mm: &ModelManager, protein_c: ProteinForCreate) -> Result<i32> {
+    pub async fn create(ctx: &Ctx, mm: &ModelManager, protein_c: ProteinForCreate) -> Result<i64> {
         base::create::<Self, _>(ctx, mm, protein_c).await
     }
-    pub async fn create_full(ctx: &Ctx, mm: &ModelManager, protein_c: Protein) -> Result<i32> {
+    pub async fn create_full(ctx: &Ctx, mm: &ModelManager, protein_c: Protein) -> Result<i64> {
         base::create::<Self, _>(ctx, mm, protein_c).await
     }
 
-    pub async fn get(ctx: &Ctx, mm: &ModelManager, id: i32) -> Result<Protein> {
+    pub async fn get(ctx: &Ctx, mm: &ModelManager, id: i64) -> Result<Protein> {
         base::get::<Self, _>(ctx, mm, id).await
     }
 
@@ -98,17 +101,24 @@ impl ProteinBmc {
     ) -> Result<Vec<Protein>> {
         base::list::<Self, _, _>(ctx, mm, filters, list_options).await
     }
+    pub async fn count(
+        ctx: &Ctx,
+        mm: &ModelManager,
+        filters: Option<Vec<ProteinFilter>>,
+    ) -> Result<i64> {
+        base::count::<Self, _>(ctx, mm, filters).await
+    }
 
     pub async fn update(
         ctx: &Ctx,
         mm: &ModelManager,
-        id: i32,
+        id: i64,
         protein_u: ProteinForUpdate,
     ) -> Result<()> {
         base::update::<Self, _>(ctx, mm, id, protein_u).await
     }
 
-    pub async fn delete(ctx: &Ctx, mm: &ModelManager, id: i32) -> Result<()> {
+    pub async fn delete(ctx: &Ctx, mm: &ModelManager, id: i64) -> Result<()> {
         base::delete::<Self>(ctx, mm, id).await
     }
 }
@@ -118,14 +128,14 @@ mod tests {
     use super::*;
     use crate::_dev_utils;
     use crate::model::Error;
-    use anyhow::Result;
     use serde_json::json;
 
-    #[ignore]
+    type TestResult<T = ()> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
+
     #[tokio::test]
-    async fn test_protein_create_ok() -> Result<()> {
+    async fn test_protein_create_ok() -> TestResult {
         let ctx = Ctx::root_ctx();
-        let mm = ModelManager::new().await?;
+        let mm = _dev_utils::init_test().await;
         let fx_name = "test_create_ok name";
 
         let protein_c = ProteinForCreate {
@@ -144,10 +154,9 @@ mod tests {
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
-    async fn test_protein_get_err_not_found() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_protein_get_err_not_found() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let fx_id = 100;
 
@@ -167,10 +176,9 @@ mod tests {
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
-    async fn test_protein_list_all_ok() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_protein_list_all_ok() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let tname = "test_protein_list_all_ok";
         let seeds = _dev_utils::get_protein_seed(tname);
@@ -180,7 +188,7 @@ mod tests {
 
         let proteins: Vec<Protein> = proteins
             .into_iter()
-            .filter(|t| t.name.starts_with("test_list_all_ok-protein"))
+            .filter(|t| t.name.starts_with(tname))
             .collect();
         assert_eq!(proteins.len(), 4, "number of seeded proteins.");
 
@@ -193,10 +201,9 @@ mod tests {
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
-    async fn test_protein_list_by_filter_ok() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_protein_list_by_filter_ok() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let tname = "test_protein_list_by_filter_ok";
         let seeds = _dev_utils::get_protein_seed(tname);
@@ -242,10 +249,9 @@ mod tests {
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
-    async fn test_protein_update_ok() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_protein_update_ok() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let tname = "test_protein_list_by_filter_ok";
         let seeds = _dev_utils::get_protein_seed(tname);
@@ -270,10 +276,9 @@ mod tests {
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
     async fn test_protein_delete_err_not_found() -> Result<()> {
-        let mm = ModelManager::new().await?;
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let fx_id = 100;
 

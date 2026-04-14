@@ -1,4 +1,5 @@
 use crate::b64::b64u_decode;
+use serde::Serialize;
 use std::env;
 use std::str::FromStr;
 
@@ -17,7 +18,7 @@ pub fn get_env_b64u_as_u8s(name: &'static str) -> Result<Vec<u8>> {
 
 pub type Result<T> = core::result::Result<T, Error>;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy, Serialize)]
 pub enum Error {
     MissingEnv(&'static str),
     WrongFormat(&'static str),

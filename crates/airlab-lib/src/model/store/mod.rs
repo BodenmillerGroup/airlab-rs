@@ -1,19 +1,22 @@
-mod error;
-
-pub use self::error::{Error, Result};
+pub mod dbx;
 
 use crate::core_config;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::{Pool, Postgres};
 
-pub type Db = Pool<Postgres>;
+pub(crate) type Db = Pool<Postgres>;
 
-pub async fn new_db_pool() -> Result<Db> {
-    let max_connections = if cfg!(test) { 1 } else { 5 };
+pub(crate) async fn new_db_pool() -> std::result::Result<Db, String> {
+    let config = core_config().map_err(|err| err.to_string())?;
+    new_db_pool_from_url(&config.DB_URL).await
+}
+
+pub(crate) async fn new_db_pool_from_url(db_con_url: &str) -> std::result::Result<Db, String> {
+    let max_connections = 1;
 
     PgPoolOptions::new()
         .max_connections(max_connections)
-        .connect(&core_config().DB_URL)
+        .connect(db_con_url)
         .await
-        .map_err(|ex| Error::FailToCreatePool(ex.to_string()))
+        .map_err(|ex| ex.to_string())
 }

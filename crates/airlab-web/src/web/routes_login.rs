@@ -4,8 +4,9 @@ use airlab_lib::ctx::Ctx;
 use airlab_lib::model::ModelManager;
 use airlab_lib::model::user::{UserBmc, UserForCreate, UserForLogin, UserForUpdate};
 use airlab_lib::pwd::{self, ContentToHash};
+use airlab_lib::token::generate_web_token;
 use axum::Json;
-use axum::extract::{Path, State};
+use axum::extract::{Json as eJson, Path, State};
 use axum::routing::{get, post};
 use axum::{Router, response::Html};
 use lettre::message::MultiPart;
@@ -14,6 +15,7 @@ use lettre::{Message, SmtpTransport, Transport};
 use serde::Deserialize;
 use serde_json::{Value, json};
 use std::fs;
+use std::io;
 use tokio::task;
 use tower_cookies::Cookies;
 use tracing::{debug, warn};
@@ -22,6 +24,7 @@ use uuid::Uuid;
 pub fn routes(mm: ModelManager) -> Router {
     Router::new()
         .route("/api/v1/login", post(api_login_handler))
+        .route("/api/v1/auth/login3", post(api_login_handler_v3))
         .route("/api/v1/auth/login", post(api_login_handler_v2))
         .route("/api/v1/auth/signup", post(api_signup_handler))
         .route(
@@ -33,9 +36,9 @@ pub fn routes(mm: ModelManager) -> Router {
             post(api_reset_password_handler),
         )
         .route("/reset-password", get(api_reset_pwd_form_handler))
-        .route("/api/v1/auth/check/:email", get(api_login_check_handler))
+        .route("/api/v1/auth/check/{email}", get(api_login_check_handler))
         .route(
-            "/api/v1/auth/password-recovery/:email",
+            "/api/v1/auth/password-recovery/{email}",
             post(api_recover_pwd_handler),
         )
         .route("/api/v1/logoff", post(api_logoff_handler))
@@ -44,14 +47,59 @@ pub fn routes(mm: ModelManager) -> Router {
 
 async fn api_reset_pwd_form_handler(State(_mm): State<ModelManager>) -> Result<Html<String>> {
     debug!("HANDLER - api_get_main_handler");
-    #[allow(clippy::expect_used)] // FIXME
-    let html_content = task::spawn_blocking(|| {
-        fs::read_to_string(format!("{}/index.html", &web_config().WEB_FOLDER))
-    })
-    .await
-    .expect("Task panicked")?;
+    let web_folder = web_config()?.WEB_FOLDER.clone();
+    let html_content =
+        task::spawn_blocking(move || fs::read_to_string(format!("{}/index.html", web_folder)))
+            .await
+            .map_err(|err| io::Error::other(format!("Task panicked: {err}")))??;
 
     Ok(Html(html_content))
+}
+
+#[derive(Deserialize, Clone, Debug)]
+pub struct LoginContent {
+    username: String,
+    password: String,
+}
+
+async fn api_login_handler_v3(
+    State(mm): State<ModelManager>,
+    cookies: Cookies,
+    eJson(payload): eJson<LoginContent>,
+) -> Result<Json<Value>> {
+    debug!("HANDLER - api_login_handler");
+
+    let LoginContent { username, password } = payload;
+    let pwd_clear = password.clone();
+
+    let pwd_clear = pwd_clear.replace("%21", "!");
+    let root_ctx = Ctx::root_ctx();
+
+    let user: UserForLogin = UserBmc::first_by_username(&root_ctx, &mm, &username)
+        .await?
+        .ok_or(Error::LoginFailUsernameNotFound)?;
+    let user_id = user.id;
+
+    let Some(pwd) = user.pwd else {
+        return Err(Error::LoginFailUserHasNoPwd { user_id });
+    };
+
+    pwd::validate_pwd(
+        &ContentToHash {
+            salt: user.pwd_salt,
+            content: pwd_clear.clone(),
+        },
+        &pwd,
+    )
+    .map_err(|_| Error::LoginFailPwdNotMatching { user_id })?;
+
+    let token = generate_web_token(&user.username, user.token_salt)?;
+    web::set_token_cookie(&cookies, &user.username, user.token_salt)?;
+    let body = Json(json!({
+        "token": token.to_string()
+    }));
+
+    Ok(body)
 }
 
 async fn api_login_handler_v2(
@@ -80,7 +128,6 @@ async fn api_login_handler_v2(
                 .last()
                 .map_or_else(String::new, |b| (*b).to_string())
         });
-
     let pwd_clear = pwd_clear.replace("%21", "!");
     let root_ctx = Ctx::root_ctx();
 
@@ -102,15 +149,11 @@ async fn api_login_handler_v2(
     )
     .map_err(|_| Error::LoginFailPwdNotMatching { user_id })?;
 
+    let token = generate_web_token(&user.username, user.token_salt)?;
     web::set_token_cookie(&cookies, &user.username, user.token_salt)?;
-
-    let _body = Json(json!({
-        "result": {
-            "success": true
-        }
-    }));
     let body = Json(json!({
-        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjMyNSwiaXNBZG1pbiI6dHJ1ZSwiaWF0IjoxNjc3NzcyODE1LCJleHAiOjE2NzgzNzc2MTUsImlzcyI6IkFpckxhYiIsInN1YiI6IjMyNSJ9.J_5677bwyHF9xKZvPb3IPRd_1f3tu3U2wlMCmmWqNvY"
+        "token": token.to_string(),
+        "mfaRequired": user.mfa_enabled
     }));
 
     Ok(body)
@@ -144,11 +187,11 @@ async fn api_recover_pwd_handler(
             "success":false
         }
     }));
+    let config = web_config()?;
 
     let from = match format!(
         "{} <{}>",
-        &web_config().EMAIL_FROM_NAME,
-        &web_config().EMAIL_FROM_ADDRESS
+        &config.EMAIL_FROM_NAME, &config.EMAIL_FROM_ADDRESS
     )
     .parse()
     {
@@ -173,29 +216,22 @@ async fn api_recover_pwd_handler(
             String::from("broken link"),
             format!(
                 "<a href='{}?token={}'>Reset password</a>",
-                &web_config().RESET_PWD_URL,
-                reset_token
+                &config.RESET_PWD_URL, reset_token
             ),
-            /*
-            format!(
-                "token: {}: <a href='{}'>Reset password</a>",
-                reset_token,
-                &web_config().RESET_PWD_URL
-            ),
-            */
         )) {
         Ok(o) => o,
         Err(e) => {
-            panic!("Cannot create email: {e}");
+            warn!("Cannot create email: {e}");
+            return Ok(fail_body);
         }
     };
 
     let creds = Credentials::new(
-        web_config().EMAIL_FROM_ADDRESS.clone(),
-        web_config().EMAIL_TOKEN.clone(),
+        config.EMAIL_FROM_ADDRESS.clone(),
+        config.EMAIL_TOKEN.clone(),
     );
 
-    let result = match SmtpTransport::relay(&web_config().EMAIL_ADDRESS) {
+    let result = match SmtpTransport::relay(&config.EMAIL_ADDRESS) {
         Ok(o) => {
             let mailer = o.credentials(creds).build();
             match mailer.send(&email) {
@@ -276,7 +312,6 @@ async fn api_reset_password_handler(
         };
         UserBmc::update(&root_ctx, &mm, user_id, u2u).await?;
     }
-    // Create the success body.
     let body = Json(json!({
         "result": {
             "success": true
@@ -299,6 +334,7 @@ async fn api_signup_handler(
     Json(payload): Json<SignupPayload>,
 ) -> Result<Json<Value>> {
     debug!("HANDLER - api_signup_handler");
+    let config = web_config()?;
 
     let SignupPayload {
         email,
@@ -324,8 +360,7 @@ async fn api_signup_handler(
 
     let from = match format!(
         "{} <{}>",
-        &web_config().EMAIL_FROM_NAME,
-        &web_config().EMAIL_FROM_ADDRESS
+        &config.EMAIL_FROM_NAME, &config.EMAIL_FROM_ADDRESS
     )
     .parse()
     {
@@ -357,11 +392,11 @@ async fn api_signup_handler(
     };
 
     let creds = Credentials::new(
-        web_config().EMAIL_FROM_ADDRESS.clone(),
-        web_config().EMAIL_TOKEN.clone(),
+        config.EMAIL_FROM_ADDRESS.clone(),
+        config.EMAIL_TOKEN.clone(),
     );
 
-    let result = match SmtpTransport::relay(&web_config().EMAIL_ADDRESS) {
+    let result = match SmtpTransport::relay(&config.EMAIL_ADDRESS) {
         Ok(o) => {
             let mailer = o.credentials(creds).build();
 
@@ -403,6 +438,7 @@ async fn api_login_handler(
         pwd: pwd_clear,
     } = payload;
     let root_ctx = Ctx::root_ctx();
+    warn!("Username: {username}");
 
     let user: UserForLogin = UserBmc::first_by_username(&root_ctx, &mm, &username)
         .await?
@@ -462,4 +498,133 @@ async fn api_logoff_handler(
 #[derive(Debug, Deserialize)]
 struct LogoffPayload {
     logoff: bool,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use airlab_lib::ctx::Ctx;
+    use airlab_lib::model::user::UserBmc;
+    use tower::ServiceExt;
+    use tower_cookies::CookieManagerLayer;
+
+    type TestResult<T = ()> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
+
+    #[tokio::test]
+    async fn login_check_route_returns_seeded_user() -> TestResult {
+        let mm = crate::web::test_support::init_test_db().await;
+        let app = routes((*mm).clone()).layer(CookieManagerLayer::new());
+
+        let response = app
+            .oneshot(
+                axum::http::Request::builder()
+                    .uri("/api/v1/auth/check/demo1%40uzh.ch")
+                    .body(axum::body::Body::empty())?,
+            )
+            .await?;
+
+        assert_eq!(response.status(), axum::http::StatusCode::OK);
+        let body = crate::web::test_support::response_body_string(response).await?;
+        assert!(body.contains("\"exists\":true"));
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn reset_password_form_serves_index_html() -> TestResult {
+        let mm = crate::web::test_support::init_test_db().await;
+        let app = routes((*mm).clone()).layer(CookieManagerLayer::new());
+
+        let response = app
+            .oneshot(
+                axum::http::Request::builder()
+                    .uri("/reset-password")
+                    .body(axum::body::Body::empty())?,
+            )
+            .await?;
+
+        assert_eq!(response.status(), axum::http::StatusCode::OK);
+        assert_eq!(
+            crate::web::test_support::response_body_string(response).await?,
+            "<html>airlab-test</html>"
+        );
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn login_check_route_returns_false_for_unknown_user() -> TestResult {
+        let mm = crate::web::test_support::init_test_db().await;
+        let app = routes((*mm).clone()).layer(CookieManagerLayer::new());
+
+        let response = app
+            .oneshot(
+                axum::http::Request::builder()
+                    .uri("/api/v1/auth/check/missing%40example.test")
+                    .body(axum::body::Body::empty())?,
+            )
+            .await?;
+
+        assert_eq!(response.status(), axum::http::StatusCode::OK);
+        let body = crate::web::test_support::response_body_string(response).await?;
+        assert!(body.contains("\"exists\":false"));
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn login_route_sets_auth_cookie_for_valid_credentials() -> TestResult {
+        let mm = crate::web::test_support::init_test_db().await;
+        let ctx = Ctx::root_ctx();
+        UserBmc::update_pwd(&ctx, &mm, 1, "secret123").await?;
+        let app = routes((*mm).clone()).layer(CookieManagerLayer::new());
+        let payload = json!({
+            "username": "demo1@uzh.ch",
+            "pwd": "secret123"
+        });
+
+        let response = app
+            .oneshot(
+                axum::http::Request::builder()
+                    .method("POST")
+                    .uri("/api/v1/login")
+                    .header(axum::http::header::CONTENT_TYPE, "application/json")
+                    .body(axum::body::Body::from(payload.to_string()))?,
+            )
+            .await?;
+
+        assert_eq!(response.status(), axum::http::StatusCode::OK);
+        let set_cookie = response
+            .headers()
+            .get(axum::http::header::SET_COOKIE)
+            .and_then(|value| value.to_str().ok())
+            .ok_or_else(|| std::io::Error::other("login should set cookie"))?;
+        assert!(set_cookie.contains(crate::web::AUTH_TOKEN));
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn logoff_route_reports_logged_off() -> TestResult {
+        let mm = crate::web::test_support::init_test_db().await;
+        let app = routes((*mm).clone()).layer(CookieManagerLayer::new());
+        let payload = json!({ "logoff": true });
+
+        let response = app
+            .oneshot(
+                axum::http::Request::builder()
+                    .method("POST")
+                    .uri("/api/v1/logoff")
+                    .header(axum::http::header::CONTENT_TYPE, "application/json")
+                    .header(axum::http::header::COOKIE, "auth-token=abc")
+                    .body(axum::body::Body::from(payload.to_string()))?,
+            )
+            .await?;
+
+        assert_eq!(response.status(), axum::http::StatusCode::OK);
+        let body = crate::web::test_support::response_body_string(response).await?;
+        assert!(body.contains("\"logged_off\":true"));
+
+        Ok(())
+    }
 }

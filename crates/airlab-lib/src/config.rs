@@ -3,13 +3,13 @@ use crate::envs::get_env;
 use crate::envs::{get_env_b64u_as_u8s, get_env_parse};
 use std::sync::OnceLock;
 
-pub fn core_config() -> &'static CoreConfig {
-    static INSTANCE: OnceLock<CoreConfig> = OnceLock::new();
+pub fn core_config() -> crate::envs::Result<&'static CoreConfig> {
+    static INSTANCE: OnceLock<crate::envs::Result<CoreConfig>> = OnceLock::new();
 
-    INSTANCE.get_or_init(|| {
-        CoreConfig::load_from_env()
-            .unwrap_or_else(|ex| panic!("FATAL - WHILE LOADING CONF - Cause: {ex:?}"))
-    })
+    match INSTANCE.get_or_init(CoreConfig::load_from_env).as_ref() {
+        Ok(config) => Ok(config),
+        Err(err) => Err(*err),
+    }
 }
 
 #[allow(non_snake_case, dead_code)]
@@ -25,13 +25,13 @@ impl CoreConfig {
     }
 }
 
-pub fn auth_config() -> &'static AuthConfig {
-    static INSTANCE: OnceLock<AuthConfig> = OnceLock::new();
+pub fn auth_config() -> crate::envs::Result<&'static AuthConfig> {
+    static INSTANCE: OnceLock<crate::envs::Result<AuthConfig>> = OnceLock::new();
 
-    INSTANCE.get_or_init(|| {
-        AuthConfig::load_from_env()
-            .unwrap_or_else(|ex| panic!("FATAL - WHILE LOADING CONF - Cause: {ex:?}"))
-    })
+    match INSTANCE.get_or_init(AuthConfig::load_from_env).as_ref() {
+        Ok(config) => Ok(config),
+        Err(err) => Err(*err),
+    }
 }
 
 #[allow(non_snake_case)]

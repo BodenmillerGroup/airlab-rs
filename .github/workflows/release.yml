@@ -1,0 +1,95 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+      - "airlab-lib-v*"
+      - "airlab-web-v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release-linux:
+    name: Release Linux Artifacts
+    runs-on: [self-hosted, Linux, X64, local]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Rust (if needed)
+        run: |
+          if ! command -v cargo >/dev/null; then
+            curl https://sh.rustup.rs -sSf | sh -s -- -y
+          fi
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Show versions
+        run: |
+          rustc --version
+          cargo --version
+          node --version
+          npm --version
+
+      - name: Derive release version
+        id: version
+        run: |
+          echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          case "${GITHUB_REF_NAME}" in
+            v*)
+              echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+              ;;
+            *-v*)
+              echo "version=${GITHUB_REF_NAME##*-v}" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "version=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+              ;;
+          esac
+
+      - name: Install frontend dependencies
+        run: npm ci --include=dev
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Build airlab-web executable
+        run: cargo build -p airlab-web --bin airlab-web --release
+
+      - name: Package release assets
+        run: |
+          mkdir -p release-assets
+          cp target/release/airlab-web "release-assets/airlab-web-linux-x64-${{ steps.version.outputs.tag }}"
+          tar -czf "release-assets/airlab-web-frontend-dist-${{ steps.version.outputs.tag }}.tar.gz" dist
+          tar -czf "release-assets/airlab-web-migrations-${{ steps.version.outputs.tag }}.tar.gz" crates/airlab-web/migrations
+
+      - name: Upload workflow artifacts
+        if: ${{ !env.ACT }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-assets-${{ steps.version.outputs.tag }}
+          path: release-assets/*
+
+      - name: Wait for tag propagation
+        if: ${{ !env.ACT }}
+        run: sleep 30
+
+      - name: Create GitHub release
+        if: ${{ !env.ACT }}
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release-assets/airlab-web-linux-x64-${{ steps.version.outputs.tag }}
+            release-assets/airlab-web-frontend-dist-${{ steps.version.outputs.tag }}.tar.gz
+            release-assets/airlab-web-migrations-${{ steps.version.outputs.tag }}.tar.gz
+          name: Release ${{ steps.version.outputs.tag }}
+          tag_name: ${{ steps.version.outputs.tag }}
+          generate_release_notes: true

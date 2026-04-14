@@ -15,26 +15,26 @@ use airlab_lib::model::validation::{ValidationBmc, ValidationForCreate};
 use airlab_lib::model::validation_file::{ValidationFileBmc, ValidationFileForCreate};
 
 struct Entity {
-    group_id: i32,
-    user_id: i32,
-    protein_id: i32,
-    species_id: i32,
-    clone_id: i32,
-    lot_id: i32,
-    tag_id: i32,
+    group_id: i64,
+    user_id: i64,
+    protein_id: i64,
+    species_id: i64,
+    clone_id: i64,
+    lot_id: i64,
+    tag_id: i64,
     tag_index: usize,
-    conjugate_id: i32,
-    panel_id: i32,
-    panel_element_id: i32,
-    validation_id: i32,
-    validation_file_id: i32,
+    conjugate_id: i64,
+    panel_id: i64,
+    panel_element_id: i64,
+    validation_id: i64,
+    validation_file_id: i64,
     protein_name: String,
     description: String,
     epitope: String,
     isotype: String,
     clone_name: String,
     lot_name: String,
-    dilution_type: i32,
+    dilution_type: i64,
     concentration: f32,
 }
 
@@ -89,7 +89,7 @@ fn get_entities() -> Vec<Entity> {
     ]
 }
 
-pub async fn setup_demo_group(ctx: &Ctx, mm: &ModelManager, user_id: i32) -> Result<()> {
+pub async fn setup_demo_group(ctx: &Ctx, mm: &ModelManager, user_id: i64) -> Result<()> {
     let group_id = create_group(ctx, mm, user_id).await?;
     let species_id = create_species(ctx, mm, group_id).await?;
     let mut tag_ids = vec![];
@@ -113,7 +113,7 @@ pub async fn setup_demo_group(ctx: &Ctx, mm: &ModelManager, user_id: i32) -> Res
     Ok(())
 }
 
-async fn create_protein(ctx: &Ctx, mm: &ModelManager, entity: &Entity) -> Result<i32> {
+async fn create_protein(ctx: &Ctx, mm: &ModelManager, entity: &Entity) -> Result<i64> {
     let fc = ProteinForCreate {
         name: entity.protein_name.clone(),
         description: Some(entity.description.clone()),
@@ -125,7 +125,7 @@ async fn create_protein(ctx: &Ctx, mm: &ModelManager, entity: &Entity) -> Result
     Ok(id)
 }
 
-async fn create_group(ctx: &Ctx, mm: &ModelManager, user_id: i32) -> Result<i32> {
+async fn create_group(ctx: &Ctx, mm: &ModelManager, user_id: i64) -> Result<i64> {
     let group_c = GroupForCreate {
         name: "Demo group".into(),
         url: Some("https://example.com".into()),
@@ -144,17 +144,17 @@ async fn create_group(ctx: &Ctx, mm: &ModelManager, user_id: i32) -> Result<i32>
     };
     let _ = MemberBmc::create(ctx, mm, member_c).await?;
 
-    println!("Demo");
+    tracing::debug!("Demo");
     Ok(group_id)
 }
 
 async fn create_tag(
     ctx: &Ctx,
     mm: &ModelManager,
-    group_id: i32,
+    group_id: i64,
     name: &str,
-    mw: i16,
-) -> Result<i32> {
+    mw: i64,
+) -> Result<i64> {
     let fc = TagForCreate {
         name: name.into(),
         group_id,
@@ -174,7 +174,7 @@ async fn create_tag(
     Ok(id)
 }
 
-async fn create_species(ctx: &Ctx, mm: &ModelManager, group_id: i32) -> Result<i32> {
+async fn create_species(ctx: &Ctx, mm: &ModelManager, group_id: i64) -> Result<i64> {
     let fc = SpeciesForCreate {
         name: "Rabbit".into(),
         acronym: "Rb".into(),
@@ -185,7 +185,7 @@ async fn create_species(ctx: &Ctx, mm: &ModelManager, group_id: i32) -> Result<i
     Ok(id)
 }
 
-async fn create_clone(ctx: &Ctx, mm: &ModelManager, entity: &Entity) -> Result<i32> {
+async fn create_clone(ctx: &Ctx, mm: &ModelManager, entity: &Entity) -> Result<i64> {
     let fc = CloneForCreate {
         name: entity.clone_name.clone(),
         group_id: entity.group_id,
@@ -205,13 +205,15 @@ async fn create_clone(ctx: &Ctx, mm: &ModelManager, entity: &Entity) -> Result<i
     Ok(id)
 }
 
-async fn create_lot(ctx: &Ctx, mm: &ModelManager, entity: &Entity) -> Result<i32> {
+async fn create_lot(ctx: &Ctx, mm: &ModelManager, entity: &Entity) -> Result<i64> {
     let fc = LotForCreate {
         name: entity.lot_name.clone(),
         group_id: entity.group_id,
         clone_id: entity.clone_id,
         created_by: Some(entity.user_id),
         provider_id: None,
+        storage_id: None,
+        collection_id: None,
         reference: None,
         requested_by: None,
         approved_by: None,
@@ -234,7 +236,7 @@ async fn create_lot(ctx: &Ctx, mm: &ModelManager, entity: &Entity) -> Result<i32
     Ok(id)
 }
 
-async fn create_conjugate(ctx: &Ctx, mm: &ModelManager, entity: &Entity) -> Result<i32> {
+async fn create_conjugate(ctx: &Ctx, mm: &ModelManager, entity: &Entity) -> Result<i64> {
     let fc = ConjugateForCreate {
         group_id: entity.group_id,
         created_by: Some(entity.user_id),
@@ -242,6 +244,7 @@ async fn create_conjugate(ctx: &Ctx, mm: &ModelManager, entity: &Entity) -> Resu
         finished_by: None,
         lot_id: entity.lot_id,
         tag_id: entity.tag_id,
+        storage_id: None,
         status: None,
         concentration: None,
         description: None,
@@ -254,7 +257,7 @@ async fn create_conjugate(ctx: &Ctx, mm: &ModelManager, entity: &Entity) -> Resu
     Ok(id)
 }
 
-async fn create_panel_element(ctx: &Ctx, mm: &ModelManager, entity: &Entity) -> Result<i32> {
+async fn create_panel_element(ctx: &Ctx, mm: &ModelManager, entity: &Entity) -> Result<i64> {
     let fc = PanelElementForCreate {
         panel_id: entity.panel_id,
         conjugate_id: entity.conjugate_id,
@@ -266,7 +269,7 @@ async fn create_panel_element(ctx: &Ctx, mm: &ModelManager, entity: &Entity) -> 
     Ok(id)
 }
 
-async fn create_panel(ctx: &Ctx, mm: &ModelManager, group_id: i32, user_id: i32) -> Result<i32> {
+async fn create_panel(ctx: &Ctx, mm: &ModelManager, group_id: i64, user_id: i64) -> Result<i64> {
     let fc = PanelForCreate {
         name: Some("Antibody validation".into()),
         group_id,
@@ -280,7 +283,7 @@ async fn create_panel(ctx: &Ctx, mm: &ModelManager, group_id: i32, user_id: i32)
     Ok(id)
 }
 
-async fn create_validation(ctx: &Ctx, mm: &ModelManager, entity: &Entity) -> Result<i32> {
+async fn create_validation(ctx: &Ctx, mm: &ModelManager, entity: &Entity) -> Result<i64> {
     let fc = ValidationForCreate {
         group_id: entity.group_id,
         created_by: Some(entity.user_id),
@@ -318,7 +321,7 @@ async fn create_validation(ctx: &Ctx, mm: &ModelManager, entity: &Entity) -> Res
     Ok(id)
 }
 
-async fn create_validation_file(ctx: &Ctx, mm: &ModelManager, entity: &Entity) -> Result<i32> {
+async fn create_validation_file(ctx: &Ctx, mm: &ModelManager, entity: &Entity) -> Result<i64> {
     let fc = ValidationFileForCreate {
         validation_id: entity.validation_id,
         created_by: entity.user_id,
@@ -331,4 +334,72 @@ async fn create_validation_file(ctx: &Ctx, mm: &ModelManager, entity: &Entity) -
     };
     let id = ValidationFileBmc::create(ctx, mm, fc).await?;
     Ok(id)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use airlab_lib::model::clone::CloneBmc;
+    use airlab_lib::model::group::{Group, GroupBmc};
+    use airlab_lib::model::member::{Member, MemberBmc};
+    use airlab_lib::model::panel::{Panel, PanelBmc};
+    use serde_json::json;
+
+    type TestResult<T = ()> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
+
+    #[tokio::test]
+    async fn setup_demo_group_creates_expected_records() -> TestResult {
+        crate::web::test_support::init_web_test_env();
+        let mm = airlab_lib::_dev_utils::init_test().await;
+        let ctx = Ctx::root_ctx();
+
+        setup_demo_group(&ctx, &mm, 1).await?;
+
+        let groups: Vec<Group> = GroupBmc::list(
+            &ctx,
+            &mm,
+            Some(serde_json::from_value(
+                json!([{ "name": { "$eq": "Demo group" } }]),
+            )?),
+            None,
+        )
+        .await?;
+        assert_eq!(groups.len(), 1);
+        let group_id = groups[0].id;
+
+        let members: Vec<Member> = MemberBmc::list(
+            &ctx,
+            &mm,
+            Some(serde_json::from_value(
+                json!([{ "group_id": { "$eq": group_id }, "user_id": { "$eq": 1 } }]),
+            )?),
+            None,
+        )
+        .await?;
+        assert_eq!(members.len(), 1);
+
+        let clones = CloneBmc::list(
+            &ctx,
+            &mm,
+            Some(serde_json::from_value(
+                json!([{ "group_id": { "$eq": group_id } }]),
+            )?),
+            None,
+        )
+        .await?;
+        assert_eq!(clones.len(), get_entities().len());
+
+        let panels: Vec<Panel> = PanelBmc::list(
+            &ctx,
+            &mm,
+            Some(serde_json::from_value(
+                json!([{ "group_id": { "$eq": group_id } }]),
+            )?),
+            None,
+        )
+        .await?;
+        assert_eq!(panels.len(), 1);
+
+        Ok(())
+    }
 }

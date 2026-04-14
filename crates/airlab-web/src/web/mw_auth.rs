@@ -4,7 +4,6 @@ use airlab_lib::ctx::Ctx;
 use airlab_lib::model::ModelManager;
 use airlab_lib::model::user::{UserBmc, UserForAuth};
 use airlab_lib::token::{Token, validate_web_token};
-use async_trait::async_trait;
 use axum::body::Body;
 use axum::extract::{FromRequestParts, State};
 use axum::http::Request;
@@ -60,7 +59,6 @@ async fn _ctx_resolve(mm: State<ModelManager>, cookies: &Cookies) -> CtxExtResul
 #[derive(Debug, Clone)]
 pub struct CtxW(pub Ctx);
 
-#[async_trait]
 impl<S: Send + Sync> FromRequestParts<S> for CtxW {
     type Rejection = Error;
 
@@ -88,4 +86,75 @@ pub enum CtxExtError {
     CannotSetTokenCookie,
     CtxNotInRequestExt,
     CtxCreateFail(String),
+}
+
+impl core::fmt::Display for CtxExtError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "{self:?}")
+    }
+}
+
+impl std::error::Error for CtxExtError {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use airlab_lib::token::generate_web_token;
+    use axum::Router;
+    use tower::ServiceExt;
+    use tower_cookies::CookieManagerLayer;
+
+    type TestResult<T = ()> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
+
+    #[tokio::test]
+    async fn ctx_resolve_returns_missing_cookie_error() {
+        let mm = crate::web::test_support::init_test_db().await;
+        let cookies = Cookies::default();
+
+        let result = _ctx_resolve(State((*mm).clone()), &cookies).await;
+
+        assert!(matches!(result, Err(CtxExtError::TokenNotInCookie)));
+    }
+
+    #[tokio::test]
+    async fn ctx_resolve_accepts_valid_cookie() -> TestResult {
+        let mm = crate::web::test_support::init_test_db().await;
+        let cookies = Cookies::default();
+        let token = generate_web_token(
+            "demo1@uzh.ch",
+            uuid::Uuid::parse_str("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")?,
+        )?;
+        cookies.add(Cookie::new(AUTH_TOKEN, token.to_string()));
+
+        let result = _ctx_resolve(State((*mm).clone()), &cookies)
+            .await
+            .map_err(|err| std::io::Error::other(err.to_string()))?;
+
+        assert_eq!(result.0.user_id(), 1);
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn middleware_allows_request_with_invalid_cookie() -> TestResult {
+        let mm = crate::web::test_support::init_test_db().await;
+        let app = Router::new()
+            .route("/", axum::routing::get(|| async { "ok" }))
+            .layer(axum::middleware::from_fn_with_state(
+                (*mm).clone(),
+                mw_ctx_resolve,
+            ))
+            .layer(CookieManagerLayer::new());
+
+        let response = app
+            .oneshot(
+                Request::builder()
+                    .uri("/")
+                    .header(axum::http::header::COOKIE, format!("{AUTH_TOKEN}=invalid"))
+                    .body(Body::empty())?,
+            )
+            .await?;
+
+        assert_eq!(response.status(), axum::http::StatusCode::OK);
+        Ok(())
+    }
 }

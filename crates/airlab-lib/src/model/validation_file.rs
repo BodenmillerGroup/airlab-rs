@@ -2,53 +2,21 @@ use crate::ctx::Ctx;
 use crate::model::ModelManager;
 use crate::model::Result;
 use crate::model::base::{self, DbBmc};
-//use chrono::prelude::*;
 use modql::field::Fields;
 use modql::filter::{FilterNodes, ListOptions, OpValsInt64, OpValsString};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
-impl ValidationFileBmc {
-    #[must_use]
-    pub fn get_create_sql(drop_table: bool) -> String {
-        let table = Self::TABLE;
-        format!(
-            r##"{}
-create table if not exists "{table}" (
-  id serial primary key,
-  validation_id integer NOT NULL,
-  created_by integer NOT NULL,
-  hash character varying NOT NULL,
-  size integer,
-  name character varying,
-  extension character varying NOT NULL,
-  description character varying,
-  meta jsonb,
-  created_at timestamp with time zone DEFAULT now() NOT NULL
-);
-CREATE INDEX "IDX_validation_file_created_by" ON validation_file USING btree (created_by);
-CREATE INDEX "IDX_validation_file_hash" ON validation_file USING btree (hash);
-CREATE INDEX "IDX_validation_file_validation_id" ON validation_file USING btree (validation_id);
-        "##,
-            if drop_table {
-                format!("drop table if exists {table};")
-            } else {
-                String::new()
-            }
-        )
-    }
-}
-
 #[derive(Debug, Clone, Fields, FromRow, Serialize, Deserialize)]
 pub struct ValidationFile {
-    pub id: i32,
+    pub id: i64,
 
     #[serde(rename = "validationId")]
-    pub validation_id: i32,
+    pub validation_id: i64,
     #[serde(rename = "createdBy")]
-    pub created_by: i32,
+    pub created_by: i64,
     pub hash: String,
-    pub size: i32,
+    pub size: i64,
     pub name: Option<String>,
     pub extension: String,
     pub description: Option<String>,
@@ -60,15 +28,14 @@ pub struct ValidationFile {
 #[derive(Fields, Deserialize, Clone, Debug)]
 pub struct ValidationFileForCreate {
     #[serde(rename = "validationId")]
-    pub validation_id: i32,
+    pub validation_id: i64,
     #[serde(rename = "createdBy")]
-    pub created_by: i32,
+    pub created_by: i64,
     pub hash: String,
-    pub size: i32,
+    pub size: i64,
     pub name: Option<String>,
     pub extension: String,
     pub description: Option<String>,
-    //pub meta: Option<String>,
     #[serde(rename = "createdAt")]
     pub created_at: chrono::DateTime<chrono::Utc>,
 }
@@ -76,7 +43,7 @@ pub struct ValidationFileForCreate {
 #[derive(Fields, Default, Deserialize, Debug)]
 pub struct ValidationFileForUpdate {
     pub hash: String,
-    pub size: i32,
+    pub size: i64,
     pub name: Option<String>,
     pub extension: Option<String>,
     pub description: Option<String>,
@@ -101,18 +68,18 @@ impl ValidationFileBmc {
         ctx: &Ctx,
         mm: &ModelManager,
         validation_file_c: ValidationFileForCreate,
-    ) -> Result<i32> {
+    ) -> Result<i64> {
         base::create::<Self, _>(ctx, mm, validation_file_c).await
     }
     pub async fn create_full(
         ctx: &Ctx,
         mm: &ModelManager,
         validation_file_c: ValidationFile,
-    ) -> Result<i32> {
+    ) -> Result<i64> {
         base::create::<Self, _>(ctx, mm, validation_file_c).await
     }
 
-    pub async fn get(ctx: &Ctx, mm: &ModelManager, id: i32) -> Result<ValidationFile> {
+    pub async fn get(ctx: &Ctx, mm: &ModelManager, id: i64) -> Result<ValidationFile> {
         base::get::<Self, _>(ctx, mm, id).await
     }
 
@@ -128,13 +95,13 @@ impl ValidationFileBmc {
     pub async fn update(
         ctx: &Ctx,
         mm: &ModelManager,
-        id: i32,
+        id: i64,
         validation_file_u: ValidationFileForUpdate,
     ) -> Result<()> {
         base::update::<Self, _>(ctx, mm, id, validation_file_u).await
     }
 
-    pub async fn delete(ctx: &Ctx, mm: &ModelManager, id: i32) -> Result<()> {
+    pub async fn delete(ctx: &Ctx, mm: &ModelManager, id: i64) -> Result<()> {
         base::delete::<Self>(ctx, mm, id).await
     }
 }
@@ -144,18 +111,18 @@ mod tests {
     use super::*;
     use crate::_dev_utils;
     use crate::model::Error;
-    use anyhow::Result;
     use serde_json::json;
 
-    #[ignore]
+    type TestResult<T = ()> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
+
     #[tokio::test]
-    async fn test_validation_file_create_ok() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_validation_file_create_ok() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let fx_name = "test_create_ok name";
 
         let validation_file_c = ValidationFileForCreate {
-            name: None,
+            name: Some(fx_name.to_string()),
             created_by: 261,
             validation_id: 2221,
             hash: String::new(),
@@ -174,10 +141,9 @@ mod tests {
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
-    async fn test_validation_file_get_err_not_found() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_validation_file_get_err_not_found() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let fx_id = 100;
 
@@ -197,10 +163,9 @@ mod tests {
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
-    async fn test_validation_file_list_all_ok() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_validation_file_list_all_ok() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let tname = "test_validation_file_list_all_ok";
         let seeds = _dev_utils::get_validation_file_seed(tname);
@@ -208,26 +173,26 @@ mod tests {
 
         let validation_files = ValidationFileBmc::list(&ctx, &mm, None, None).await?;
 
-        let validation_files: Vec<ValidationFile> = validation_files.into_iter().collect();
+        let validation_files: Vec<ValidationFile> = validation_files
+            .into_iter()
+            .filter(|t| {
+                t.name
+                    .as_deref()
+                    .is_some_and(|name| name.starts_with(tname))
+            })
+            .collect();
         assert_eq!(
             validation_files.len(),
             4,
             "number of seeded validation_files."
         );
 
-        if false {
-            for validation_file in validation_files.iter() {
-                ValidationFileBmc::delete(&ctx, &mm, validation_file.id).await?;
-            }
-        }
-
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
-    async fn test_validation_file_list_by_filter_ok() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_validation_file_list_by_filter_ok() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let tname = "test_validation_file_list_by_filter_ok";
         let seeds = _dev_utils::get_validation_file_seed(tname);
@@ -251,31 +216,25 @@ mod tests {
             ValidationFileBmc::list(&ctx, &mm, Some(filters), Some(list_options)).await?;
 
         assert_eq!(validation_files.len(), 3);
-        assert_eq!(validation_files[0].name, Some("wrong".into()));
-
-        if false {
-            let validation_files = ValidationFileBmc::list(
-                &ctx,
-                &mm,
-                Some(serde_json::from_value(json!([{
-                    "name": {"$startsWith": "test_list_by_filter_ok"}
-                }]))?),
-                None,
-            )
-            .await?;
-            assert_eq!(validation_files.len(), 5);
-            for validation_file in validation_files.iter() {
-                ValidationFileBmc::delete(&ctx, &mm, validation_file.id).await?;
-            }
-        }
+        assert_eq!(
+            validation_files[0].name.as_deref(),
+            Some("test_validation_file_list_by_filter_ok-03")
+        );
+        assert_eq!(
+            validation_files[1].name.as_deref(),
+            Some("test_validation_file_list_by_filter_ok-02.a")
+        );
+        assert_eq!(
+            validation_files[2].name.as_deref(),
+            Some("test_validation_file_list_by_filter_ok-01.a")
+        );
 
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
-    async fn test_validation_file_update_ok() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_validation_file_update_ok() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let tname = "test_validation_file_update_ok";
         let seeds = _dev_utils::get_validation_file_seed(tname);
@@ -301,10 +260,9 @@ mod tests {
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
     async fn test_validation_file_delete_err_not_found() -> Result<()> {
-        let mm = ModelManager::new().await?;
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let fx_id = 100;
 

@@ -53,12 +53,12 @@ impl Display for Token {
 }
 
 pub fn generate_web_token(user: &str, salt: Uuid) -> Result<Token> {
-    let config = &auth_config();
+    let config = auth_config()?;
     _generate_token(user, config.TOKEN_DURATION_SEC, salt, &config.TOKEN_KEY)
 }
 
 pub fn validate_web_token(origin_token: &Token, salt: Uuid) -> Result<()> {
-    let config = &auth_config();
+    let config = auth_config()?;
     _validate_token_sign_and_exp(origin_token, salt, &config.TOKEN_KEY)?;
 
     Ok(())
@@ -66,7 +66,7 @@ pub fn validate_web_token(origin_token: &Token, salt: Uuid) -> Result<()> {
 
 fn _generate_token(ident: &str, duration_sec: f64, salt: Uuid, key: &[u8]) -> Result<Token> {
     let ident = ident.to_string();
-    let exp = now_utc_plus_sec_str(duration_sec);
+    let exp = now_utc_plus_sec_str(duration_sec).map_err(|_| Error::CannotFormatExp)?;
 
     let sign_b64u = _token_sign_into_b64u(&ident, &exp, salt, key)?;
 
@@ -113,12 +113,14 @@ fn _token_sign_into_b64u(ident: &str, exp: &str, salt: Uuid, key: &[u8]) -> Resu
 #[cfg(test)]
 mod tests {
     use super::*;
-    use anyhow::Result;
+    use crate::_dev_utils;
     use std::thread;
     use std::time::Duration;
 
+    type TestResult<T = ()> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
+
     #[test]
-    fn test_token_display_ok() -> Result<()> {
+    fn test_token_display_ok() -> TestResult {
         let fx_token_str = "ZngtaWRlbnQtMDE.MjAyMy0wNS0xN1QxNTozMDowMFo.some-sign-b64u-encoded";
         let fx_token = Token {
             ident: "fx-ident-01".to_string(),
@@ -132,7 +134,7 @@ mod tests {
     }
 
     #[test]
-    fn test_token_from_str_ok() -> Result<()> {
+    fn test_token_from_str_ok() -> TestResult {
         let fx_token_str = "ZngtaWRlbnQtMDE.MjAyMy0wNS0xN1QxNTozMDowMFo.some-sign-b64u-encoded";
         let fx_token = Token {
             ident: "fx-ident-01".to_string(),
@@ -148,11 +150,12 @@ mod tests {
     }
 
     #[test]
-    fn test_validate_web_token_ok() -> Result<()> {
+    fn test_validate_web_token_ok() -> TestResult {
+        _dev_utils::init_test_env();
         let fx_user = "user_one";
-        let fx_salt = Uuid::parse_str("f05e8961-d6ad-4086-9e78-a6de065e5453").unwrap();
+        let fx_salt = Uuid::parse_str("f05e8961-d6ad-4086-9e78-a6de065e5453")?;
         let fx_duration_sec = 0.02;
-        let token_key = &auth_config().TOKEN_KEY;
+        let token_key = &auth_config()?.TOKEN_KEY;
         let fx_token = _generate_token(fx_user, fx_duration_sec, fx_salt, token_key)?;
 
         thread::sleep(Duration::from_millis(10));
@@ -164,11 +167,12 @@ mod tests {
     }
 
     #[test]
-    fn test_validate_web_token_err_expired() -> Result<()> {
+    fn test_validate_web_token_err_expired() -> TestResult {
+        _dev_utils::init_test_env();
         let fx_user = "user_one";
-        let fx_salt = Uuid::parse_str("f05e8961-d6ad-4086-9e78-a6de065e5453").unwrap();
+        let fx_salt = Uuid::parse_str("f05e8961-d6ad-4086-9e78-a6de065e5453")?;
         let fx_duration_sec = 0.01;
-        let token_key = &auth_config().TOKEN_KEY;
+        let token_key = &auth_config()?.TOKEN_KEY;
         let fx_token = _generate_token(fx_user, fx_duration_sec, fx_salt, token_key)?;
 
         thread::sleep(Duration::from_millis(20));

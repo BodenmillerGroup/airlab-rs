@@ -8,15 +8,12 @@ pub fn now_utc() -> OffsetDateTime {
     OffsetDateTime::now_utc()
 }
 
-#[must_use]
-#[allow(clippy::missing_panics_doc)]
-pub fn format_time(time: OffsetDateTime) -> String {
-    #[allow(clippy::unwrap_used)]
-    time.format(&Rfc3339).unwrap()
+pub fn format_time(time: OffsetDateTime) -> Result<String> {
+    time.format(&Rfc3339)
+        .map_err(|_| Error::FailToTimeFormat(time.unix_timestamp()))
 }
 
-#[must_use]
-pub fn now_utc_plus_sec_str(sec: f64) -> String {
+pub fn now_utc_plus_sec_str(sec: f64) -> Result<String> {
     let new_time = now_utc() + Duration::seconds_f64(sec);
     format_time(new_time)
 }
@@ -30,6 +27,7 @@ pub type Result<T> = core::result::Result<T, Error>;
 #[derive(Debug)]
 pub enum Error {
     FailToDateParse(String),
+    FailToTimeFormat(i64),
 }
 
 impl core::fmt::Display for Error {

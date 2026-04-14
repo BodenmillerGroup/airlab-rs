@@ -8,7 +8,7 @@ pub mod pwd;
 pub mod time;
 pub mod token;
 
-#[cfg(test)]
+#[doc(hidden)]
 pub mod _dev_utils;
 
 use config::auth_config;

@@ -1,0 +1,6 @@
+[advisories]
+ignore = [
+  # Unfixed upstream; monitor this. The advisory is reported via sqlx's optional
+  # mysql/macro dependency path and is not part of the Postgres runtime used here.
+  "RUSTSEC-2023-0071",
+]

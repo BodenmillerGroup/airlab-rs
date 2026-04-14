@@ -1,0 +1,166 @@
+export const TemplateCyTOF1 = `<SampleAcquisitionTemplate xmlns="http://www.dvssciences.com/xsd/Cytof/SampleAcquisitionTemplate_1_0.xsd">
+<Template>
+<Name>{panelName}</Name>
+<Description>{panelName}</Description>
+</Template>
+<AcquisitionParams>
+<TemplateName>{panelName}</TemplateName>
+<AcquisitionDelay>10</AcquisitionDelay>
+<DetectorStabilityDelay>15</DetectorStabilityDelay>
+<DrySample>false</DrySample>
+<AcqSeconds>1200</AcqSeconds>
+<AcidWashSeconds>120</AcidWashSeconds>
+<BufferWashSeconds>120</BufferWashSeconds>
+<SampleVolume>0</SampleVolume>
+</AcquisitionParams>
+<AnalysisParams>
+<TemplateName>{panelName}</TemplateName>
+<DualCountStart>1</DualCountStart>
+<DualDataCalibStart>0</DualDataCalibStart>
+<DualDataCalibEnd>2</DualDataCalibEnd>
+<MinCellLength>10</MinCellLength>
+<MaxCellLength>75</MaxCellLength>
+<LowerThreshold>200</LowerThreshold>
+<Sigma>3</Sigma>
+<CellSubstraction>0</CellSubstraction>
+<CustomFilteringExpression />
+<CellsTarget>0</CellsTarget>
+<NoiseReduction>true</NoiseReduction>
+<OutputCellConvolution>false</OutputCellConvolution>
+<SignalIntensityCheck>false</SignalIntensityCheck>
+<SignalDualCheck>true</SignalDualCheck>
+<SignalPulseCheck>false</SignalPulseCheck>
+<InstrumentDualCalibration>true</InstrumentDualCalibration>
+<DataDualCalibration>false</DataDualCalibration>
+<DoAnalysis>true</DoAnalysis>
+<OnTheFlyAnalysis>true</OnTheFlyAnalysis>
+<PostAnalysis>false</PostAnalysis>
+<DefaultThresholdFiltering>true</DefaultThresholdFiltering>
+<CustomThresholdFiltering>false</CustomThresholdFiltering>
+<IntensityUpperLimit>50</IntensityUpperLimit>
+</AnalysisParams>
+-----+++<AcquisitionMarkers>
+<Label>{protName}</Label>
+<Description>{protDescription}</Description>
+<Mass>{isotopeMass}</Mass>
+<MassSymbol>{atom}</MassSymbol>
+<TemplateName>{panelName}</TemplateName>
+<AnalyteName>{atom}({atomShortMass})</AnalyteName>
+<OrderNumber>{orderNumber}</OrderNumber>
+</AcquisitionMarkers>-----+++</SampleAcquisitionTemplate>`;
+
+export const TemplateCyTOF2 = `<SampleAcquisitionTemplate xmlns="http://www.dvssciences.com/xsd/Cytof/SampleAcquisitionTemplate_1_0.xsd">
+<Template>
+<Name>{panelName}</Name>
+</Template>
+<AcquisitionParams>
+<TemplateName>{panelName}</TemplateName>
+<AcquisitionDelay>10</AcquisitionDelay>
+<DetectorStabilityDelay>15</DetectorStabilityDelay>
+<DrySample>false</DrySample>
+<AcqSeconds>1200</AcqSeconds>
+<AcidWashSeconds>120</AcidWashSeconds>
+<BufferWashSeconds>120</BufferWashSeconds>
+<SampleVolume>0</SampleVolume>
+<DisableWashing>false</DisableWashing>
+<AblationPower>10</AblationPower>
+<AblationDistanceBetweenShotsX>1</AblationDistanceBetweenShotsX>
+<AblationDistanceBetweenShotsY>1</AblationDistanceBetweenShotsY>
+<AblationFrequency>100</AblationFrequency>
+<PlumeStart>2102</PlumeStart>
+<PlumeWidth>384</PlumeWidth>
+</AcquisitionParams>
+<AnalysisParams>
+<TemplateName>{panelName}</TemplateName>
+<DualCountStart>1</DualCountStart>
+<DualDataCalibStart>0</DualDataCalibStart>
+<DualDataCalibEnd>2</DualDataCalibEnd>
+<MinCellLength>10</MinCellLength>
+<MaxCellLength>75</MaxCellLength>
+<LowerThreshold>200</LowerThreshold>
+<Sigma>3</Sigma>
+<CellSubstraction>0</CellSubstraction>
+<CustomFilteringExpression />
+<CellsTarget>0</CellsTarget>
+<NoiseReduction>true</NoiseReduction>
+<OutputCellConvolution>false</OutputCellConvolution>
+<SignalIntensityCheck>false</SignalIntensityCheck>
+<SignalDualCheck>true</SignalDualCheck>
+<SignalPulseCheck>false</SignalPulseCheck>
+<InstrumentDualCalibration>true</InstrumentDualCalibration>
+<DataDualCalibration>false</DataDualCalibration>
+<DoAnalysis>true</DoAnalysis>
+<OnTheFlyAnalysis>true</OnTheFlyAnalysis>
+<PostAnalysis>false</PostAnalysis>
+<DefaultThresholdFiltering>true</DefaultThresholdFiltering>
+<CustomThresholdFiltering>false</CustomThresholdFiltering>
+<IntensityUpperLimit>50</IntensityUpperLimit>
+<Randomization>true</Randomization>
+</AnalysisParams>
+-----+++<AcquisitionMarkers>
+<Label>{protName}</Label>
+<Description>{protDescription}</Description>
+<Mass>{isotopeMass}</Mass>
+<MassSymbol>{atom}</MassSymbol>
+<TemplateName>{panelName}</TemplateName>
+<AnalyteName>{atom}({atomShortMass})</AnalyteName>
+<OrderNumber>{orderNumber}</OrderNumber>
+</AcquisitionMarkers>-----+++</SampleAcquisitionTemplate>`;
+
+export const TemplateHelios = `<?xml version="1.0" standalone="yes"?>
+<MethodSchema xmlns="http://www.dvssciences.com/xsd/Cytof/MethodSchema_v1_0_3.xsd">
+  -----+++<MassChannels>
+    <Mass>{atomShortMass}</Mass>
+    <Element>{atom}</Element>
+    <Target>{protDescription}</Target>
+    <Label>{atomShortMass}{atom}</Label>
+    <ElementID>{atom}({atomShortMass})</ElementID>
+  </MassChannels>-----+++
+  <Params>
+    <WashingTime>0</WashingTime>
+    <BufferTime>0</BufferTime>
+    <OutputConvolutions>true</OutputConvolutions>
+    <NoiseReduction>true</NoiseReduction>
+    <LowerConvolutionThreshold>400</LowerConvolutionThreshold>
+    <LevelSubstraction>0</LevelSubstraction>
+    <MinEventDuration>10</MinEventDuration>
+    <MaxEventDuration>150</MaxEventDuration>
+    <Sigma>3</Sigma>
+    <ThresholdFilteringCustom>false</ThresholdFilteringCustom>
+    <CustomExpression />
+    <TemplateName>{panelName}</TemplateName>
+    <SignalType>Dual</SignalType>
+    <AnalysisType>Real-time</AnalysisType>
+    <PreserveIMD>false</PreserveIMD>
+    <DualDataCalibStart>0</DualDataCalibStart>
+    <DualDataCalibEnd>2</DualDataCalibEnd>
+    <InstrumentDualCalibration>true</InstrumentDualCalibration>
+    <DataDualCalibration>false</DataDualCalibration>
+    <IntensityUpperLimit>50</IntensityUpperLimit>
+    <DualCountStart>1</DualCountStart>
+    <TemplatePath>E:\\{panelName}.tem</TemplatePath>
+    <Randomization>true</Randomization>
+    <SolutionMode>false</SolutionMode>
+    <EventMode>true</EventMode>
+    <ViewPlot>true</ViewPlot>
+    <RefreshSeconds>10</RefreshSeconds>
+    <PushesToShow>400</PushesToShow>
+    <ModifierAuthorization>3</ModifierAuthorization>
+    <GaussianDiscrimination>true</GaussianDiscrimination>
+  </Params>
+  <SignalType>
+    <SignalType>Dual</SignalType>
+  </SignalType>
+  <SignalType>
+    <SignalType>Intensity</SignalType>
+  </SignalType>
+  <SignalType>
+    <SignalType>Pulse</SignalType>
+  </SignalType>
+  <AnalysisType>
+    <AnalysisType>Real-time</AnalysisType>
+  </AnalysisType>
+  <AnalysisType>
+    <AnalysisType>Post-Acquisition</AnalysisType>
+  </AnalysisType>
+</MethodSchema>`;

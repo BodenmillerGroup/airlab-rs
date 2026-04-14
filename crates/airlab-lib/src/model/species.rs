@@ -2,45 +2,18 @@ use crate::ctx::Ctx;
 use crate::model::ModelManager;
 use crate::model::Result;
 use crate::model::base::{self, DbBmc};
+use crate::model::helpers::{i64_or, opt_string, string_or};
 use modql::field::Fields;
 use modql::filter::{FilterNodes, ListOptions, OpValsInt64, OpValsString};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use sqlx::FromRow;
-
-impl SpeciesBmc {
-    #[must_use]
-    pub fn get_create_sql(drop_table: bool) -> String {
-        let table = Self::TABLE;
-        format!(
-            r##"{}
-create table if not exists "{table}" (
-  id serial primary key,
-  group_id integer NOT NULL,
-  name character varying NOT NULL,
-  acronym character varying NOT NULL,
-  meta jsonb,
-  created_at timestamp with time zone DEFAULT now() NOT NULL
-);
-ALTER TABLE ONLY species
-  ADD CONSTRAINT "UQ_species_group_id_and_acronym" UNIQUE (group_id, acronym);
-ALTER TABLE ONLY species
-  ADD CONSTRAINT "UQ_species_group_id_and_name" UNIQUE (group_id, name);
-CREATE INDEX "IDX_species_group_id" ON species USING btree (group_id);
-        "##,
-            if drop_table {
-                format!("drop table if exists {table};")
-            } else {
-                String::new()
-            }
-        )
-    }
-}
 
 #[derive(Debug, Clone, Fields, FromRow, Serialize, Deserialize, Default)]
 pub struct Species {
-    pub id: i32,
+    pub id: i64,
     #[serde(rename = "groupId")]
-    pub group_id: i32,
+    pub group_id: i64,
 
     pub name: String,
     pub acronym: String,
@@ -53,8 +26,22 @@ pub struct Species {
 pub struct SpeciesForCreate {
     pub name: String,
     #[serde(rename = "groupId")]
-    pub group_id: i32,
+    pub group_id: i64,
     pub acronym: String,
+}
+impl From<Value> for SpeciesForCreate {
+    fn from(v: Value) -> Self {
+        let obj = match v {
+            Value::Object(map) => Value::Object(map),
+            _ => Value::Object(Default::default()),
+        };
+
+        SpeciesForCreate {
+            name: string_or(&obj, "name"),
+            group_id: i64_or(&obj, "groupId", 0),
+            acronym: string_or(&obj, "acronym"),
+        }
+    }
 }
 
 #[derive(Fields, Default, Deserialize, Debug)]
@@ -62,11 +49,23 @@ pub struct SpeciesForUpdate {
     pub name: Option<String>,
     pub acronym: String,
 }
+impl From<Value> for SpeciesForUpdate {
+    fn from(v: Value) -> Self {
+        let obj = match v {
+            Value::Object(map) => Value::Object(map),
+            _ => Value::Object(Default::default()),
+        };
 
-#[derive(FilterNodes, Deserialize, Default, Debug)]
+        SpeciesForUpdate {
+            name: opt_string(&obj, "name"),
+            acronym: string_or(&obj, "acronym"),
+        }
+    }
+}
+
+#[derive(FilterNodes, Deserialize, Default, Debug, Clone)]
 pub struct SpeciesFilter {
     id: Option<OpValsInt64>,
-
     name: Option<OpValsString>,
     group_id: Option<OpValsInt64>,
 }
@@ -78,14 +77,22 @@ impl DbBmc for SpeciesBmc {
 }
 
 impl SpeciesBmc {
-    pub async fn create(ctx: &Ctx, mm: &ModelManager, species_c: SpeciesForCreate) -> Result<i32> {
+    pub async fn create(ctx: &Ctx, mm: &ModelManager, species_c: SpeciesForCreate) -> Result<i64> {
         base::create::<Self, _>(ctx, mm, species_c).await
     }
-    pub async fn create_full(ctx: &Ctx, mm: &ModelManager, species_c: Species) -> Result<i32> {
+    pub async fn create_full(ctx: &Ctx, mm: &ModelManager, species_c: Species) -> Result<i64> {
         base::create::<Self, _>(ctx, mm, species_c).await
     }
 
-    pub async fn get(ctx: &Ctx, mm: &ModelManager, id: i32) -> Result<Species> {
+    pub async fn count(
+        ctx: &Ctx,
+        mm: &ModelManager,
+        filters: Option<Vec<SpeciesFilter>>,
+    ) -> Result<i64> {
+        base::count::<Self, _>(ctx, mm, filters).await
+    }
+
+    pub async fn get(ctx: &Ctx, mm: &ModelManager, id: i64) -> Result<Species> {
         base::get::<Self, _>(ctx, mm, id).await
     }
 
@@ -101,13 +108,13 @@ impl SpeciesBmc {
     pub async fn update(
         ctx: &Ctx,
         mm: &ModelManager,
-        id: i32,
+        id: i64,
         species_u: SpeciesForUpdate,
     ) -> Result<()> {
         base::update::<Self, _>(ctx, mm, id, species_u).await
     }
 
-    pub async fn delete(ctx: &Ctx, mm: &ModelManager, id: i32) -> Result<()> {
+    pub async fn delete(ctx: &Ctx, mm: &ModelManager, id: i64) -> Result<()> {
         base::delete::<Self>(ctx, mm, id).await
     }
 }
@@ -117,13 +124,13 @@ mod tests {
     use super::*;
     use crate::_dev_utils;
     use crate::model::Error;
-    use anyhow::Result;
     use serde_json::json;
 
-    #[ignore]
+    type TestResult<T = ()> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
+
     #[tokio::test]
-    async fn test_species_create_ok() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_species_create_ok() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let fx_name = "test_create_ok name";
 
@@ -142,10 +149,9 @@ mod tests {
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
-    async fn test_species_get_err_not_found() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_species_get_err_not_found() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let fx_id = 100;
 
@@ -165,10 +171,9 @@ mod tests {
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
-    async fn test_species_list_all_ok() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_species_list_all_ok() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let tname = "test_species_list_all_ok";
         let seeds = _dev_utils::get_species_seed(tname);
@@ -178,7 +183,7 @@ mod tests {
 
         let species: Vec<Species> = species
             .into_iter()
-            .filter(|t| t.name.starts_with("test_list_all_ok-species"))
+            .filter(|t| t.name.starts_with(tname))
             .collect();
         assert_eq!(species.len(), 4, "number of seeded species.");
 
@@ -191,10 +196,9 @@ mod tests {
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
-    async fn test_species_list_by_filter_ok() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_species_list_by_filter_ok() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let tname = "test_species_list_by_filter_ok";
         let seeds = _dev_utils::get_species_seed(tname);
@@ -240,20 +244,18 @@ mod tests {
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
-    async fn test_species_update_ok() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_species_update_ok() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
-        let species = SpeciesBmc::list(&ctx, &mm, None, None).await?;
-        let tname = "test_species_list_by_filter_ok";
+        let tname = "test_species_update_ok";
         let seeds = _dev_utils::get_species_seed(tname);
-        let _fx_species = _dev_utils::seed_species(&ctx, &mm, &seeds).await?.remove(0);
+        let fx_species = _dev_utils::seed_species(&ctx, &mm, &seeds).await?.remove(0);
 
         SpeciesBmc::update(
             &ctx,
             &mm,
-            species[0].id,
+            fx_species.id,
             SpeciesForUpdate {
                 name: Some(tname.to_string()),
                 ..Default::default()
@@ -261,16 +263,15 @@ mod tests {
         )
         .await?;
 
-        let species = SpeciesBmc::get(&ctx, &mm, species[0].id).await?;
+        let species = SpeciesBmc::get(&ctx, &mm, fx_species.id).await?;
         assert_eq!(species.name, tname);
 
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
     async fn test_species_delete_err_not_found() -> Result<()> {
-        let mm = ModelManager::new().await?;
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let fx_id = 100;
 

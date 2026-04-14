@@ -2,45 +2,18 @@ use crate::ctx::Ctx;
 use crate::model::ModelManager;
 use crate::model::Result;
 use crate::model::base::{self, DbBmc};
+use crate::model::helpers::{i64_or, opt_string, string_or};
 use modql::field::Fields;
 use modql::filter::{FilterNodes, ListOptions, OpValsInt64, OpValsString};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use sqlx::FromRow;
-
-impl ProviderBmc {
-    #[must_use]
-    pub fn get_create_sql(drop_table: bool) -> String {
-        let table = Self::TABLE;
-        format!(
-            r##"{}
-create table if not exists "{table}" (
-  id serial primary key,
-  group_id integer NOT NULL,
-  name character varying NOT NULL,
-  description character varying,
-  url character varying,
-  meta jsonb,
-  created_at timestamp with time zone DEFAULT now() NOT NULL
-);
-ALTER TABLE ONLY provider
-  ADD CONSTRAINT "UQ_provider_group_id_and_name" UNIQUE (group_id, name);
-CREATE INDEX "IDX_provider_group_id" ON provider USING btree (group_id);
-CREATE INDEX "IDX_provider_name" ON provider USING btree (name);
-        "##,
-            if drop_table {
-                format!("drop table if exists {table};")
-            } else {
-                String::new()
-            }
-        )
-    }
-}
 
 #[derive(Debug, Clone, Fields, FromRow, Serialize, Deserialize, Default)]
 pub struct Provider {
-    pub id: i32,
+    pub id: i64,
     #[serde(rename = "groupId")]
-    pub group_id: i32,
+    pub group_id: i64,
     pub name: String,
     pub description: Option<String>,
     pub url: Option<String>,
@@ -53,9 +26,25 @@ pub struct Provider {
 pub struct ProviderForCreate {
     pub name: String,
     #[serde(rename = "groupId")]
-    pub group_id: i32,
+    pub group_id: i64,
     pub description: Option<String>,
     pub url: Option<String>,
+}
+
+impl From<Value> for ProviderForCreate {
+    fn from(v: Value) -> Self {
+        let obj = match v {
+            Value::Object(map) => Value::Object(map),
+            _ => Value::Object(Default::default()),
+        };
+
+        ProviderForCreate {
+            name: string_or(&obj, "name"),
+            group_id: i64_or(&obj, "groupId", 0),
+            description: opt_string(&obj, "description"),
+            url: opt_string(&obj, "url"),
+        }
+    }
 }
 
 #[derive(Fields, Default, Deserialize, Debug)]
@@ -65,7 +54,22 @@ pub struct ProviderForUpdate {
     pub url: Option<String>,
 }
 
-#[derive(FilterNodes, Deserialize, Default, Debug)]
+impl From<Value> for ProviderForUpdate {
+    fn from(v: Value) -> Self {
+        let obj = match v {
+            Value::Object(map) => Value::Object(map),
+            _ => Value::Object(Default::default()),
+        };
+
+        ProviderForUpdate {
+            name: opt_string(&obj, "name"),
+            description: opt_string(&obj, "description"),
+            url: opt_string(&obj, "url"),
+        }
+    }
+}
+
+#[derive(FilterNodes, Deserialize, Default, Debug, Clone)]
 pub struct ProviderFilter {
     id: Option<OpValsInt64>,
     group_id: Option<OpValsInt64>,
@@ -83,14 +87,14 @@ impl ProviderBmc {
         ctx: &Ctx,
         mm: &ModelManager,
         provider_c: ProviderForCreate,
-    ) -> Result<i32> {
+    ) -> Result<i64> {
         base::create::<Self, _>(ctx, mm, provider_c).await
     }
-    pub async fn create_full(ctx: &Ctx, mm: &ModelManager, provider_c: Provider) -> Result<i32> {
+    pub async fn create_full(ctx: &Ctx, mm: &ModelManager, provider_c: Provider) -> Result<i64> {
         base::create::<Self, _>(ctx, mm, provider_c).await
     }
 
-    pub async fn get(ctx: &Ctx, mm: &ModelManager, id: i32) -> Result<Provider> {
+    pub async fn get(ctx: &Ctx, mm: &ModelManager, id: i64) -> Result<Provider> {
         base::get::<Self, _>(ctx, mm, id).await
     }
 
@@ -103,16 +107,24 @@ impl ProviderBmc {
         base::list::<Self, _, _>(ctx, mm, filters, list_options).await
     }
 
+    pub async fn count(
+        ctx: &Ctx,
+        mm: &ModelManager,
+        filters: Option<Vec<ProviderFilter>>,
+    ) -> Result<i64> {
+        base::count::<Self, _>(ctx, mm, filters).await
+    }
+
     pub async fn update(
         ctx: &Ctx,
         mm: &ModelManager,
-        id: i32,
+        id: i64,
         provider_u: ProviderForUpdate,
     ) -> Result<()> {
         base::update::<Self, _>(ctx, mm, id, provider_u).await
     }
 
-    pub async fn delete(ctx: &Ctx, mm: &ModelManager, id: i32) -> Result<()> {
+    pub async fn delete(ctx: &Ctx, mm: &ModelManager, id: i64) -> Result<()> {
         base::delete::<Self>(ctx, mm, id).await
     }
 }
@@ -122,13 +134,13 @@ mod tests {
     use super::*;
     use crate::_dev_utils;
     use crate::model::Error;
-    use anyhow::Result;
     use serde_json::json;
 
-    #[ignore]
+    type TestResult<T = ()> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
+
     #[tokio::test]
-    async fn test_provider_create_ok() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_provider_create_ok() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let fx_name = "test_create_ok name";
 
@@ -148,10 +160,9 @@ mod tests {
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
-    async fn test_provider_get_err_not_found() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_provider_get_err_not_found() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let fx_id = 100;
 
@@ -171,10 +182,9 @@ mod tests {
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
-    async fn test_provider_list_all_ok() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_provider_list_all_ok() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let tname = "test_provider_list_all_ok";
         let seeds = _dev_utils::get_provider_seed(tname);
@@ -184,7 +194,7 @@ mod tests {
 
         let providers: Vec<Provider> = providers
             .into_iter()
-            .filter(|t| t.name.starts_with("test_list_all_ok-provider"))
+            .filter(|t| t.name.starts_with(tname))
             .collect();
         assert_eq!(providers.len(), 4, "number of seeded providers.");
 
@@ -197,10 +207,9 @@ mod tests {
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
-    async fn test_provider_list_by_filter_ok() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_provider_list_by_filter_ok() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let tname = "test_provider_list_by_filter_ok";
         let seeds = _dev_utils::get_provider_seed(tname);
@@ -246,34 +255,21 @@ mod tests {
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
-    async fn test_provider_update_ok() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_provider_update_ok() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
-
-        let providers = ProviderBmc::list(
-            &ctx,
-            &mm,
-            None,
-            Some(ListOptions {
-                limit: Some(1),
-                offset: None,
-                order_bys: None,
-            }),
-        )
-        .await?;
 
         let tname = "test_provider_update_ok";
         let seeds = _dev_utils::get_provider_seed(tname);
-        let _fx_provider = _dev_utils::seed_providers(&ctx, &mm, &seeds)
+        let fx_provider = _dev_utils::seed_providers(&ctx, &mm, &seeds)
             .await?
             .remove(0);
 
         ProviderBmc::update(
             &ctx,
             &mm,
-            providers[0].id,
+            fx_provider.id,
             ProviderForUpdate {
                 name: Some(tname.to_string()),
                 ..Default::default()
@@ -281,16 +277,15 @@ mod tests {
         )
         .await?;
 
-        let provider = ProviderBmc::get(&ctx, &mm, providers[0].id).await?;
+        let provider = ProviderBmc::get(&ctx, &mm, fx_provider.id).await?;
         assert_eq!(provider.name, tname);
 
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
     async fn test_provider_delete_err_not_found() -> Result<()> {
-        let mm = ModelManager::new().await?;
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let fx_id = 100;
 

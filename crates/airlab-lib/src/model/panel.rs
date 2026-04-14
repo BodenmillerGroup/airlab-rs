@@ -2,59 +2,28 @@ use crate::ctx::Ctx;
 use crate::model::ModelManager;
 use crate::model::Result;
 use crate::model::base::{self, DbBmc};
-//use chrono::prelude::*;
+use crate::model::helpers::{bool_or, i64_or, opt_bool, opt_i64, opt_string};
 use modql::field::Fields;
 use modql::filter::{FilterNodes, ListOptions, OpValsBool, OpValsInt64, OpValsString};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use sqlx::FromRow;
-
-impl PanelBmc {
-    #[must_use]
-    pub fn get_create_sql(drop_table: bool) -> String {
-        let table = Self::TABLE;
-        format!(
-            r##"{}
-create table if not exists "{table}" (
-  id serial primary key,
-  group_id integer NOT NULL,
-  created_by integer NOT NULL,
-  name character varying,
-  description character varying,
-  is_fluorophore boolean DEFAULT false NOT NULL,
-  is_locked boolean DEFAULT false NOT NULL,
-  application integer,
-  meta jsonb,
-  is_archived boolean DEFAULT false NOT NULL,
-  created_at timestamp with time zone DEFAULT now() NOT NULL,
-  updated_at timestamp with time zone DEFAULT now() NOT NULL
-);
-CREATE INDEX "IDX_panel_group_id" ON panel USING btree (group_id);
-CREATE INDEX "IDX_panel_created_by" ON panel USING btree (created_by);
-        "##,
-            if drop_table {
-                format!("drop table if exists {table};")
-            } else {
-                String::new()
-            }
-        )
-    }
-}
 
 #[derive(Debug, Clone, Fields, FromRow, Serialize, Deserialize)]
 pub struct Panel {
-    pub id: i32,
+    pub id: i64,
     #[serde(rename = "groupId")]
-    pub group_id: i32,
+    pub group_id: i64,
 
     #[serde(rename = "createdBy")]
-    pub created_by: i32,
+    pub created_by: i64,
     pub name: Option<String>,
     pub description: Option<String>,
     #[serde(rename = "isFluorophore")]
     pub is_fluorophore: bool,
     #[serde(rename = "isLocked")]
     pub is_locked: bool,
-    pub application: Option<i32>,
+    pub application: Option<i64>,
     pub meta: Option<serde_json::Value>,
     #[serde(rename = "isArchived")]
     pub is_archived: bool,
@@ -68,26 +37,44 @@ pub struct Panel {
 pub struct PanelForCreate {
     pub name: Option<String>,
     #[serde(rename = "groupId")]
-    pub group_id: i32,
+    pub group_id: i64,
 
     #[serde(rename = "createdBy")]
-    pub created_by: Option<i32>,
+    pub created_by: Option<i64>,
     pub description: Option<String>,
     #[serde(rename = "isFluorophore")]
     pub is_fluorophore: bool,
     #[serde(rename = "isLocked")]
     pub is_locked: bool,
-    pub application: Option<i32>,
-    //pub meta: Option<String>,
+    pub application: Option<i64>,
+}
+
+impl From<Value> for PanelForCreate {
+    fn from(v: Value) -> Self {
+        let obj = match v {
+            Value::Object(map) => Value::Object(map),
+            _ => Value::Object(Default::default()),
+        };
+
+        PanelForCreate {
+            name: opt_string(&obj, "name"),
+            group_id: i64_or(&obj, "groupId", 0),
+            created_by: opt_i64(&obj, "createdBy"),
+            description: opt_string(&obj, "description"),
+            is_fluorophore: bool_or(&obj, "isFluorophore", false),
+            is_locked: bool_or(&obj, "isLocked", false),
+            application: opt_i64(&obj, "application"),
+        }
+    }
 }
 
 #[derive(Deserialize, Debug)]
 pub struct ElementUpdate {
-    pub concentration: Option<f32>,
+    pub concentration: Option<f64>,
     #[serde(rename = "conjugateId")]
-    pub conjugate_id: i32,
+    pub conjugate_id: i64,
     #[serde(rename = "dilutionType")]
-    pub dilution_type: i32,
+    pub dilution_type: i64,
 }
 
 #[derive(Default, Deserialize, Debug)]
@@ -98,7 +85,7 @@ pub struct PanelPayloadForUpdate {
     pub is_fluorophore: Option<bool>,
     #[serde(rename = "isLocked")]
     pub is_locked: Option<bool>,
-    pub application: Option<i32>,
+    pub application: Option<i64>,
     pub elements: Vec<ElementUpdate>,
 }
 
@@ -111,14 +98,31 @@ pub struct PanelForUpdate {
     #[serde(rename = "isLocked")]
     pub is_locked: Option<bool>,
     pub is_archived: Option<bool>,
-    pub application: Option<i32>,
+    pub application: Option<i64>,
 }
 
-#[derive(FilterNodes, Deserialize, Default, Debug)]
+impl From<Value> for PanelForUpdate {
+    fn from(v: Value) -> Self {
+        let obj = match v {
+            Value::Object(map) => Value::Object(map),
+            _ => Value::Object(Default::default()),
+        };
+
+        PanelForUpdate {
+            name: opt_string(&obj, "name"),
+            description: opt_string(&obj, "description"),
+            is_fluorophore: opt_bool(&obj, "isFluorophore"),
+            is_locked: opt_bool(&obj, "isLocked"),
+            is_archived: opt_bool(&obj, "is_archived"),
+            application: opt_i64(&obj, "application"),
+        }
+    }
+}
+
+#[derive(FilterNodes, Deserialize, Default, Debug, Clone)]
 pub struct PanelFilter {
     id: Option<OpValsInt64>,
     group_id: Option<OpValsInt64>,
-    //conjugate_id: Option<OpValsInt64>,
     name: Option<OpValsString>,
     is_archived: Option<OpValsBool>,
 }
@@ -130,14 +134,14 @@ impl DbBmc for PanelBmc {
 }
 
 impl PanelBmc {
-    pub async fn create(ctx: &Ctx, mm: &ModelManager, panel_c: PanelForCreate) -> Result<i32> {
+    pub async fn create(ctx: &Ctx, mm: &ModelManager, panel_c: PanelForCreate) -> Result<i64> {
         base::create::<Self, _>(ctx, mm, panel_c).await
     }
-    pub async fn create_full(ctx: &Ctx, mm: &ModelManager, panel_c: Panel) -> Result<i32> {
+    pub async fn create_full(ctx: &Ctx, mm: &ModelManager, panel_c: Panel) -> Result<i64> {
         base::create::<Self, _>(ctx, mm, panel_c).await
     }
 
-    pub async fn get(ctx: &Ctx, mm: &ModelManager, id: i32) -> Result<Panel> {
+    pub async fn get(ctx: &Ctx, mm: &ModelManager, id: i64) -> Result<Panel> {
         base::get::<Self, _>(ctx, mm, id).await
     }
 
@@ -150,16 +154,24 @@ impl PanelBmc {
         base::list::<Self, _, _>(ctx, mm, filters, list_options).await
     }
 
+    pub async fn count(
+        ctx: &Ctx,
+        mm: &ModelManager,
+        filters: Option<Vec<PanelFilter>>,
+    ) -> Result<i64> {
+        base::count::<Self, _>(ctx, mm, filters).await
+    }
+
     pub async fn update(
         ctx: &Ctx,
         mm: &ModelManager,
-        id: i32,
+        id: i64,
         panel_u: PanelForUpdate,
     ) -> Result<()> {
         base::update::<Self, _>(ctx, mm, id, panel_u).await
     }
 
-    pub async fn delete(ctx: &Ctx, mm: &ModelManager, id: i32) -> Result<()> {
+    pub async fn delete(ctx: &Ctx, mm: &ModelManager, id: i64) -> Result<()> {
         base::delete::<Self>(ctx, mm, id).await
     }
 }
@@ -169,13 +181,13 @@ mod tests {
     use super::*;
     use crate::_dev_utils;
     use crate::model::Error;
-    use anyhow::Result;
     use serde_json::json;
 
-    #[ignore]
+    type TestResult<T = ()> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
+
     #[tokio::test]
-    async fn test_panel_create_ok() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_panel_create_ok() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let fx_name = "test_create_ok name";
 
@@ -191,17 +203,16 @@ mod tests {
         let id = PanelBmc::create(&ctx, &mm, panel_c).await?;
 
         let panel = PanelBmc::get(&ctx, &mm, id).await?;
-        assert_eq!(panel.name.unwrap(), fx_name);
+        assert_eq!(panel.name.as_deref(), Some(fx_name));
 
         PanelBmc::delete(&ctx, &mm, id).await?;
 
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
-    async fn test_panel_get_err_not_found() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_panel_get_err_not_found() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let fx_id = 100;
 
@@ -221,10 +232,9 @@ mod tests {
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
-    async fn test_panel_list_all_ok() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_panel_list_all_ok() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let tname = "test_panel_list_all_ok";
         let seeds = _dev_utils::get_panel_seed(tname);
@@ -236,9 +246,8 @@ mod tests {
             .into_iter()
             .filter(|t| {
                 t.name
-                    .as_ref()
-                    .unwrap()
-                    .starts_with("test_list_all_ok-panel")
+                    .as_deref()
+                    .is_some_and(|name| name.starts_with(tname))
             })
             .collect();
         assert_eq!(panels.len(), 4, "number of seeded panels.");
@@ -252,10 +261,9 @@ mod tests {
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
     async fn test_panel_list_by_filter_ok() -> Result<()> {
-        let mm = ModelManager::new().await?;
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let tname = "test_panel_list_by_filter_ok";
         let seeds = _dev_utils::get_panel_seed(tname);
@@ -278,7 +286,6 @@ mod tests {
         let panels = PanelBmc::list(&ctx, &mm, Some(filters), Some(list_options)).await?;
 
         assert_eq!(panels.len(), 3);
-        //assert!(panels[0].name.ends_with("03"));
 
         if false {
             let panels = PanelBmc::list(
@@ -299,10 +306,9 @@ mod tests {
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
     async fn test_panel_update_ok() -> Result<()> {
-        let mm = ModelManager::new().await?;
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let tname = "test_panel_list_by_filter_ok";
         let seeds = _dev_utils::get_panel_seed(tname);
@@ -320,15 +326,14 @@ mod tests {
         .await?;
 
         let panel = PanelBmc::get(&ctx, &mm, fx_panel.id).await?;
-        assert_eq!(panel.name.unwrap(), tname);
+        assert_eq!(panel.name.as_deref(), Some(tname));
 
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
     async fn test_panel_delete_err_not_found() -> Result<()> {
-        let mm = ModelManager::new().await?;
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let fx_id = 100;
 

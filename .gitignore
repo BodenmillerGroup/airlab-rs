@@ -4,3 +4,6 @@
 /data/
 /web-airlab/
 /.env
+/node_modules/
+/dist/
+/release-assets/

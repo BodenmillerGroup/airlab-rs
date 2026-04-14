@@ -2,70 +2,75 @@ use crate::ctx::Ctx;
 use crate::model::ModelManager;
 use crate::model::Result;
 use crate::model::base::{self, DbBmc};
+use crate::model::helpers::{i64_or, opt_f32};
 use modql::field::Fields;
 use modql::filter::{FilterNodes, ListOptions, OpValsInt64};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use sqlx::FromRow;
-
-impl PanelElementBmc {
-    #[must_use]
-    pub fn get_create_sql(drop_table: bool) -> String {
-        let table = Self::TABLE;
-        format!(
-            r##"{}
-create table if not exists "{table}" (
-  id serial primary key,
-  panel_id integer NOT NULL,
-  conjugate_id integer NOT NULL,
-  dilution_type smallint DEFAULT 0 NOT NULL,
-  concentration real
-);
-ALTER TABLE ONLY panel_element
-  ADD CONSTRAINT "UQ_panel_element_panel_id_and_conjugate_id" UNIQUE (panel_id, conjugate_id);
-CREATE INDEX "IDX_panel_element_conjugate_id" ON panel_element USING btree (conjugate_id);
-CREATE INDEX "IDX_panel_element_panel_id" ON panel_element USING btree (panel_id);
-        "##,
-            if drop_table {
-                format!("drop table if exists {table};")
-            } else {
-                String::new()
-            }
-        )
-    }
-}
 
 #[derive(Debug, Clone, Fields, FromRow, Serialize, Deserialize, Default)]
 pub struct PanelElement {
-    pub id: i32,
+    pub id: i64,
 
     #[serde(rename = "panelId")]
-    pub panel_id: i32,
+    pub panel_id: i64,
     #[serde(rename = "conjugateId")]
-    pub conjugate_id: i32,
+    pub conjugate_id: i64,
     #[serde(rename = "dilutionType")]
-    pub dilution_type: i16,
+    pub dilution_type: i64,
     pub concentration: Option<f32>,
 }
 
 #[derive(Fields, Deserialize, Clone, Debug)]
 pub struct PanelElementForCreate {
     #[serde(rename = "panelId")]
-    pub panel_id: i32,
+    pub panel_id: i64,
     #[serde(rename = "conjugateId")]
-    pub conjugate_id: i32,
+    pub conjugate_id: i64,
     #[serde(rename = "dilutionType")]
-    pub dilution_type: i32,
+    pub dilution_type: i64,
     pub concentration: Option<f32>,
+}
+
+impl From<Value> for PanelElementForCreate {
+    fn from(v: Value) -> Self {
+        let obj = match v {
+            Value::Object(map) => Value::Object(map),
+            _ => Value::Object(Default::default()),
+        };
+
+        PanelElementForCreate {
+            panel_id: i64_or(&obj, "panelId", 0),
+            conjugate_id: i64_or(&obj, "conjugateId", 0),
+            dilution_type: i64_or(&obj, "dilutionType", 0),
+            concentration: opt_f32(&obj, "concentration"),
+        }
+    }
 }
 
 #[derive(Fields, Default, Deserialize, Debug)]
 pub struct PanelElementForUpdate {
     #[serde(rename = "dilutionType")]
-    pub dilution_type: i32,
+    pub dilution_type: i64,
     pub concentration: Option<f32>,
 }
 
-#[derive(FilterNodes, Deserialize, Default, Debug)]
+impl From<Value> for PanelElementForUpdate {
+    fn from(v: Value) -> Self {
+        let obj = match v {
+            Value::Object(map) => Value::Object(map),
+            _ => Value::Object(Default::default()),
+        };
+
+        PanelElementForUpdate {
+            dilution_type: i64_or(&obj, "dilutionType", 0),
+            concentration: opt_f32(&obj, "concentration"),
+        }
+    }
+}
+
+#[derive(FilterNodes, Deserialize, Default, Debug, Clone)]
 pub struct PanelElementFilter {
     id: Option<OpValsInt64>,
 
@@ -84,18 +89,18 @@ impl PanelElementBmc {
         ctx: &Ctx,
         mm: &ModelManager,
         panel_element_c: PanelElementForCreate,
-    ) -> Result<i32> {
+    ) -> Result<i64> {
         base::create::<Self, _>(ctx, mm, panel_element_c).await
     }
     pub async fn create_full(
         ctx: &Ctx,
         mm: &ModelManager,
         panel_element_c: PanelElement,
-    ) -> Result<i32> {
+    ) -> Result<i64> {
         base::create::<Self, _>(ctx, mm, panel_element_c).await
     }
 
-    pub async fn get(ctx: &Ctx, mm: &ModelManager, id: i32) -> Result<PanelElement> {
+    pub async fn get(ctx: &Ctx, mm: &ModelManager, id: i64) -> Result<PanelElement> {
         base::get::<Self, _>(ctx, mm, id).await
     }
 
@@ -108,16 +113,24 @@ impl PanelElementBmc {
         base::list::<Self, _, _>(ctx, mm, filters, list_options).await
     }
 
+    pub async fn count(
+        ctx: &Ctx,
+        mm: &ModelManager,
+        filters: Option<Vec<PanelElementFilter>>,
+    ) -> Result<i64> {
+        base::count::<Self, _>(ctx, mm, filters).await
+    }
+
     pub async fn update(
         ctx: &Ctx,
         mm: &ModelManager,
-        id: i32,
+        id: i64,
         panel_element_u: PanelElementForUpdate,
     ) -> Result<()> {
         base::update::<Self, _>(ctx, mm, id, panel_element_u).await
     }
 
-    pub async fn delete(ctx: &Ctx, mm: &ModelManager, id: i32) -> Result<()> {
+    pub async fn delete(ctx: &Ctx, mm: &ModelManager, id: i64) -> Result<()> {
         base::delete::<Self>(ctx, mm, id).await
     }
 }
@@ -127,16 +140,14 @@ mod tests {
     use super::*;
     use crate::_dev_utils;
     use crate::model::Error;
-    use anyhow::Result;
     use serde_json::json;
 
-    #[ignore]
-    #[tokio::test]
-    async fn test_panel_element_create_ok() -> Result<()> {
-        let mm = ModelManager::new().await?;
-        let ctx = Ctx::root_ctx();
-        let _fx_name = "test_create_ok name";
+    type TestResult<T = ()> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
+    #[tokio::test]
+    async fn test_panel_element_create_ok() -> TestResult {
+        let mm = _dev_utils::init_test().await;
+        let ctx = Ctx::root_ctx();
         let panel_element_c = PanelElementForCreate {
             panel_id: 1815,
             conjugate_id: 4292,
@@ -146,17 +157,17 @@ mod tests {
         let id = PanelElementBmc::create(&ctx, &mm, panel_element_c).await?;
 
         let panel_element = PanelElementBmc::get(&ctx, &mm, id).await?;
-        assert_eq!(panel_element.id, 1);
+        assert_eq!(panel_element.panel_id, 1815);
+        assert_eq!(panel_element.conjugate_id, 4292);
 
         PanelElementBmc::delete(&ctx, &mm, id).await?;
 
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
-    async fn test_panel_element_get_err_not_found() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_panel_element_get_err_not_found() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let fx_id = 100;
 
@@ -176,10 +187,9 @@ mod tests {
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
-    async fn test_panel_element_list_all_ok() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_panel_element_list_all_ok() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let tname = "test_panel_element_list_all_ok";
         let seeds = _dev_utils::get_panel_element_seed(tname);
@@ -187,73 +197,51 @@ mod tests {
 
         let panel_elements = PanelElementBmc::list(&ctx, &mm, None, None).await?;
 
-        let panel_elements: Vec<PanelElement> =
-            panel_elements.into_iter().filter(|t| t.id == 1).collect();
+        let panel_elements: Vec<PanelElement> = panel_elements
+            .into_iter()
+            .filter(|t| {
+                matches!(
+                    (t.panel_id, t.conjugate_id),
+                    (1009, 1008) | (1815, 1008) | (1009, 4292) | (1815, 4292)
+                )
+            })
+            .collect();
         assert_eq!(panel_elements.len(), 4, "number of seeded panel_elements.");
-
-        if false {
-            for panel_element in panel_elements.iter() {
-                PanelElementBmc::delete(&ctx, &mm, panel_element.id).await?;
-            }
-        }
 
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
-    async fn test_panel_element_list_by_filter_ok() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_panel_element_list_by_filter_ok() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
-        let tname = "test_panel_element_list_all_ok";
+        let tname = "test_panel_element_list_by_filter_ok";
         let seeds = _dev_utils::get_panel_element_seed(tname);
         _dev_utils::seed_panel_elements(&ctx, &mm, &seeds).await?;
 
         let filters: Vec<PanelElementFilter> = serde_json::from_value(json!([
             {
-                "name": {
-                    "$endsWith": ".a",
-                    "$containsAny": ["01", "02"]
-                }
-            },
-            {
-                "name": {"$contains": "03"}
+                "panel_id": 1009
             }
         ]))?;
         let list_options = serde_json::from_value(json!({
-            "order_bys": "!id"
+            "order_bys": "id"
         }))?;
         let panel_elements =
             PanelElementBmc::list(&ctx, &mm, Some(filters), Some(list_options)).await?;
 
         assert_eq!(panel_elements.len(), 3);
-        assert!(panel_elements[0].id == 3);
-
-        if false {
-            let panel_elements = PanelElementBmc::list(
-                &ctx,
-                &mm,
-                Some(serde_json::from_value(json!([{
-                    "name": {"$startsWith": "test_list_by_filter_ok"}
-                }]))?),
-                None,
-            )
-            .await?;
-            assert_eq!(panel_elements.len(), 5);
-            for panel_element in panel_elements.iter() {
-                PanelElementBmc::delete(&ctx, &mm, panel_element.id).await?;
-            }
-        }
+        assert_eq!(panel_elements[0].dilution_type, 2);
+        assert_eq!(panel_elements[1].dilution_type, 1);
 
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
-    async fn test_panel_element_update_ok() -> Result<()> {
-        let mm = ModelManager::new().await?;
+    async fn test_panel_element_update_ok() -> TestResult {
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
-        let tname = "test_panel_element_list_all_ok";
+        let tname = "test_panel_element_update_ok";
         let seeds = _dev_utils::get_panel_element_seed(tname);
         let fx_panel_element = _dev_utils::seed_panel_elements(&ctx, &mm, &seeds)
             .await?
@@ -264,21 +252,22 @@ mod tests {
             &mm,
             fx_panel_element.id,
             PanelElementForUpdate {
-                ..Default::default()
+                dilution_type: 9,
+                concentration: Some(0.9),
             },
         )
         .await?;
 
         let panel_element = PanelElementBmc::get(&ctx, &mm, fx_panel_element.id).await?;
-        assert_eq!(panel_element.id, 1);
+        assert_eq!(panel_element.dilution_type, 9);
+        assert_eq!(panel_element.concentration, Some(0.9));
 
         Ok(())
     }
 
-    #[ignore]
     #[tokio::test]
     async fn test_panel_element_delete_err_not_found() -> Result<()> {
-        let mm = ModelManager::new().await?;
+        let mm = _dev_utils::init_test().await;
         let ctx = Ctx::root_ctx();
         let fx_id = 100;
 

@@ -14,3 +14,22 @@ impl core::fmt::Display for Error {
 }
 
 impl std::error::Error for Error {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn display_uses_debug_output() {
+        assert_eq!(
+            Error::CtxCannotNewRootCtx.to_string(),
+            "CtxCannotNewRootCtx"
+        );
+    }
+
+    #[test]
+    fn result_alias_uses_ctx_error() {
+        let result: Result<()> = Err(Error::CtxCannotNewRootCtx);
+        assert!(matches!(result, Err(Error::CtxCannotNewRootCtx)));
+    }
+}

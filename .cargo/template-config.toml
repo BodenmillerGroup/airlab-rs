@@ -11,9 +11,18 @@ SERVICE_EMAIL_FROM_NAME="<from-email-name>"
 SERVICE_EMAIL_TOKEN="<email-token>"
 SERVICE_EMAIL_ADDRESS="<email-service-url>"
 SERVICE_LOG_AGGR_URL="<log-aggregator-url>"
+SERVICE_LOG_AGGR_AUTH="Basic <base64_user_password>"
+SERVICE_LOG_AGGR_REQUEST_STREAM="airlab_requests"
+SERVICE_LOG_AGGR_FRONTEND_STREAM="airlab_frontend"
+SERVICE_LOG_AGGR_EVENT_STREAM="airlab_event"
+SERVICE_NAME="airlab-web"
+SERVICE_ENV="prod"
 SERVICE_RESET_PWD_URL="<reset-password-url>"
 SERVICE_HOST_ADDR="<host-url>"
 SERVICE_HOST_PORT="<port-port>"
 SUPER_USER="admin@example.com"
 SUPER_USER_PWD="changeit"
 SETUP_DEMO_GROUP=true
+
+[target.x86_64-unknown-linux-gnu]
+linker = "x86_64-unknown-linux-gnu-gcc"

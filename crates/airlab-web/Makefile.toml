@@ -1,0 +1,4 @@
+[tasks.dorelease] # release airlab-web
+workspace = false
+command = "cargo"
+args = ["smart-release", "-b", "patch", "--execute", "--allow-dirty", "--only", "airlab-web"]

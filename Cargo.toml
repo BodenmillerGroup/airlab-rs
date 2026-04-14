@@ -7,3 +7,7 @@ members = [
     "crates/airlab-lib",
     "crates/airlab-web",
 ]
+default-members = [
+    "crates/airlab-lib",
+    "crates/airlab-web",
+]
