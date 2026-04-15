@@ -7,7 +7,7 @@ pub fn web_config() -> airlab_lib::envs::Result<&'static WebConfig> {
     #[cfg(test)]
     {
         let config = Box::new(WebConfig::load_from_env()?);
-        return Ok(Box::leak(config));
+        Ok(Box::leak(config))
     }
 
     #[cfg(not(test))]

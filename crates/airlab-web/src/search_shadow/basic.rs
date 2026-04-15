@@ -531,8 +531,8 @@ fn field_key(kind: BasicShadowKind, table: ReturnType, field: &str) -> Option<St
         return Some("user_name".to_string());
     }
 
-    if kind == BasicShadowKind::Validation {
-        if let Some(key) = match (table, field) {
+    if kind == BasicShadowKind::Validation
+        && let Some(key) = match (table, field) {
             (ReturnType::Clone, "name") => Some("clone_name".to_string()),
             (ReturnType::Protein, "name") => Some("protein_name".to_string()),
             (ReturnType::Lot, "number") => Some("lot_number".to_string()),
@@ -543,10 +543,9 @@ fn field_key(kind: BasicShadowKind, table: ReturnType, field: &str) -> Option<St
         } {
             return Some(key);
         }
-    }
 
-    if kind == BasicShadowKind::Lot {
-        if let Some(key) = match (table, field) {
+    if kind == BasicShadowKind::Lot
+        && let Some(key) = match (table, field) {
             (ReturnType::Clone, "name") => Some("clone_name".to_string()),
             (ReturnType::Protein, "name") => Some("protein_name".to_string()),
             (ReturnType::Provider, "name") => Some("provider_name".to_string()),
@@ -558,10 +557,9 @@ fn field_key(kind: BasicShadowKind, table: ReturnType, field: &str) -> Option<St
         } {
             return Some(key);
         }
-    }
 
-    if kind == BasicShadowKind::Conjugate {
-        if let Some(key) = match (table, field) {
+    if kind == BasicShadowKind::Conjugate
+        && let Some(key) = match (table, field) {
             (ReturnType::Lot, "name") => Some("lot_name".to_string()),
             (ReturnType::Clone, "name") => Some("clone_name".to_string()),
             (ReturnType::Protein, "name") => Some("protein_name".to_string()),
@@ -574,10 +572,9 @@ fn field_key(kind: BasicShadowKind, table: ReturnType, field: &str) -> Option<St
         } {
             return Some(key);
         }
-    }
 
-    if kind == BasicShadowKind::PanelElement {
-        if let Some(key) = match (table, field) {
+    if kind == BasicShadowKind::PanelElement
+        && let Some(key) = match (table, field) {
             (ReturnType::Panel, "name") => Some("panel_name".to_string()),
             (ReturnType::Conjugate, "description") => Some("conjugate_description".to_string()),
             (ReturnType::Tag, "name") => Some("tag_name".to_string()),
@@ -585,7 +582,6 @@ fn field_key(kind: BasicShadowKind, table: ReturnType, field: &str) -> Option<St
         } {
             return Some(key);
         }
-    }
 
     match (table, field) {
         (ReturnType::User, "id") => Some("id".to_string()),
@@ -1334,7 +1330,7 @@ async fn build_conjugate_rows(mm: &ModelManager) -> airlab_lib::model::Result<Ve
                 ),
             ];
             if let Some(value) = row.concentration {
-                pairs.push(("concentration", BasicShadowValue::Float(value as f64)));
+                pairs.push(("concentration", BasicShadowValue::Float(value)));
             }
             row_from_pairs(row.id, pairs)
         })

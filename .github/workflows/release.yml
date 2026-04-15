@@ -13,7 +13,7 @@ permissions:
 jobs:
   release-linux:
     name: Release Linux Artifacts
-    runs-on: [self-hosted, Linux, X64, local]
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout

@@ -297,8 +297,8 @@ async fn sql_search_handler(mm: &MM, req: RpcSearchRequest) -> Result<Json<Value
         }
     }
 
-    if let Some(value) = &global_filter {
-        if req.return_type == ReturnType::Lot {
+    if let Some(value) = &global_filter
+        && req.return_type == ReturnType::Lot {
             let pattern = format!("%{value}%");
             query.and_where(
                 Condition::any()
@@ -361,7 +361,6 @@ async fn sql_search_handler(mm: &MM, req: RpcSearchRequest) -> Result<Json<Value
                     .into(),
             );
         }
-    }
 
     if let Some(order) = order {
         debug!(
