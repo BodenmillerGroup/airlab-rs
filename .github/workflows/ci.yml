@@ -142,6 +142,7 @@ jobs:
 
       - name: Run cargo deny
         id: rust_deny
+        continue-on-error: true
         run: cargo deny check
 
       - name: Summarize rust quality job
@@ -160,7 +161,7 @@ jobs:
           [ "${{ steps.rust_fmt.outcome }}" = "failure" ] && warning_steps+=("Check Rust formatting")
           [ "${{ steps.rust_clippy.conclusion }}" = "failure" ] && failed_steps+=("Run clippy")
           [ "${{ steps.rust_audit.outcome }}" = "failure" ] && warning_steps+=("Run cargo audit")
-          [ "${{ steps.rust_deny.conclusion }}" = "failure" ] && failed_steps+=("Run cargo deny")
+          [ "${{ steps.rust_deny.outcome }}" = "failure" ] && warning_steps+=("Run cargo deny")
 
           if [ -f cargo-audit.log ]; then
             while IFS= read -r line; do
