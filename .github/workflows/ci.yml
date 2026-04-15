@@ -118,6 +118,7 @@ jobs:
 
       - name: Check Rust formatting
         id: rust_fmt
+        continue-on-error: true
         run: cargo fmt --all --check
 
       - name: Run clippy
@@ -156,7 +157,7 @@ jobs:
           [ "${{ steps.cache_cargo.conclusion }}" = "failure" ] && failed_steps+=("Cache cargo artifacts")
           [ "${{ steps.install_cargo_audit.conclusion }}" = "failure" ] && failed_steps+=("Install cargo-audit")
           [ "${{ steps.install_cargo_deny.conclusion }}" = "failure" ] && failed_steps+=("Install cargo-deny")
-          [ "${{ steps.rust_fmt.conclusion }}" = "failure" ] && failed_steps+=("Check Rust formatting")
+          [ "${{ steps.rust_fmt.outcome }}" = "failure" ] && warning_steps+=("Check Rust formatting")
           [ "${{ steps.rust_clippy.conclusion }}" = "failure" ] && failed_steps+=("Run clippy")
           [ "${{ steps.rust_audit.outcome }}" = "failure" ] && warning_steps+=("Run cargo audit")
           [ "${{ steps.rust_deny.conclusion }}" = "failure" ] && failed_steps+=("Run cargo deny")

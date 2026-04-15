@@ -540,9 +540,10 @@ fn field_key(kind: BasicShadowKind, table: ReturnType, field: &str) -> Option<St
             (ReturnType::Species, "name") => Some("species_name".to_string()),
             (ReturnType::User, "name") => Some("user_name".to_string()),
             _ => None,
-        } {
-            return Some(key);
         }
+    {
+        return Some(key);
+    }
 
     if kind == BasicShadowKind::Lot
         && let Some(key) = match (table, field) {
@@ -554,9 +555,10 @@ fn field_key(kind: BasicShadowKind, table: ReturnType, field: &str) -> Option<St
             (ReturnType::Validation, "application") => Some("validation_application".to_string()),
             (ReturnType::Validation, "status") => Some("validation_status".to_string()),
             _ => None,
-        } {
-            return Some(key);
         }
+    {
+        return Some(key);
+    }
 
     if kind == BasicShadowKind::Conjugate
         && let Some(key) = match (table, field) {
@@ -569,9 +571,10 @@ fn field_key(kind: BasicShadowKind, table: ReturnType, field: &str) -> Option<St
             (ReturnType::Collection, "id") => Some("collection_id".to_string()),
             (ReturnType::Collection, "name") => Some("collection_name".to_string()),
             _ => None,
-        } {
-            return Some(key);
         }
+    {
+        return Some(key);
+    }
 
     if kind == BasicShadowKind::PanelElement
         && let Some(key) = match (table, field) {
@@ -579,9 +582,10 @@ fn field_key(kind: BasicShadowKind, table: ReturnType, field: &str) -> Option<St
             (ReturnType::Conjugate, "description") => Some("conjugate_description".to_string()),
             (ReturnType::Tag, "name") => Some("tag_name".to_string()),
             _ => None,
-        } {
-            return Some(key);
         }
+    {
+        return Some(key);
+    }
 
     match (table, field) {
         (ReturnType::User, "id") => Some("id".to_string()),
