@@ -68,6 +68,14 @@ export const globalFilterConfig: FilterConfig[] = [
     type: 'text',
   },
   {
+    key: 'lotId',
+    label: 'Lot Id',
+    table: 'Lot',
+    field: 'id',
+    op: 'eq',
+    type: 'number',
+  },
+  {
     key: 'lotNumber',
     label: 'Lot Number',
     table: 'Lot',
@@ -99,6 +107,14 @@ export const globalFilterConfig: FilterConfig[] = [
     field: 'id',
     op: 'eq',
     type: 'select',
+  },
+  {
+    key: 'lotCollectionName',
+    label: 'Lot Collection',
+    table: 'Collection',
+    field: 'name',
+    op: 'contains',
+    type: 'text',
   },
   {
     key: 'validationApplication',

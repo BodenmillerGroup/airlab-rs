@@ -7,7 +7,7 @@ import { useMainStore } from "@/stores/main"
 vi.mock("@/router", () => ({
   default: {
     push: vi.fn(),
-    currentRoute: { value: { path: "/" } },
+    currentRoute: { value: { path: "/", fullPath: "/" } },
   },
 }))
 
@@ -97,6 +97,29 @@ describe("main store – logout flow", () => {
     expect(store.isLoggedIn).toBe(false)
     expect(store.userProfile).toBeNull()
     expect(router.push).toHaveBeenCalledWith("/login")
+  })
+
+  it("handleUnauthorizedSession clears session and routes to login with redirect", async () => {
+    vi.spyOn(auth, "getLocalToken").mockReturnValue("LOCAL")
+    ;(router.currentRoute.value as any).path = "/main/groups/1/dashboard"
+    ;(router.currentRoute.value as any).fullPath = "/main/groups/1/dashboard?tab=recent"
+
+    const store = useMainStore()
+    store.token = "LOCAL"
+    store.isLoggedIn = true
+    store.userProfile = { id: 1 } as any
+
+    await store.handleUnauthorizedSession()
+
+    expect(auth.removeLocalToken).toHaveBeenCalled()
+    expect(store.token).toBe("")
+    expect(store.isLoggedIn).toBe(false)
+    expect(store.userProfile).toBeNull()
+    expect(router.push).toHaveBeenCalledWith({
+      path: "/login",
+      query: { redirect: "/main/groups/1/dashboard?tab=recent" },
+    })
+    expect(store.notifications[store.notifications.length - 1]?.content).toBe("Your session expired. Please log in again.")
   })
 
   it("userLogOut adds notification", async () => {

@@ -13,6 +13,7 @@ vi.mock("ky", () => {
 describe("ApiManager", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    ApiManager.setUnauthorizedHandler(undefined);
   });
 
   it("initializes ky with prefixUrl and hooks", () => {
@@ -65,6 +66,35 @@ describe("ApiManager", () => {
     expect(newResponse).toBeInstanceOf(Response);
     expect(newResponse.status).toBe(401);
     expect(newResponse.statusText).toBe("Unauthorized");
+  });
+
+  it("calls the unauthorized handler for 403 responses", async () => {
+    const onUnauthorized = vi.fn();
+    ApiManager.setUnauthorizedHandler(onUnauthorized);
+    ApiManager.init("X");
+
+    const config = (ky.extend as any).mock.calls[0][0];
+    const afterResponse = config.hooks.afterResponse[0];
+    const request = new Request("http://test/api/v1/users/profile");
+
+    const fakeResponse = {
+      ok: false,
+      status: 403,
+      statusText: "Forbidden",
+      json: vi.fn().mockResolvedValue({
+        statusCode: 403,
+        message: "Forbidden",
+      }),
+    };
+
+    await afterResponse(request, {} as any, fakeResponse as any);
+
+    expect(onUnauthorized).toHaveBeenCalledOnce();
+    expect(onUnauthorized).toHaveBeenCalledWith({
+      status: 403,
+      request,
+      response: fakeResponse,
+    });
   });
 
   it("exposes the configured api instance", () => {

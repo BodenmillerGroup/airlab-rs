@@ -23,7 +23,7 @@
           <FilterField key-name="proteinName" class="mb-1" />
           <FilterField key-name="cloneName" class="mb-1" />
           <FilterField key-name="mass" class="mb-1" />
-          <FilterField key-name="collectionId" class="mb-1" />
+          <FilterField key-name="lotCollectionName" class="mb-1" />
           <FilterField key-name="conjugateStatus" class="mb-1" />
           <FilterField key-name="validationApplication" class="mb-1" />
           <FilterField key-name="validationStatus" class="mb-1" />
@@ -91,6 +91,20 @@
           >
             {{ item.lotName }}
           </router-link>
+        </template>
+
+        <template #item.collection ="{ item }">
+          <router-link
+            v-if="item.lotCollectionId"
+            class="link"
+            :to="{
+              name: 'main-group-collections-edit',
+              params: { groupId: item.groupId, id: item.lotCollectionId }
+            }"
+          >
+            {{ item.lotCollectionName }}
+          </router-link>
+          <span v-else>—</span>
         </template>
 
         <template #item.tag ="{ item }">
@@ -392,6 +406,10 @@ function removeValidationStatusFilter(status) {
         }
         return a.number.localeCompare(b.number);
       },
+    },
+    {
+      title: "Collection",
+      key: "collection",
     },
     {
       title: "Tag",

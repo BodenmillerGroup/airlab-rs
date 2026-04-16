@@ -96,10 +96,12 @@ mod tests {
     use super::*;
     use airlab_lib::ctx::Ctx;
     use airlab_lib::model::user::{User, UserBmc};
+    use serial_test::serial;
 
     type TestResult<T = ()> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
     #[tokio::test]
+    #[serial]
     async fn setup_admin_user_does_not_create_super_user_when_users_exist() -> TestResult {
         crate::web::test_support::init_web_test_env();
         let mm = airlab_lib::_dev_utils::init_test().await;
@@ -120,6 +122,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[serial]
     async fn setup_admin_user_is_idempotent_when_users_exist() -> TestResult {
         crate::web::test_support::init_web_test_env();
         let mm = airlab_lib::_dev_utils::init_test().await;

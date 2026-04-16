@@ -22,11 +22,13 @@ pub fn serve_dir() -> crate::Result<MethodRouter> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serial_test::serial;
     use tower::ServiceExt;
 
     type TestResult<T = ()> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
     #[tokio::test]
+    #[serial]
     async fn static_fallback_redirects_to_root() -> TestResult {
         crate::web::test_support::init_web_test_env();
         let response = serve_dir()?

@@ -6,6 +6,8 @@ import router from './router'
 import { vuetify } from './plugins/vuetify'
 import VueMasonry from 'vue3-masonry-css'
 import { reportFrontendError } from '@/telemetry/errors'
+import { ApiManager } from '@/utils/api'
+import { useMainStore } from '@/stores/main'
 
 import './component-hooks'
 import './plugins/masonry-css'
@@ -46,10 +48,13 @@ app.config.errorHandler = (err, instance, info) => {
 
 // 🔌 Plugins
 app.use(pinia)
+const mainStore = useMainStore(pinia)
+ApiManager.setUnauthorizedHandler(async () => {
+  await mainStore.handleUnauthorizedSession()
+})
 app.use(router)
 app.use(vuetify)
 app.use(VueMasonry)
 
 // 🚀 Mount
 app.mount('#app')
-

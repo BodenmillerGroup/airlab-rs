@@ -23,6 +23,7 @@
           <FilterField key-name="validationApplication" class="mb-1" />
           <FilterField key-name="validationStatus" class="mb-1" />
           <FilterField key-name="lotName" class="mb-1" />
+          <FilterField key-name="lotId" class="mb-1" />
           <FilterField key-name="lotNumber" class="mb-1" />
         </v-expansion-panel-text>
       </v-expansion-panel>

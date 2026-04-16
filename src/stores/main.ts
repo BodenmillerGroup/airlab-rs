@@ -33,6 +33,7 @@ export const useMainStore = defineStore('main', () => {
   const processing = ref(false)
   const processingProgress = ref(0)
   const proteinLimit = ref(5)
+  const authRedirectInProgress = ref(false)
 
   // 🧠 Getters
   const isAdmin = computed(() => userProfile.value?.isAdmin ?? false)
@@ -138,7 +139,34 @@ export const useMainStore = defineStore('main', () => {
     removeLocalToken()
     token.value = ''
     isLoggedIn.value = false
+    logInError.value = false
+    mfaPending.value = false
+    tempToken.value = ''
     userProfile.value = null
+  }
+
+  async function handleUnauthorizedSession() {
+    const currentPath = router.currentRoute.value.path
+    const redirectPath = router.currentRoute.value.fullPath ?? currentPath
+    const hadSession = Boolean(token.value || getLocalToken())
+
+    await removeLogIn()
+
+    if (!hadSession || authRedirectInProgress.value) {
+      return
+    }
+
+    authRedirectInProgress.value = true
+
+    try {
+      if (currentPath !== '/login') {
+        await router.push({ path: '/login', query: { redirect: redirectPath } })
+      }
+
+      addNotification({ content: 'Your session expired. Please log in again.', color: 'warning' })
+    } finally {
+      authRedirectInProgress.value = false
+    }
   }
 
   async function checkLoggedIn() {
@@ -263,6 +291,7 @@ export const useMainStore = defineStore('main', () => {
     userLogOut,
     checkLoggedIn,
     removeLogIn,
+    handleUnauthorizedSession,
 
     // Profile
     getUserProfile,

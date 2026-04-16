@@ -117,6 +117,7 @@ mod tests {
     use axum::Router;
     use axum::body::Body;
     use axum::http::Request;
+    use serial_test::serial;
     use tower::ServiceExt;
     use tower_cookies::CookieManagerLayer;
 
@@ -133,6 +134,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[serial]
     async fn set_token_cookie_sets_auth_cookie() -> TestResult {
         crate::web::test_support::init_web_test_env();
 

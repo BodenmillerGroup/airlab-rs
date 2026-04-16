@@ -10,6 +10,7 @@ use axum::response::Response;
 use serde_json::{Value, json};
 use std::fs;
 use std::sync::Once;
+use serial_test::serial;
 use tower::ServiceExt;
 
 type TestResult<T = ()> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
@@ -132,6 +133,7 @@ async fn assert_case(app: &Router, case: &SearchCase) -> TestResult {
 }
 
 #[tokio::test]
+#[serial]
 async fn search_smoke_matrix_covers_all_return_types() -> TestResult {
     let mm = init_test_db().await;
     let app = authed_router(routes(airlab_web::search_shadow::SearchState::new(

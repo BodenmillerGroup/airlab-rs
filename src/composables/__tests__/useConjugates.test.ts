@@ -5,6 +5,7 @@ import { useFilterStore } from "@/stores/useFilterStore"
 import { useGroupStore } from "@/stores/group"
 import { useConjugateStore } from "@/stores/conjugate"
 import { useLotStore } from "@/stores/lot"
+import { useCollectionStore } from "@/stores/collection"
 import { useCloneStore } from "@/stores/clone"
 import { useProteinStore } from "@/stores/protein"
 import { useUserStore } from "@/stores/user"
@@ -23,6 +24,7 @@ describe("useConjugates", () => {
     const groupStore = useGroupStore()
     const conjugateStore = useConjugateStore()
     const lotStore = useLotStore()
+    const collectionStore = useCollectionStore()
     const cloneStore = useCloneStore()
     const proteinStore = useProteinStore()
     const userStore = useUserStore()
@@ -68,7 +70,8 @@ describe("useConjugates", () => {
     ] as any)
     vi.spyOn(conjugateStore, "reloadListQuery").mockResolvedValue([] as any)
 
-    vi.spyOn(lotStore, "getLot").mockReturnValue({ id: 3, cloneId: 1, number: "L-1", status: 6 } as any)
+    vi.spyOn(lotStore, "getLot").mockReturnValue({ id: 3, cloneId: 1, collectionId: 12, number: "L-1", status: 6 } as any)
+    vi.spyOn(collectionStore, "getCollection").mockReturnValue({ id: 12, name: "Collection A" } as any)
     vi.spyOn(memberStore, "getMemberById").mockReturnValue({ id: 1, userId: 2 } as any)
     vi.spyOn(userStore, "getUserById").mockReturnValue({ id: 2, name: "Test User" } as any)
     vi.spyOn(cloneStore, "getClone").mockReturnValue({ id: 1, proteinId: 11, name: "Clone-1" } as any)
@@ -86,6 +89,8 @@ describe("useConjugates", () => {
         groupId: 10,
         tagName: "Tag",
         lotName: "L-1",
+        lotCollectionId: 12,
+        lotCollectionName: "Collection A",
         cloneName: "Clone-1",
         proteinName: "Protein-1",
         userName: "Test User",
@@ -134,6 +139,50 @@ describe("useConjugates", () => {
           field: "tube_number",
           op: "eq",
           value: 42,
+        }),
+      ]),
+    }))
+  })
+
+  it("passes the lot collection filter into the search query", async () => {
+    const filterStore = useFilterStore()
+    const groupStore = useGroupStore()
+    const conjugateStore = useConjugateStore()
+    const validationStore = useValidationStore()
+    const mainStore = useMainStore()
+
+    vi.spyOn(groupStore, "activeGroupId", "get").mockReturnValue(10)
+    vi.spyOn(conjugateStore, "page", "get").mockReturnValue(1)
+    vi.spyOn(conjugateStore, "limit", "get").mockReturnValue(25)
+    vi.spyOn(conjugateStore, "listConjugates", "get").mockReturnValue([] as any)
+    vi.spyOn(validationStore, "cloneValidationMap", "get").mockReturnValue({} as any)
+
+    filterStore.filters = {
+      ...filterStore.filters,
+      lotCollectionName: "Archive",
+    } as any
+
+    vi.spyOn(mainStore, "checkApiError").mockResolvedValue()
+    const loadListSpy = vi.spyOn(conjugateStore, "loadListQuery").mockResolvedValue([] as any)
+    vi.spyOn(conjugateStore, "reloadListQuery").mockResolvedValue([] as any)
+
+    useConjugates()
+
+    expect(loadListSpy).toHaveBeenCalled()
+    expect(loadListSpy).toHaveBeenLastCalledWith(expect.objectContaining({
+      groupId: 10,
+      filters: expect.arrayContaining([
+        expect.objectContaining({
+          table: "Conjugate",
+          field: "group_id",
+          op: "eq",
+          value: 10,
+        }),
+        expect.objectContaining({
+          table: "Collection",
+          field: "name",
+          op: "contains",
+          value: "Archive",
         }),
       ]),
     }))

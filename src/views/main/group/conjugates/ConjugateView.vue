@@ -49,6 +49,23 @@
         </router-link>
       </div>
       <div>
+        <span class="subheader">Collection: </span>
+        <router-link
+          v-if="conjugate.lotCollectionId"
+          class="link"
+          :to="{
+            name: 'main-group-collections-edit',
+            params: {
+              groupId: activeGroupId,
+              id: conjugate.lotCollectionId,
+            },
+          }"
+        >
+          {{ conjugate.lotCollectionName }}
+        </router-link>
+        <span v-else>{{ conjugate.lotCollectionName }}</span>
+      </div>
+      <div>
         <span class="subheader">Protein: </span>
         <router-link
           class="link"

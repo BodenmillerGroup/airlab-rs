@@ -343,11 +343,13 @@ mod tests {
     use airlab_lib::model::group::{Group, GroupBmc};
     use airlab_lib::model::member::{Member, MemberBmc};
     use airlab_lib::model::panel::{Panel, PanelBmc};
+    use serial_test::serial;
     use serde_json::json;
 
     type TestResult<T = ()> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
     #[tokio::test]
+    #[serial]
     async fn setup_demo_group_creates_expected_records() -> TestResult {
         crate::web::test_support::init_web_test_env();
         let mm = airlab_lib::_dev_utils::init_test().await;

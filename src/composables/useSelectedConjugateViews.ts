@@ -2,6 +2,7 @@ import { computed, ref, watch, type Ref } from 'vue'
 import { useGroupStore } from '@/stores/group'
 import { useConjugateStore } from '@/stores/conjugate'
 import { useLotStore } from '@/stores/lot'
+import { useCollectionStore } from '@/stores/collection'
 import { useCloneStore } from '@/stores/clone'
 import { useProteinStore } from '@/stores/protein'
 import { useTagStore } from '@/stores/tag'
@@ -15,6 +16,7 @@ export function useSelectedConjugateViews(
   const groupStore = useGroupStore()
   const conjugateStore = useConjugateStore()
   const lotStore = useLotStore()
+  const collectionStore = useCollectionStore()
   const cloneStore = useCloneStore()
   const proteinStore = useProteinStore()
   const tagStore = useTagStore()
@@ -42,6 +44,13 @@ export function useSelectedConjugateViews(
         lotStore.fetchByIds(groupId, lotIds),
         tagStore.fetchByIds(groupId, tagIds),
       ])
+
+      const collectionIds = [...new Set(
+        lotIds
+          .map((id) => lotStore.getLot(id)?.collectionId)
+          .filter((id): id is number => typeof id === 'number')
+      )]
+      await collectionStore.fetchByIds(collectionIds)
 
       const cloneIds = [...new Set(
         lotIds
@@ -72,6 +81,9 @@ export function useSelectedConjugateViews(
 
     for (const conjugate of selected) {
       const lot = lotStore.getLot(conjugate.lotId)
+      const collection = typeof lot?.collectionId === 'number'
+        ? collectionStore.getCollection(lot.collectionId)
+        : undefined
       const clone = lot ? cloneStore.getClone(lot.cloneId) : undefined
       const protein = clone ? proteinStore.getProtein(clone.proteinId) : undefined
       const tag = tagStore.getTag(conjugate.tagId)
@@ -103,6 +115,8 @@ export function useSelectedConjugateViews(
         cloneName: clone?.name ?? '—',
         cloneId: lot?.cloneId ?? 0,
         lotName: lot?.number ?? '—',
+        lotCollectionId: lot?.collectionId ?? null,
+        lotCollectionName: collection?.name ?? '—',
         userName: '—',
         userId: conjugate.labeledBy,
         validations,

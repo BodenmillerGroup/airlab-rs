@@ -26,6 +26,8 @@ export interface ConjugateView {
     readonly cloneName: string;
     readonly cloneId: number;
     readonly lotName: string;
+    readonly lotCollectionId: number | null;
+    readonly lotCollectionName: string;
     readonly userName: string;
     readonly userId: number;
     readonly validations: ValidationDto[];

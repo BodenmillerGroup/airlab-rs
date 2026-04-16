@@ -11,6 +11,7 @@ import { useMemberStore } from '@/stores/member';
 import { useTagStore } from '@/stores/tag';
 import { useValidationStore } from '@/stores/validation';
 import { useStorageStore } from '@/stores/storage';
+import { useCollectionStore } from '@/stores/collection';
 
 import type {
   ConjugateDto,
@@ -49,6 +50,7 @@ export const useConjugateStore = defineStore('conjugate', () => {
   const tagStore = useTagStore();
   const validationStore = useValidationStore();
   const storageStore = useStorageStore();
+  const collectionStore = useCollectionStore();
   const activeListQuery = ref<ConjugateListQuery | null>(null);
 
   // 🧠 Getters
@@ -236,6 +238,14 @@ export const useConjugateStore = defineStore('conjugate', () => {
       .filter((id): id is number => typeof id === 'number');
 
     await lotStore.fetchByIds(groupId, lotIds, true);
+
+    const collectionIds = [...new Set(
+      lotIds
+        .map((id) => lotStore.getLotById(id)?.collectionId)
+        .filter((id): id is number => typeof id === 'number')
+    )];
+
+    await collectionStore.fetchByIds(collectionIds);
 
     const cloneIds = [...new Set(
       lotIds

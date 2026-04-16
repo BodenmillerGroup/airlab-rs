@@ -32,6 +32,11 @@
           {{ unwrapItem(item)?.cloneName ?? '' }}
         </span>
       </template>
+      <template #item.lotCollectionName="{ item }">
+        <span :class="getClass(unwrapItem(item)?.status ?? 0)">
+          {{ unwrapItem(item)?.lotCollectionName ?? '' }}
+        </span>
+      </template>
       <template #item.tubeNumber="{ item }">
         <span :class="getClass(unwrapItem(item)?.status ?? 0)">
           {{ unwrapItem(item)?.tubeNumber ?? '' }}
@@ -124,6 +129,11 @@ const rawHeaders = [
   {
     title: 'Clone',
     key: 'cloneName',
+    sort: (a: string, b: string) => (a ?? '').localeCompare(b ?? ''),
+  },
+  {
+    title: 'Collection',
+    key: 'lotCollectionName',
     sort: (a: string, b: string) => (a ?? '').localeCompare(b ?? ''),
   },
   {

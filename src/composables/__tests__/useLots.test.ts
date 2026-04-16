@@ -78,4 +78,45 @@ describe("useLots", () => {
       }),
     ])
   })
+
+  it("includes the lot id filter in the search query", async () => {
+    const filterStore = useFilterStore()
+    const groupStore = useGroupStore()
+    const lotStore = useLotStore()
+    const mainStore = useMainStore()
+
+    vi.spyOn(groupStore, "activeGroupId", "get").mockReturnValue(10)
+    vi.spyOn(lotStore, "page", "get").mockReturnValue(1)
+    vi.spyOn(lotStore, "listLots", "get").mockReturnValue([] as any)
+
+    filterStore.filters = {
+      lotId: 42,
+    } as any
+
+    vi.spyOn(mainStore, "checkApiError").mockResolvedValue()
+    const loadListSpy = vi.spyOn(lotStore, "loadListQuery").mockResolvedValue([] as any)
+    vi.spyOn(lotStore, "reloadListQuery").mockResolvedValue([] as any)
+
+    useLots()
+
+    expect(loadListSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        groupId: 10,
+        filters: expect.arrayContaining([
+          expect.objectContaining({
+            table: "Lot",
+            field: "group_id",
+            op: "eq",
+            value: 10,
+          }),
+          expect.objectContaining({
+            table: "Lot",
+            field: "id",
+            op: "eq",
+            value: 42,
+          }),
+        ]),
+      }),
+    )
+  })
 })

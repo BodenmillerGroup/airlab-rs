@@ -4,6 +4,7 @@ import { useFilterStore } from '@/stores/useFilterStore'
 import { useGroupStore } from '@/stores/group'
 import { useConjugateStore } from '@/stores/conjugate'
 import { useLotStore } from '@/stores/lot'
+import { useCollectionStore } from '@/stores/collection'
 import { useCloneStore } from '@/stores/clone'
 import { useProteinStore } from '@/stores/protein'
 import { useUserStore } from '@/stores/user'
@@ -29,6 +30,7 @@ export function useConjugates(options: UseConjugateOptions = {}) {
   const groupStore = useGroupStore()
   const conjugateStore = useConjugateStore()
   const lotStore = useLotStore()
+  const collectionStore = useCollectionStore()
   const cloneStore = useCloneStore()
   const proteinStore = useProteinStore()
   const userStore = useUserStore()
@@ -46,13 +48,14 @@ export function useConjugates(options: UseConjugateOptions = {}) {
       return createOrder('Conjugate', 'id', 'desc')
     }
 
-    const keyMap: Record<string, string> = {
-      id: 'id',
-      tubeNumber: 'tube_number',
-      protein: 'name',
-      clone: 'name',
-      lot: 'name',
-      tag: 'name',
+      const keyMap: Record<string, string> = {
+        id: 'id',
+        tubeNumber: 'tube_number',
+        protein: 'name',
+        clone: 'name',
+        lot: 'name',
+        collection: 'name',
+        tag: 'name',
       tagMw: 'mw',
       user: 'name',
       concentration: 'concentration',
@@ -70,6 +73,7 @@ export function useConjugates(options: UseConjugateOptions = {}) {
       first.key === 'protein' ? 'Protein' :
       first.key === 'clone' ? 'Clone' :
       first.key === 'lot' ? 'Lot' :
+      first.key === 'collection' ? 'Collection' :
       first.key === 'tag' || first.key === 'tagMw' ? 'Tag' :
       first.key === 'user' ? 'User' :
       first.key === 'validations' ? 'Validation' :
@@ -128,6 +132,9 @@ export function useConjugates(options: UseConjugateOptions = {}) {
   const items = computed<ConjugateView[]>(() =>
     conjugateStore.listConjugates.flatMap((conjugate) => {
       const lot = lotStore.getLot(conjugate.lotId)
+      const collection = typeof lot?.collectionId === 'number'
+        ? collectionStore.getCollection(lot.collectionId)
+        : undefined
       const member = memberStore.getMemberById(conjugate.labeledBy)
       const user = member ? userStore.getUserById(member.userId) : undefined
       const clone = lot ? cloneStore.getClone(lot.cloneId) : undefined
@@ -158,6 +165,8 @@ export function useConjugates(options: UseConjugateOptions = {}) {
         cloneName: clone?.name ?? '—',
         cloneId: lot?.cloneId ?? 0,
         lotName: lot?.number ?? '—',
+        lotCollectionId: lot?.collectionId ?? null,
+        lotCollectionName: collection?.name ?? '—',
         isArchived: conjugate.isArchived,
         userName: user?.name ?? '—',
         userId: member?.userId ?? conjugate.labeledBy ?? 0,

@@ -1402,6 +1402,23 @@ exports[`vue templates > matches template snapshot for views/main/group/conjugat
         </router-link>
       </div>
       <div>
+        <span class="subheader">Collection: </span>
+        <router-link
+          v-if="conjugate.lotCollectionId"
+          class="link"
+          :to="{
+            name: 'main-group-collections-edit',
+            params: {
+              groupId: activeGroupId,
+              id: conjugate.lotCollectionId,
+            },
+          }"
+        >
+          {{ conjugate.lotCollectionName }}
+        </router-link>
+        <span v-else>{{ conjugate.lotCollectionName }}</span>
+      </div>
+      <div>
         <span class="subheader">Protein: </span>
         <router-link
           class="link"
@@ -1466,7 +1483,7 @@ exports[`vue templates > matches template snapshot for views/main/group/conjugat
           <FilterField key-name="proteinName" class="mb-1" />
           <FilterField key-name="cloneName" class="mb-1" />
           <FilterField key-name="mass" class="mb-1" />
-          <FilterField key-name="collectionId" class="mb-1" />
+          <FilterField key-name="lotCollectionName" class="mb-1" />
           <FilterField key-name="conjugateStatus" class="mb-1" />
           <FilterField key-name="validationApplication" class="mb-1" />
           <FilterField key-name="validationStatus" class="mb-1" />
@@ -1994,6 +2011,7 @@ exports[`vue templates > matches template snapshot for views/main/group/lots/Lot
           <FilterField key-name="validationApplication" class="mb-1" />
           <FilterField key-name="validationStatus" class="mb-1" />
           <FilterField key-name="lotName" class="mb-1" />
+          <FilterField key-name="lotId" class="mb-1" />
           <FilterField key-name="lotNumber" class="mb-1" />
         </v-expansion-panel-text>
       </v-expansion-panel>
